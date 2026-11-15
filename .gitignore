@@ -20,6 +20,12 @@
 # production
 /build
 
+# rust / cargo
+/target/
+**/target/
+**/*.rs.bk
+*.pdb
+
 # misc
 .DS_Store
 *.pem

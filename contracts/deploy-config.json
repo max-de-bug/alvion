@@ -1,0 +1,29 @@
+{
+  "networks": {
+    "avalancheFuji": {
+      "name": "Avalanche Fuji Testnet",
+      "chainId": 43113,
+      "rpcUrl": "https://api.avax-test.network/ext/bc/C/rpc",
+      "nativeCurrency": "AVAX",
+      "explorer": "https://testnet.snowtrace.io",
+      "usdcContract": "0x5425890298aed601595a70ab815c96711a31bc65",
+      "pythOracle": "0x77017684D705bF40C0F09b1fC1A5A90C53696879"
+    },
+    "avalancheMainnet": {
+      "name": "Avalanche C-Chain",
+      "chainId": 43114,
+      "rpcUrl": "https://api.avax.network/ext/bc/C/rpc",
+      "nativeCurrency": "AVAX",
+      "explorer": "https://snowtrace.io",
+      "usdcContract": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
+      "pythOracle": "0x4305FB66699C3B2702D4d05CF36551390A4c69C6"
+    }
+  },
+  "vaultParameters": {
+    "maxLeverage": 100,
+    "collateralToken": "USDC",
+    "settlementToken": "USDC",
+    "pricingModel": "Hyperliquid / Oracle Price + Dynamic Spread (Skew Impact + Size Impact)",
+    "executionType": "Option A: Hybrid CLOB + Single USDC Vault Backstop"
+  }
+}
