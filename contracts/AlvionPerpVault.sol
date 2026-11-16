@@ -2,6 +2,7 @@
 pragma solidity ^0.8.24;
 
 import "./interfaces/IAlvionVault.sol";
+import "./interfaces/IPyth.sol";
 
 interface IERC20 {
     function transfer(address recipient, uint256 amount) external returns (bool);
@@ -25,6 +26,7 @@ contract AlvionPerpVault is IAlvionVault {
     IERC20 public immutable usdc;
     address public owner;
     address public sequencer; // Authorized off-chain matching engine address
+    IPyth public pyth; // Pyth Network Pull Oracle on Avalanche
 
     // Pricing & Risk Parameters
     uint256 public constant BPS_DENOMINATOR = 10000;
@@ -129,6 +131,11 @@ contract AlvionPerpVault is IAlvionVault {
         _initMarketAndDomain("BTC", 50_000_000 * 1e6, 100, 1_000_000 * 1e6, 2_000_000 * 1e6);
         _initMarketAndDomain("ETH", 30_000_000 * 1e6, 100, 750_000 * 1e6, 1_500_000 * 1e6);
         _initMarketAndDomain("SOL", 20_000_000 * 1e6, 100, 500_000 * 1e6, 1_000_000 * 1e6);
+        _initMarketAndDomain("SPY", 100_000_000 * 1e6, 50, 1_000_000 * 1e6, 2_000_000 * 1e6);
+        _initMarketAndDomain("NVDA", 50_000_000 * 1e6, 50, 500_000 * 1e6, 1_000_000 * 1e6);
+        _initMarketAndDomain("TSLA", 50_000_000 * 1e6, 50, 500_000 * 1e6, 1_000_000 * 1e6);
+        _initMarketAndDomain("AAPL", 50_000_000 * 1e6, 50, 500_000 * 1e6, 1_000_000 * 1e6);
+        _initMarketAndDomain("QQQ", 50_000_000 * 1e6, 50, 500_000 * 1e6, 1_000_000 * 1e6);
     }
 
     function _initMarketAndDomain(
@@ -166,7 +173,7 @@ contract AlvionPerpVault is IAlvionVault {
         bytes calldata takerSig,
         uint256 matchPrice,
         uint256 matchSizeUsd
-    ) external onlySequencer nonReentrant verifySolvency returns (uint256 makerPosId, uint256 takerPosId) {
+    ) public onlySequencer nonReentrant verifySolvency returns (uint256 makerPosId, uint256 takerPosId) {
         require(block.timestamp <= makerOrder.expiry, "MAKER_ORDER_EXPIRED");
         require(block.timestamp <= takerOrder.expiry, "TAKER_ORDER_EXPIRED");
         require(makerOrder.isLong != takerOrder.isLong, "ORDERS_SAME_DIRECTION");
@@ -223,6 +230,27 @@ contract AlvionPerpVault is IAlvionVault {
             matchPrice,
             matchSizeUsd
         );
+    }
+
+    function settleMatchedOrdersWithPyth(
+        bytes[] calldata priceUpdateData,
+        EIP712Order calldata makerOrder,
+        bytes calldata makerSig,
+        EIP712Order calldata takerOrder,
+        bytes calldata takerSig,
+        uint256 matchPrice,
+        uint256 matchSizeUsd
+    ) external payable onlySequencer returns (uint256 makerPosId, uint256 takerPosId) {
+        if (address(pyth) != address(0) && priceUpdateData.length > 0) {
+            uint256 fee = pyth.getUpdateFee(priceUpdateData);
+            require(msg.value >= fee, "INSUFFICIENT_PYTH_FEE");
+            pyth.updatePriceFeeds{value: fee}(priceUpdateData);
+        }
+        return settleMatchedOrders(makerOrder, makerSig, takerOrder, takerSig, matchPrice, matchSizeUsd);
+    }
+
+    function setPythOracle(address _pyth) external onlyOwner {
+        pyth = IPyth(_pyth);
     }
 
     function hashOrder(EIP712Order calldata order) public view returns (bytes32) {
@@ -437,7 +465,36 @@ contract AlvionPerpVault is IAlvionVault {
     function liquidatePosition(
         uint256 positionId,
         uint256 currentOraclePrice
-    ) external nonReentrant verifySolvency {
+    ) public nonReentrant verifySolvency {
+        _executeLiquidation(positionId, currentOraclePrice, msg.sender);
+    }
+
+    /**
+     * @notice Liquidate undercollateralized position with atomic on-chain Pyth proof
+     */
+    function liquidatePositionWithPyth(
+        uint256 positionId,
+        bytes32 pythPriceFeedId,
+        bytes[] calldata priceUpdateData
+    ) external payable nonReentrant verifySolvency {
+        if (address(pyth) != address(0) && priceUpdateData.length > 0) {
+            uint256 fee = pyth.getUpdateFee(priceUpdateData);
+            require(msg.value >= fee, "INSUFFICIENT_PYTH_FEE");
+            pyth.updatePriceFeeds{value: fee}(priceUpdateData);
+        }
+
+        IPyth.Price memory p = pyth.getPriceNoOlderThan(pythPriceFeedId, 60);
+        require(p.price > 0, "INVALID_ORACLE_PRICE");
+        uint256 currentPrice = uint256(uint64(p.price)) * 1e10; // scale Pyth 8 decimals to 18 decimals
+
+        _executeLiquidation(positionId, currentPrice, msg.sender);
+    }
+
+    function _executeLiquidation(
+        uint256 positionId,
+        uint256 currentOraclePrice,
+        address liquidator
+    ) internal {
         Position storage pos = positions[positionId];
         require(pos.isOpen, "POSITION_NOT_OPEN");
 
@@ -468,10 +525,10 @@ contract AlvionPerpVault is IAlvionVault {
         totalVaultLiquidityUsdc += vaultKeeps;
 
         if (liquidatorReward > 0) {
-            require(usdc.transfer(msg.sender, liquidatorReward), "REWARD_TRANSFER_FAILED");
+            require(usdc.transfer(liquidator, liquidatorReward), "REWARD_TRANSFER_FAILED");
         }
 
-        emit PositionLiquidated(positionId, pos.trader, msg.sender, currentOraclePrice);
+        emit PositionLiquidated(positionId, pos.trader, liquidator, currentOraclePrice);
     }
 
     function getDynamicExecutionPrice(
@@ -534,6 +591,21 @@ contract AlvionPerpVault is IAlvionVault {
 
     function setSequencer(address _sequencer) external onlyOwner {
         sequencer = _sequencer;
+    }
+
+    function transferOwnership(address _newOwner) external onlyOwner {
+        require(_newOwner != address(0), "INVALID_OWNER");
+        owner = _newOwner;
+    }
+
+    function addMarket(
+        bytes32 symbol,
+        uint256 maxOi,
+        uint256 maxLev,
+        uint256 domainInsuranceUsdc,
+        uint256 maxRealizablePnlCap
+    ) external onlyOwner {
+        _initMarketAndDomain(symbol, maxOi, maxLev, domainInsuranceUsdc, maxRealizablePnlCap);
     }
 }
 

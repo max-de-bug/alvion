@@ -1,5 +1,5 @@
 use std::collections::{BTreeMap, HashMap, VecDeque};
-use crate::types::{Order, OrderBookLevel, Side, Trade, L2Depth, PRICE_SCALE, USD_SCALE};
+use crate::types::{Order, OrderBookLevel, Side, Trade, L2Depth, L4Level, L4Depth, PRICE_SCALE, USD_SCALE};
 use uuid::Uuid;
 
 pub struct OrderBook {
@@ -232,6 +232,112 @@ impl OrderBook {
             bids,
             asks,
             spread,
+            spread_bps,
+        }
+    }
+
+    /// Calculate Impact Bid and Impact Ask (VWAP for a standard impact size, e.g. $5,000 USD)
+    pub fn get_impact_prices(&self, impact_notional_usd: u64) -> (Option<u64>, Option<u64>) {
+        // Impact Bid: selling impact_notional into the bids (highest down)
+        let impact_bid = {
+            let mut remaining = impact_notional_usd;
+            let mut weighted_sum: u128 = 0;
+            let mut total_filled: u64 = 0;
+
+            for (&price, queue) in self.bids.iter().rev() {
+                for order in queue {
+                    let fill = order.remaining_size_usd.min(remaining);
+                    weighted_sum += (price as u128) * (fill as u128);
+                    total_filled += fill;
+                    remaining = remaining.saturating_sub(fill);
+                    if remaining == 0 {
+                        break;
+                    }
+                }
+                if remaining == 0 {
+                    break;
+                }
+            }
+            if total_filled > 0 {
+                Some((weighted_sum / total_filled as u128) as u64)
+            } else {
+                self.bids.keys().next_back().copied()
+            }
+        };
+
+        // Impact Ask: buying impact_notional from the asks (lowest up)
+        let impact_ask = {
+            let mut remaining = impact_notional_usd;
+            let mut weighted_sum: u128 = 0;
+            let mut total_filled: u64 = 0;
+
+            for (&price, queue) in self.asks.iter() {
+                for order in queue {
+                    let fill = order.remaining_size_usd.min(remaining);
+                    weighted_sum += (price as u128) * (fill as u128);
+                    total_filled += fill;
+                    remaining = remaining.saturating_sub(fill);
+                    if remaining == 0 {
+                        break;
+                    }
+                }
+                if remaining == 0 {
+                    break;
+                }
+            }
+            if total_filled > 0 {
+                Some((weighted_sum / total_filled as u128) as u64)
+            } else {
+                self.asks.keys().next().copied()
+            }
+        };
+
+        (impact_bid, impact_ask)
+    }
+
+    /// Extract L4 Depth snapshot with automated Vault MM attribution and impact metrics
+    pub fn get_l4_depth(&self, max_levels: usize, sequence: u64) -> L4Depth {
+        let (impact_bid_scaled, impact_ask_scaled) = self.get_impact_prices(5_000 * USD_SCALE);
+
+        let bids: Vec<L4Level> = self.bids.iter().rev().take(max_levels).map(|(&p, q)| {
+            let total_size: u64 = q.iter().map(|o| o.remaining_size_usd).sum();
+            let is_vault_mm = q.iter().any(|o| o.trader.contains("VaultMM") || o.id.starts_with("MM-"));
+            L4Level {
+                price: p as f64 / PRICE_SCALE as f64,
+                size: total_size as f64 / USD_SCALE as f64,
+                order_count: q.len(),
+                is_vault_mm,
+            }
+        }).collect();
+
+        let asks: Vec<L4Level> = self.asks.iter().take(max_levels).map(|(&p, q)| {
+            let total_size: u64 = q.iter().map(|o| o.remaining_size_usd).sum();
+            let is_vault_mm = q.iter().any(|o| o.trader.contains("VaultMM") || o.id.starts_with("MM-"));
+            L4Level {
+                price: p as f64 / PRICE_SCALE as f64,
+                size: total_size as f64 / USD_SCALE as f64,
+                order_count: q.len(),
+                is_vault_mm,
+            }
+        }).collect();
+
+        let best_bid = bids.first().map(|b| b.price).unwrap_or(0.0);
+        let best_ask = asks.first().map(|a| a.price).unwrap_or(0.0);
+        let spread = if best_ask > 0.0 && best_bid > 0.0 { best_ask - best_bid } else { 0.0 };
+        let mid = if best_ask > 0.0 && best_bid > 0.0 { (best_ask + best_bid) / 2.0 } else { 1.0 };
+        let spread_bps = (spread / mid) * 10000.0;
+
+        let impact_bid = impact_bid_scaled.map_or(best_bid, |p| p as f64 / PRICE_SCALE as f64);
+        let impact_ask = impact_ask_scaled.map_or(best_ask, |p| p as f64 / PRICE_SCALE as f64);
+
+        L4Depth {
+            market: self.market.clone(),
+            sequence,
+            timestamp: chrono::Utc::now().timestamp_millis() as u64,
+            bids,
+            asks,
+            impact_bid,
+            impact_ask,
             spread_bps,
         }
     }

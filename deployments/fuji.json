@@ -1,0 +1,13 @@
+{
+  "network": "avalancheFuji",
+  "chainId": 43113,
+  "contractAddress": "0xb3d1bcb79c7770f7d070ae6ac7b345a95372279e",
+  "deployer": "0x9a99266C173CC5a3E8C863Bcd2cA2028Ad6edAb7",
+  "owner": "0xA082394ece720f349bD11913A9C1c4B481f6742d",
+  "sequencer": "0xA082394ece720f349bD11913A9C1c4B481f6742d",
+  "usdcAddress": "0x5425890298aed601595a70ab815c96711a31bc65",
+  "pythOracleAddress": "0x77017684D705bF40C0F09b1fC1A5A90C53696879",
+  "txHash": "0xbb495cab3344adf47286600850ac0b0128c2b4d2e08202eb125c1716f29043c5",
+  "blockNumber": 61141951,
+  "deployedAt": "2026-11-15T23:09:24.513Z"
+}

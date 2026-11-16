@@ -29,6 +29,8 @@
 # misc
 .DS_Store
 *.pem
+*.key
+.fuji_deployer.key
 
 # debug
 npm-debug.log*

@@ -53,60 +53,133 @@ const HYPERLIQUID_API_URL = "https://api.hyperliquid.xyz/info";
 const DEFAULT_VAULT_LIQUIDITY_USDC = 5_000_000; // $5M USDC Single Vault simulation
 const AVALANCHE_USDC_ADDRESS = "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E";
 
+export async function fetchNyseEquities(): Promise<MarketContext[]> {
+  const equityDefs = [
+    { name: "SPY", maxLeverage: 20, fallbackPx: 754.37, szDecimals: 2 },
+    { name: "NVDA", maxLeverage: 10, fallbackPx: 162.85, szDecimals: 2 },
+    { name: "TSLA", maxLeverage: 10, fallbackPx: 390.22, szDecimals: 2 },
+    { name: "AAPL", maxLeverage: 10, fallbackPx: 356.27, szDecimals: 2 },
+    { name: "QQQ", maxLeverage: 20, fallbackPx: 512.40, szDecimals: 2 },
+    { name: "MSFT", maxLeverage: 10, fallbackPx: 428.15, szDecimals: 2 },
+    { name: "AMZN", maxLeverage: 10, fallbackPx: 214.30, szDecimals: 2 },
+    { name: "GOOGL", maxLeverage: 10, fallbackPx: 184.50, szDecimals: 2 },
+    { name: "META", maxLeverage: 10, fallbackPx: 642.80, szDecimals: 2 },
+    { name: "COIN", maxLeverage: 10, fallbackPx: 228.60, szDecimals: 2 },
+    { name: "MSTR", maxLeverage: 10, fallbackPx: 320.10, szDecimals: 2 },
+  ];
+
+  const results: MarketContext[] = [];
+
+  await Promise.all(
+    equityDefs.map(async (eq) => {
+      let price = eq.fallbackPx;
+      let prevClose = eq.fallbackPx;
+      let dayVol = 50_000_000;
+
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 1200);
+        const res = await fetch(
+          `https://query1.finance.yahoo.com/v8/finance/chart/${eq.name}?interval=1d&range=1d`,
+          {
+            headers: { "User-Agent": "Mozilla/5.0" },
+            signal: controller.signal,
+          }
+        );
+        clearTimeout(timeout);
+
+        if (res.ok) {
+          const json = await res.json();
+          const meta = json.chart?.result?.[0]?.meta;
+          if (meta) {
+            price = Number(meta.regularMarketPrice || meta.fulldayPrice || eq.fallbackPx);
+            prevClose = Number(meta.previousClose || meta.chartPreviousClose || price);
+            dayVol = Number(meta.regularMarketVolume || 50_000_000);
+          }
+        }
+      } catch {
+        // Use resilient fallback on network timeout
+      }
+
+      const change24h = prevClose > 0 ? ((price - prevClose) / prevClose) * 100 : 0;
+      results.push({
+        name: eq.name,
+        szDecimals: eq.szDecimals,
+        maxLeverage: eq.maxLeverage,
+        oraclePx: price,
+        markPx: price,
+        midPx: price,
+        impactBidPx: Number((price * 0.9998).toFixed(2)),
+        impactAskPx: Number((price * 1.0002).toFixed(2)),
+        fundingRate: 0.00008, // ~0.008% 1h adaptive funding
+        openInterest: 25_000_000,
+        dayVolumeUsd: dayVol * price * 0.0005,
+        prevDayPx: prevClose,
+        change24h: Number(change24h.toFixed(2)),
+      });
+    })
+  );
+
+  return results;
+}
+
 export async function fetchHyperliquidMarkets(): Promise<MarketContext[]> {
   try {
-    const res = await fetch(HYPERLIQUID_API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type: "metaAndAssetCtxs" }),
-      next: { revalidate: 2 }, // cache 2s
-    });
+    const [nyseEquities, hlRes] = await Promise.all([
+      fetchNyseEquities(),
+      fetch(HYPERLIQUID_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "metaAndAssetCtxs" }),
+        next: { revalidate: 2 }, // cache 2s
+      }).catch(() => null),
+    ]);
 
-    if (!res.ok) {
-      throw new Error(`Hyperliquid API error: ${res.statusText}`);
+    const featuredTokens = [
+      "SPY", "NVDA", "TSLA", "AAPL", "QQQ", "MSFT", "AMZN", "GOOGL", "META", "COIN", "MSTR",
+      "AVAX", "BTC", "ETH", "SOL"
+    ];
+    const markets: MarketContext[] = [...nyseEquities];
+
+    if (hlRes && hlRes.ok) {
+      const data = await hlRes.json();
+      const metaUniverse = data[0]?.universe || [];
+      const assetContexts = data[1] || [];
+
+      metaUniverse.forEach((u: { name: string; szDecimals: number; maxLeverage?: number }, idx: number) => {
+        const ctx = assetContexts[idx];
+        if (!ctx) return;
+
+        const oraclePx = parseFloat(ctx.oraclePx || "0");
+        const markPx = parseFloat(ctx.markPx || ctx.midPx || "0");
+        const midPx = parseFloat(ctx.midPx || ctx.markPx || "0");
+        const prevDayPx = parseFloat(ctx.prevDayPx || markPx.toString());
+        const impactBids = ctx.impactPxs ? parseFloat(ctx.impactPxs[0] || markPx.toString()) : markPx;
+        const impactAsks = ctx.impactPxs ? parseFloat(ctx.impactPxs[1] || markPx.toString()) : markPx;
+        const fundingRate = parseFloat(ctx.funding || "0");
+        const openInterest = parseFloat(ctx.openInterest || "0");
+        const dayVolumeUsd = parseFloat(ctx.dayNtlVlm || "0");
+        const change24h = prevDayPx > 0 ? ((markPx - prevDayPx) / prevDayPx) * 100 : 0;
+
+        markets.push({
+          name: u.name,
+          szDecimals: u.szDecimals,
+          maxLeverage: Math.min(100, Math.max(u.maxLeverage || 50, 100)),
+          oraclePx,
+          markPx,
+          midPx,
+          impactBidPx: impactBids,
+          impactAskPx: impactAsks,
+          fundingRate,
+          openInterest,
+          dayVolumeUsd,
+          prevDayPx,
+          change24h,
+        });
+      });
     }
 
-    const data = await res.json();
-    const metaUniverse = data[0]?.universe || [];
-    const assetContexts = data[1] || [];
-
-    const featuredTokens = ["AVAX", "BTC", "ETH", "SOL", "NEAR", "SUI", "DOGE", "LINK", "ARB"];
-
-    const markets: MarketContext[] = [];
-
-    metaUniverse.forEach((u: { name: string; szDecimals: number; maxLeverage?: number }, idx: number) => {
-      const ctx = assetContexts[idx];
-      if (!ctx) return;
-
-      const oraclePx = parseFloat(ctx.oraclePx || "0");
-      const markPx = parseFloat(ctx.markPx || ctx.midPx || "0");
-      const midPx = parseFloat(ctx.midPx || ctx.markPx || "0");
-      const prevDayPx = parseFloat(ctx.prevDayPx || markPx.toString());
-      const impactBids = ctx.impactPxs ? parseFloat(ctx.impactPxs[0] || markPx.toString()) : markPx;
-      const impactAsks = ctx.impactPxs ? parseFloat(ctx.impactPxs[1] || markPx.toString()) : markPx;
-      const fundingRate = parseFloat(ctx.funding || "0");
-      const openInterest = parseFloat(ctx.openInterest || "0");
-      const dayVolumeUsd = parseFloat(ctx.dayNtlVlm || "0");
-      const change24h = prevDayPx > 0 ? ((markPx - prevDayPx) / prevDayPx) * 100 : 0;
-
-      markets.push({
-        name: u.name,
-        szDecimals: u.szDecimals,
-        maxLeverage: Math.min(100, Math.max(u.maxLeverage || 50, 100)), // Allow up to 100x on our platform
-        oraclePx,
-        markPx,
-        midPx,
-        impactBidPx: impactBids,
-        impactAskPx: impactAsks,
-        fundingRate,
-        openInterest,
-        dayVolumeUsd,
-        prevDayPx,
-        change24h,
-      });
-    });
-
-    // Prioritize featured markets, starting with AVAX
+    // Prioritize NYSE Tokenized Equities & Avalanche Crypto
     return markets.sort((a, b) => {
       const aFeatured = featuredTokens.indexOf(a.name);
       const bFeatured = featuredTokens.indexOf(b.name);
@@ -116,9 +189,68 @@ export async function fetchHyperliquidMarkets(): Promise<MarketContext[]> {
       return b.dayVolumeUsd - a.dayVolumeUsd;
     });
   } catch (error) {
-    console.error("Error fetching Hyperliquid markets:", error);
-    // Return fallback sample data for AVAX, BTC, ETH
+    console.error("Error fetching markets:", error);
     return [
+      {
+        name: "SPY",
+        szDecimals: 2,
+        maxLeverage: 20,
+        oraclePx: 754.37,
+        markPx: 754.37,
+        midPx: 754.37,
+        impactBidPx: 754.2,
+        impactAskPx: 754.5,
+        fundingRate: 0.00008,
+        openInterest: 25000000,
+        dayVolumeUsd: 150000000,
+        prevDayPx: 757.12,
+        change24h: -0.36,
+      },
+      {
+        name: "NVDA",
+        szDecimals: 2,
+        maxLeverage: 10,
+        oraclePx: 162.85,
+        markPx: 162.85,
+        midPx: 162.85,
+        impactBidPx: 162.8,
+        impactAskPx: 162.9,
+        fundingRate: 0.00009,
+        openInterest: 18000000,
+        dayVolumeUsd: 95000000,
+        prevDayPx: 166.19,
+        change24h: -2.01,
+      },
+      {
+        name: "TSLA",
+        szDecimals: 2,
+        maxLeverage: 10,
+        oraclePx: 390.22,
+        markPx: 390.22,
+        midPx: 390.22,
+        impactBidPx: 390.1,
+        impactAskPx: 390.35,
+        fundingRate: 0.00008,
+        openInterest: 14000000,
+        dayVolumeUsd: 78000000,
+        prevDayPx: 397.45,
+        change24h: -1.82,
+      },
+      {
+        name: "AAPL",
+        szDecimals: 2,
+        maxLeverage: 10,
+        oraclePx: 356.27,
+        markPx: 356.27,
+        midPx: 356.27,
+        impactBidPx: 356.2,
+        impactAskPx: 356.35,
+        fundingRate: 0.00008,
+        openInterest: 20000000,
+        dayVolumeUsd: 82000000,
+        prevDayPx: 354.88,
+        change24h: 0.39,
+      },
       {
         name: "AVAX",
         szDecimals: 2,

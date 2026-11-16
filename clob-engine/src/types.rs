@@ -79,3 +79,51 @@ pub struct L2Depth {
     pub spread_bps: f64,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct L4Level {
+    pub price: f64,
+    pub size: f64,
+    pub order_count: usize,
+    pub is_vault_mm: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct L4Depth {
+    pub market: String,
+    pub sequence: u64,
+    pub timestamp: u64,
+    pub bids: Vec<L4Level>,
+    pub asks: Vec<L4Level>,
+    pub impact_bid: f64,
+    pub impact_ask: f64,
+    pub spread_bps: f64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AdaptiveFundingInfo {
+    pub market: String,
+    pub oracle_price: f64,
+    pub mark_price: f64,
+    pub impact_bid: f64,
+    pub impact_ask: f64,
+    pub clob_premium_bps: f64,
+    pub vault_skew_bps: f64,
+    pub funding_rate_1h_pct: f64,
+    pub funding_rate_8h_pct: f64,
+    pub long_funding_rate_1h_pct: f64,
+    pub short_funding_rate_1h_pct: f64,
+    pub next_funding_time: u64,
+    pub formula: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SequencerTickReport {
+    pub tick_id: u64,
+    pub timestamp: u64,
+    pub active_markets: usize,
+    pub expired_orders_purged: usize,
+    pub vault_mm_quotes_active: usize,
+    pub solvency_verified: bool,
+    pub phase: String,
+}
+

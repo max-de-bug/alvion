@@ -1,0 +1,24 @@
+{
+  "totalCount": 48920,
+  "entries": {
+    "0xa082394ece720f349bd11913a9c1c4b481f6742d": {
+      "address": "0xa082394ece720f349bd11913a9c1c4b481f6742d",
+      "referralCode": "a08239",
+      "referralsCount": 0,
+      "xp": 350,
+      "tier": "BRONZE",
+      "quests": {
+        "walletConnected": true,
+        "signatureVerified": false,
+        "twitterFollowed": false,
+        "discordJoined": false,
+        "testnetTraded": false,
+        "peersInvited": false
+      },
+      "rank": 48921,
+      "joinedAt": 1794786017236,
+      "passId": "ALV-A082742D",
+      "email": "trader@alvion.exchange"
+    }
+  }
+}

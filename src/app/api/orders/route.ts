@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
           leverage,
           signature,
         }),
-        signal: AbortSignal.timeout(200),
+        signal: AbortSignal.timeout(2000),
       });
 
       if (rustRes.ok) {
@@ -139,7 +139,7 @@ export async function DELETE(req: NextRequest) {
     try {
       await fetch(`${RUST_CLOB_URL}/api/order/${market}/${orderId}`, {
         method: "DELETE",
-        signal: AbortSignal.timeout(200),
+        signal: AbortSignal.timeout(2000),
       });
     } catch {
       // ignore

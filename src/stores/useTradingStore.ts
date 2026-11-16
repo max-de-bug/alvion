@@ -1,5 +1,144 @@
 import { create } from "zustand";
 
+export interface MarketMetadata {
+  symbol: string;
+  name: string;
+  category: "EQUITY" | "CRYPTO";
+  exchangeBadge: string;
+  maxLeverage: number;
+  initialMarginPct: number;
+  is24x7: boolean;
+}
+
+export const MARKETS_METADATA: Record<string, MarketMetadata> = {
+  SPY: {
+    symbol: "SPY",
+    name: "SPDR S&P 500 ETF Trust",
+    category: "EQUITY",
+    exchangeBadge: "NYSE Arca",
+    maxLeverage: 20,
+    initialMarginPct: 5,
+    is24x7: true,
+  },
+  NVDA: {
+    symbol: "NVDA",
+    name: "NVIDIA Corporation",
+    category: "EQUITY",
+    exchangeBadge: "NASDAQ / NYSE",
+    maxLeverage: 10,
+    initialMarginPct: 10,
+    is24x7: true,
+  },
+  TSLA: {
+    symbol: "TSLA",
+    name: "Tesla, Inc.",
+    category: "EQUITY",
+    exchangeBadge: "NASDAQ / NYSE",
+    maxLeverage: 10,
+    initialMarginPct: 10,
+    is24x7: true,
+  },
+  AAPL: {
+    symbol: "AAPL",
+    name: "Apple Inc.",
+    category: "EQUITY",
+    exchangeBadge: "NASDAQ / NYSE",
+    maxLeverage: 10,
+    initialMarginPct: 10,
+    is24x7: true,
+  },
+  QQQ: {
+    symbol: "QQQ",
+    name: "Invesco QQQ Trust (Nasdaq-100)",
+    category: "EQUITY",
+    exchangeBadge: "NASDAQ",
+    maxLeverage: 20,
+    initialMarginPct: 5,
+    is24x7: true,
+  },
+  MSFT: {
+    symbol: "MSFT",
+    name: "Microsoft Corporation",
+    category: "EQUITY",
+    exchangeBadge: "NASDAQ",
+    maxLeverage: 10,
+    initialMarginPct: 10,
+    is24x7: true,
+  },
+  AMZN: {
+    symbol: "AMZN",
+    name: "Amazon.com, Inc.",
+    category: "EQUITY",
+    exchangeBadge: "NASDAQ",
+    maxLeverage: 10,
+    initialMarginPct: 10,
+    is24x7: true,
+  },
+  GOOGL: {
+    symbol: "GOOGL",
+    name: "Alphabet Inc. (Google)",
+    category: "EQUITY",
+    exchangeBadge: "NASDAQ",
+    maxLeverage: 10,
+    initialMarginPct: 10,
+    is24x7: true,
+  },
+  META: {
+    symbol: "META",
+    name: "Meta Platforms, Inc.",
+    category: "EQUITY",
+    exchangeBadge: "NASDAQ",
+    maxLeverage: 10,
+    initialMarginPct: 10,
+    is24x7: true,
+  },
+  COIN: {
+    symbol: "COIN",
+    name: "Coinbase Global, Inc.",
+    category: "EQUITY",
+    exchangeBadge: "NASDAQ",
+    maxLeverage: 10,
+    initialMarginPct: 10,
+    is24x7: true,
+  },
+  MSTR: {
+    symbol: "MSTR",
+    name: "MicroStrategy Inc.",
+    category: "EQUITY",
+    exchangeBadge: "NASDAQ",
+    maxLeverage: 10,
+    initialMarginPct: 10,
+    is24x7: true,
+  },
+  AVAX: {
+    symbol: "AVAX",
+    name: "Avalanche",
+    category: "CRYPTO",
+    exchangeBadge: "Avalanche C-Chain",
+    maxLeverage: 25,
+    initialMarginPct: 4,
+    is24x7: true,
+  },
+  BTC: {
+    symbol: "BTC",
+    name: "Bitcoin",
+    category: "CRYPTO",
+    exchangeBadge: "Global Crypto",
+    maxLeverage: 50,
+    initialMarginPct: 2,
+    is24x7: true,
+  },
+  ETH: {
+    symbol: "ETH",
+    name: "Ethereum",
+    category: "CRYPTO",
+    exchangeBadge: "Global Crypto",
+    maxLeverage: 50,
+    initialMarginPct: 2,
+    is24x7: true,
+  },
+};
+
 export interface Position {
   id: string;
   market: string;
