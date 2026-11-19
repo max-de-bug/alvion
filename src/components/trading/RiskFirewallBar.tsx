@@ -11,12 +11,12 @@ interface RiskFirewallBarProps {
   solvency: SolvencyData | null;
 }
 
-export const RiskFirewallBar: React.FC<RiskFirewallBarProps> = ({
+export const RiskFirewallBar = React.memo<RiskFirewallBarProps>(function RiskFirewallBar({
   domainInfo,
   vaultLiquidity,
   vaultNetSkew,
   solvency,
-}) => {
+}) {
   return (
     <div className="bg-slate-900/70 border border-slate-800/80 rounded-xl px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs">
       <div className="flex items-center gap-4 flex-wrap">
@@ -64,5 +64,5 @@ export const RiskFirewallBar: React.FC<RiskFirewallBarProps> = ({
       </div>
     </div>
   );
-};
+});
 

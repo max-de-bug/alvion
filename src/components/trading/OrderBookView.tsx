@@ -10,11 +10,11 @@ interface OrderBookViewProps {
   onSelectPrice: (px: string) => void;
 }
 
-export const OrderBookView: React.FC<OrderBookViewProps> = ({
+export const OrderBookView = React.memo<OrderBookViewProps>(function OrderBookView({
   orderBook,
   markPrice,
   onSelectPrice,
-}) => {
+}) {
   return (
     <div className="md:col-span-5 bg-slate-900/80 border border-slate-800 rounded-xl p-3 flex flex-col h-[340px]">
       <div className="flex items-center justify-between border-b border-slate-800/80 pb-2 mb-2">
@@ -66,5 +66,5 @@ export const OrderBookView: React.FC<OrderBookViewProps> = ({
       </div>
     </div>
   );
-};
+});
 

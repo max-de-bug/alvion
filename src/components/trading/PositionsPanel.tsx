@@ -18,7 +18,7 @@ interface PositionsPanelProps {
   onCancelOrder: (id: string) => void;
 }
 
-export const PositionsPanel: React.FC<PositionsPanelProps> = ({
+export const PositionsPanel = React.memo<PositionsPanelProps>(function PositionsPanel({
   bottomTab,
   setBottomTab,
   positions,
@@ -28,7 +28,7 @@ export const PositionsPanel: React.FC<PositionsPanelProps> = ({
   currentMarket,
   onClosePosition,
   onCancelOrder,
-}) => {
+}) {
   return (
     <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 flex flex-col">
       <div className="flex items-center justify-between border-b border-slate-800/80 pb-2 mb-3">
@@ -307,5 +307,5 @@ export const PositionsPanel: React.FC<PositionsPanelProps> = ({
       )}
     </div>
   );
-};
+});
 

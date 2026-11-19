@@ -7,7 +7,7 @@ interface NotificationToastProps {
   notification: string | null;
 }
 
-export const NotificationToast: React.FC<NotificationToastProps> = ({ notification }) => {
+export const NotificationToast = React.memo<NotificationToastProps>(function NotificationToast({ notification }) {
   if (!notification) return null;
 
   return (
@@ -16,5 +16,5 @@ export const NotificationToast: React.FC<NotificationToastProps> = ({ notificati
       <span>{notification}</span>
     </div>
   );
-};
+});
 

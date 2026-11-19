@@ -1,3 +1,4 @@
+mod error;
 mod types;
 mod orderbook;
 mod domain;
@@ -290,7 +291,8 @@ async fn handle_liquidate(
             StatusCode::BAD_REQUEST,
             Json(serde_json::json!({
                 "success": false,
-                "error": format!("{:?}", e),
+                "error": e.to_string(),
+                "error_code": e.error_code(),
             })),
         ),
     }

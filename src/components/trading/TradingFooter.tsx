@@ -2,7 +2,7 @@
 
 import React from "react";
 
-export const TradingFooter: React.FC = () => {
+export const TradingFooter = React.memo(function TradingFooter() {
   return (
     <footer className="border-t border-slate-900 bg-slate-950 px-4 py-3 text-center text-xs text-slate-500">
       <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
@@ -13,5 +13,5 @@ export const TradingFooter: React.FC = () => {
       </div>
     </footer>
   );
-};
+});
 

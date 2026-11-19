@@ -8,11 +8,11 @@ interface TradingChartProps {
   setTimeframe: (tf: "1m" | "5m" | "15m" | "1h") => void;
 }
 
-export const TradingChart: React.FC<TradingChartProps> = ({
+export const TradingChart = React.memo<TradingChartProps>(function TradingChart({
   currentMarketName,
   timeframe,
   setTimeframe,
-}) => {
+}) {
   return (
     <div className="md:col-span-7 bg-slate-900/80 border border-slate-800 rounded-xl p-4 flex flex-col h-[340px]">
       <div className="flex items-center justify-between border-b border-slate-800/80 pb-2.5 mb-2.5">
@@ -68,5 +68,5 @@ export const TradingChart: React.FC<TradingChartProps> = ({
       </div>
     </div>
   );
-};
+});
 

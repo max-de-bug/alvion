@@ -18,14 +18,7 @@ pub struct MarketDomain {
     pub available_short_liquidity_usd: u64,
 }
 
-#[derive(Debug)]
-pub enum DomainError {
-    MarketNotFound,
-    PositionNotFound,
-    PositionClosed,
-    ExceededDomainPnlCap { requested: u64, allowed: u64 },
-    MaintenanceMarginViolated,
-}
+pub use crate::error::DomainError;
 
 pub struct DomainRiskManager {
     pub domains: HashMap<String, MarketDomain>,
@@ -113,7 +106,7 @@ impl DomainRiskManager {
         size_usd: u64,
         entry_price: u64,
     ) -> Result<Position, DomainError> {
-        let domain = self.domains.get_mut(&market).ok_or(DomainError::MarketNotFound)?;
+        let domain = self.domains.get_mut(&market).ok_or_else(|| DomainError::market_not_found(&market))?;
 
         match side {
             Side::Buy => domain.long_open_interest_usd += size_usd,
@@ -147,15 +140,15 @@ impl DomainRiskManager {
         position_id: &str,
         exit_price: u64,
     ) -> Result<(i64, u64), DomainError> {
-        let pos = self.positions.get_mut(position_id).ok_or(DomainError::PositionNotFound)?;
+        let pos = self.positions.get_mut(position_id).ok_or_else(|| DomainError::position_not_found(position_id))?;
         if !pos.is_open {
-            return Err(DomainError::PositionClosed);
+            return Err(DomainError::position_closed(position_id));
         }
 
         let market = pos.market.clone();
         let raw_pnl = Self::calc_pnl(pos.side, pos.entry_price, pos.size_usd, exit_price);
 
-        let domain = self.domains.get_mut(&market).ok_or(DomainError::MarketNotFound)?;
+        let domain = self.domains.get_mut(&market).ok_or_else(|| DomainError::market_not_found(&market))?;
 
         // Deduct Open Interest
         match pos.side {
@@ -190,9 +183,9 @@ impl DomainRiskManager {
 
     /// Check if position is liquidatable (Maintenance margin = 0.8% = 80 bps)
     pub fn can_liquidate(&self, position_id: &str, current_price: u64) -> Result<bool, DomainError> {
-        let pos = self.positions.get(position_id).ok_or(DomainError::PositionNotFound)?;
+        let pos = self.positions.get(position_id).ok_or_else(|| DomainError::position_not_found(position_id))?;
         if !pos.is_open {
-            return Err(DomainError::PositionClosed);
+            return Err(DomainError::position_closed(position_id));
         }
 
         let pnl = Self::calc_pnl(pos.side, pos.entry_price, pos.size_usd, current_price);
@@ -312,6 +305,58 @@ impl DomainRiskManager {
             let price_diff = entry_price as i64 - current_price as i64;
             (price_diff * size_usd as i64) / entry_price as i64
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_market_not_found_error() {
+        let mut manager = DomainRiskManager::new(1_000_000 * USD_SCALE);
+        let res = manager.open_position(
+            "0xTrader".to_string(),
+            "NONEXISTENT_MARKET".to_string(),
+            Side::Buy,
+            100 * USD_SCALE,
+            10,
+            1000 * USD_SCALE,
+            10 * PRICE_SCALE,
+        );
+        assert_eq!(
+            res.unwrap_err(),
+            DomainError::market_not_found("NONEXISTENT_MARKET")
+        );
+    }
+
+    #[test]
+    fn test_position_not_found_and_closed_errors() {
+        let mut manager = DomainRiskManager::new(1_000_000 * USD_SCALE);
+        // Position not found
+        let res = manager.close_position_with_junior_pnl("POS-INVALID", 10 * PRICE_SCALE);
+        assert_eq!(res.unwrap_err(), DomainError::position_not_found("POS-INVALID"));
+
+        // Open position on AVAX
+        let pos = manager.open_position(
+            "0xTrader".to_string(),
+            "AVAX".to_string(),
+            Side::Buy,
+            100 * USD_SCALE,
+            10,
+            1000 * USD_SCALE,
+            10 * PRICE_SCALE,
+        ).expect("should open position");
+
+        // Close position
+        let (pnl, payout) = manager.close_position_with_junior_pnl(&pos.id, 12 * PRICE_SCALE)
+            .expect("should close position");
+        assert!(pnl > 0);
+        assert!(payout > 100 * USD_SCALE);
+
+        // Closing again should return PositionClosed error
+        let res2 = manager.close_position_with_junior_pnl(&pos.id, 12 * PRICE_SCALE);
+        assert_eq!(res2.unwrap_err(), DomainError::position_closed(&pos.id));
     }
 }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { MarketContext, QuoteResult } from "@/lib/hyperliquid";
 import { SignedOrder, MatchedTrade } from "@/lib/orderTypes";
@@ -18,6 +18,26 @@ export function formatUsdCompact(val: number): string {
   if (val >= 1_000) return `$${(val / 1_000).toFixed(2)}K`;
   return `$${val.toFixed(2)}`;
 }
+
+const EMPTY_MARKETS: MarketContext[] = [];
+const EMPTY_ORDERS: SignedOrder[] = [];
+const EMPTY_TRADES: MatchedTrade[] = [];
+
+const DEFAULT_MARKET: MarketContext = {
+  name: "AVAX",
+  oraclePx: 7.18,
+  markPx: 7.17,
+  midPx: 7.175,
+  prevDayPx: 7.49,
+  change24h: -4.1,
+  fundingRate: -0.000016,
+  dayVolumeUsd: 26500000,
+  openInterest: 2420000,
+  szDecimals: 2,
+  maxLeverage: 100,
+  impactBidPx: 7.165,
+  impactAskPx: 7.185,
+};
 
 export function useTradingDashboard() {
   const queryClient = useQueryClient();
@@ -56,12 +76,12 @@ export function useTradingDashboard() {
   } = useTradingStore();
 
   // 1. Fetch live markets from Hyperliquid backend API via TanStack Query
-  const { data: markets = [] } = useQuery<MarketContext[]>({
+  const { data: markets = EMPTY_MARKETS } = useQuery<MarketContext[]>({
     queryKey: ["markets"],
     queryFn: async () => {
       const res = await fetch("/api/markets");
       const data = await res.json();
-      return data.success && data.markets ? (data.markets as MarketContext[]) : [];
+      return data.success && data.markets ? (data.markets as MarketContext[]) : EMPTY_MARKETS;
     },
     refetchInterval: 4000,
   });
@@ -78,21 +98,8 @@ export function useTradingDashboard() {
   const currentMarket = useMemo(() => {
     return (
       markets.find((m) => m.name === selectedMarketName) ||
-      markets[0] || {
-        name: "AVAX",
-        oraclePx: 7.18,
-        markPx: 7.17,
-        midPx: 7.175,
-        prevDayPx: 7.49,
-        change24h: -4.1,
-        fundingRate: -0.000016,
-        dayVolumeUsd: 26500000,
-        openInterest: 2420000,
-        szDecimals: 2,
-        maxLeverage: 100,
-        impactBidPx: 7.165,
-        impactAskPx: 7.185,
-      }
+      markets[0] ||
+      DEFAULT_MARKET
     );
   }, [markets, selectedMarketName]);
 
@@ -107,16 +114,19 @@ export function useTradingDashboard() {
   };
   const isEquity = marketMeta.category === "EQUITY";
 
-  // Set default limit price when switching markets
+  // Set default limit price when switching markets without infinite loop
+  const initializedMarketRef = useRef<string | null>(null);
+
   useEffect(() => {
-    if (currentMarket) {
-      setLimitPrice(
+    if (currentMarket && initializedMarketRef.current !== currentMarket.name) {
+      initializedMarketRef.current = currentMarket.name;
+      const defaultPrice =
         currentMarket.markPx > 10
           ? currentMarket.markPx.toFixed(2)
-          : currentMarket.markPx.toFixed(4)
-      );
+          : currentMarket.markPx.toFixed(4);
+      setLimitPrice(defaultPrice);
     }
-  }, [selectedMarketName, currentMarket, setLimitPrice]);
+  }, [currentMarket?.name, currentMarket?.markPx, setLimitPrice]);
 
   // 2. Fetch Open Orders and Recent Trades from Option A matching engine via TanStack Query
   const { data: engineState } = useQuery({
@@ -131,17 +141,17 @@ export function useTradingDashboard() {
       return {
         openOrders: (ordersData.success && ordersData.orders
           ? ordersData.orders.filter((o: SignedOrder) => o.status === "OPEN")
-          : []) as SignedOrder[],
+          : EMPTY_ORDERS) as SignedOrder[],
         recentTrades: (tradesData.success && tradesData.trades
           ? tradesData.trades
-          : []) as MatchedTrade[],
+          : EMPTY_TRADES) as MatchedTrade[],
       };
     },
     refetchInterval: 2500,
   });
 
-  const openOrders = useMemo(() => engineState?.openOrders ?? [], [engineState?.openOrders]);
-  const recentTrades = useMemo(() => engineState?.recentTrades ?? [], [engineState?.recentTrades]);
+  const openOrders = useMemo(() => engineState?.openOrders ?? EMPTY_ORDERS, [engineState?.openOrders]);
+  const recentTrades = useMemo(() => engineState?.recentTrades ?? EMPTY_TRADES, [engineState?.recentTrades]);
 
   // 3. Fetch Hyperliquid L2 Order Book via TanStack Query
   const { data: orderBook = null } = useQuery<OrderBookData | null>({
@@ -248,7 +258,7 @@ export function useTradingDashboard() {
   }, [fundingInfo?.next_funding_time]);
 
   // Execute trade (Option A: EIP-712 Limit order or Vault Market order)
-  const handleExecuteTrade = async () => {
+  const handleExecuteTrade = useCallback(async () => {
     if (!quote) return;
     if (walletBalance < marginUsdc) {
       notify("Insufficient USDC balance", 3000);
@@ -341,46 +351,68 @@ export function useTradingDashboard() {
     } catch (err) {
       console.error("Order submission failed", err);
     }
-  };
+  }, [
+    quote,
+    walletBalance,
+    marginUsdc,
+    orderType,
+    limitPrice,
+    leverage,
+    address,
+    isConnected,
+    signOrder,
+    currentMarket.name,
+    isLong,
+    notify,
+    setWalletBalance,
+    addPosition,
+    queryClient,
+  ]);
 
   // Cancel resting limit order with 0 gas
-  const handleCancelOrder = async (orderId: string) => {
-    try {
-      const res = await fetch(`/api/orders?id=${orderId}`, { method: "DELETE" });
-      const data = await res.json();
-      if (data.success) {
-        notify(`Order ${orderId} cancelled instantly (0 Gas).`, 3500);
-        queryClient.invalidateQueries({ queryKey: ["engineState"] });
-        queryClient.invalidateQueries({ queryKey: ["domain"] });
-        queryClient.invalidateQueries({ queryKey: ["solvency"] });
+  const handleCancelOrder = useCallback(
+    async (orderId: string) => {
+      try {
+        const res = await fetch(`/api/orders?id=${orderId}`, { method: "DELETE" });
+        const data = await res.json();
+        if (data.success) {
+          notify(`Order ${orderId} cancelled instantly (0 Gas).`, 3500);
+          queryClient.invalidateQueries({ queryKey: ["engineState"] });
+          queryClient.invalidateQueries({ queryKey: ["domain"] });
+          queryClient.invalidateQueries({ queryKey: ["solvency"] });
+        }
+      } catch (err) {
+        console.error("Failed to cancel order", err);
       }
-    } catch (err) {
-      console.error("Failed to cancel order", err);
-    }
-  };
+    },
+    [notify, queryClient]
+  );
 
   // Close position and settle PnL in USDC directly
-  const handleClosePosition = (posId: string) => {
-    const pos = positions.find((p) => p.id === posId);
-    if (!pos) return;
+  const handleClosePosition = useCallback(
+    (posId: string) => {
+      const pos = positions.find((p) => p.id === posId);
+      if (!pos) return;
 
-    const market = markets.find((m) => m.name === pos.market) || currentMarket;
-    const currentPrice = market.markPx;
+      const market = markets.find((m) => m.name === pos.market) || currentMarket;
+      const currentPrice = market.markPx;
 
-    const pnlRatio = pos.isLong
-      ? (currentPrice - pos.entryPrice) / pos.entryPrice
-      : (pos.entryPrice - currentPrice) / pos.entryPrice;
+      const pnlRatio = pos.isLong
+        ? (currentPrice - pos.entryPrice) / pos.entryPrice
+        : (pos.entryPrice - currentPrice) / pos.entryPrice;
 
-    const netPnlUsdc = pos.sizeUsdc * pnlRatio;
-    const payout = Math.max(0, pos.marginUsdc + netPnlUsdc);
+      const netPnlUsdc = pos.sizeUsdc * pnlRatio;
+      const payout = Math.max(0, pos.marginUsdc + netPnlUsdc);
 
-    setWalletBalance((prev) => prev + payout);
-    removePosition(posId);
+      setWalletBalance((prev) => prev + payout);
+      removePosition(posId);
 
-    const pnlFormatted =
-      netPnlUsdc >= 0 ? `+$${netPnlUsdc.toFixed(2)}` : `-$${Math.abs(netPnlUsdc).toFixed(2)}`;
-    notify(`Position settled on Avalanche C-Chain for ${pnlFormatted} USDC.`, 5000);
-  };
+      const pnlFormatted =
+        netPnlUsdc >= 0 ? `+$${netPnlUsdc.toFixed(2)}` : `-$${Math.abs(netPnlUsdc).toFixed(2)}`;
+      notify(`Position settled on Avalanche C-Chain for ${pnlFormatted} USDC.`, 5000);
+    },
+    [positions, markets, currentMarket, setWalletBalance, removePosition, notify]
+  );
 
   return {
     // State from store

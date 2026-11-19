@@ -23,7 +23,7 @@ interface MarketTickerBarProps {
   formatUsdCompact: (val: number) => string;
 }
 
-export const MarketTickerBar: React.FC<MarketTickerBarProps> = ({
+export const MarketTickerBar = React.memo<MarketTickerBarProps>(function MarketTickerBar({
   selectedMarketName,
   setSelectedMarketName,
   currentMarket,
@@ -39,7 +39,7 @@ export const MarketTickerBar: React.FC<MarketTickerBarProps> = ({
   availableLongLiq,
   availableShortLiq,
   formatUsdCompact,
-}) => {
+}) {
   return (
     <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-3 flex flex-wrap items-center justify-between gap-4">
       <div className="flex items-center gap-3 flex-wrap">
@@ -211,5 +211,5 @@ export const MarketTickerBar: React.FC<MarketTickerBarProps> = ({
       </div>
     </div>
   );
-};
+});
 

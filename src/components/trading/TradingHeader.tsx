@@ -16,7 +16,7 @@ interface TradingHeaderProps {
   disconnect: () => void;
 }
 
-export const TradingHeader: React.FC<TradingHeaderProps> = ({
+export const TradingHeader = React.memo<TradingHeaderProps>(function TradingHeader({
   activeTab,
   setActiveTab,
   walletBalance,
@@ -26,7 +26,7 @@ export const TradingHeader: React.FC<TradingHeaderProps> = ({
   chainId,
   connectWallet,
   disconnect,
-}) => {
+}) {
   return (
     <header className="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-50 px-4 py-2.5">
       <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
@@ -158,5 +158,5 @@ export const TradingHeader: React.FC<TradingHeaderProps> = ({
       </div>
     </header>
   );
-};
+});
 

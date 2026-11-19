@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import dynamic from "next/dynamic";
 import { useTradingDashboard } from "@/hooks/useTradingDashboard";
 import {
   TradingHeader,
@@ -11,11 +12,25 @@ import {
   OrderBookView,
   PositionsPanel,
   OrderPanel,
-  FullOrderBookTab,
-  VaultBackstopTab,
-  ArchitectureDocsTab,
   TradingFooter,
 } from "@/components/trading";
+
+// Vercel Best Practice: bundle-dynamic-imports
+// Lazy-load secondary tabs so initial JS payload is minimal and critical path renders instantly
+const FullOrderBookTab = dynamic(
+  () => import("@/components/trading/FullOrderBookTab").then((m) => m.FullOrderBookTab),
+  { ssr: false }
+);
+
+const VaultBackstopTab = dynamic(
+  () => import("@/components/trading/VaultBackstopTab").then((m) => m.VaultBackstopTab),
+  { ssr: false }
+);
+
+const ArchitectureDocsTab = dynamic(
+  () => import("@/components/trading/ArchitectureDocsTab").then((m) => m.ArchitectureDocsTab),
+  { ssr: false }
+);
 
 export default function Home() {
   const {

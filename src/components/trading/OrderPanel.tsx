@@ -30,7 +30,7 @@ interface OrderPanelProps {
 const LEVERAGE_OPTIONS = [2, 5, 10, 25, 50, 75, 100];
 const MARGIN_PERCENTAGES = [0.25, 0.5, 0.75, 1];
 
-export const OrderPanel: React.FC<OrderPanelProps> = ({
+export const OrderPanel = React.memo<OrderPanelProps>(function OrderPanel({
   orderType,
   setOrderType,
   isLong,
@@ -51,7 +51,7 @@ export const OrderPanel: React.FC<OrderPanelProps> = ({
   shortFundingRate,
   formatUsdCompact,
   onExecuteTrade,
-}) => {
+}) {
   return (
     <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-4 flex flex-col gap-4 shadow-xl">
       {/* Order Type Selector */}
@@ -278,5 +278,5 @@ export const OrderPanel: React.FC<OrderPanelProps> = ({
       </div>
     </div>
   );
-};
+});
 
