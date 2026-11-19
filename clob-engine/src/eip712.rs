@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use tiny_keccak::{Hasher, Keccak};
 
 pub const AVALANCHE_C_CHAIN_ID: u64 = 43114;

@@ -358,36 +358,55 @@ async fn fetch_live_oracles(
 ) -> Option<std::collections::HashMap<String, u64>> {
     let mut result = std::collections::HashMap::new();
 
-    // 1. Fetch NYSE & NASDAQ Tokenized Equities
     let equities = [
         "SPY", "NVDA", "TSLA", "AAPL", "QQQ", "MSFT", "AMZN", "GOOGL", "META", "COIN", "MSTR",
     ];
-    for sym in equities {
-        let url = format!("https://query1.finance.yahoo.com/v8/finance/chart/{}?interval=1d&range=1d", sym);
-        if let Ok(res) = client.get(&url).header("User-Agent", "Mozilla/5.0").send().await {
-            if let Ok(json) = res.json::<serde_json::Value>().await {
-                if let Some(price) = json["chart"]["result"][0]["meta"]["regularMarketPrice"].as_f64() {
-                    result.insert(sym.to_string(), (price * PRICE_SCALE as f64) as u64);
-                }
-            }
-        }
-    }
 
-    // 2. Fetch Avalanche & Crypto Core (AVAX, BTC, ETH, SOL) from Hyperliquid
-    let payload = serde_json::json!({ "type": "allMids" });
-    if let Ok(res) = client.post("https://api.hyperliquid.xyz/info").json(&payload).send().await {
-        if let Ok(mids) = res.json::<std::collections::HashMap<String, String>>().await {
-            for crypto in ["AVAX", "BTC", "ETH", "SOL"] {
-                if let Some(px_str) = mids.get(crypto) {
-                    if let Ok(px) = px_str.parse::<f64>() {
-                        result.insert(crypto.to_string(), (px * PRICE_SCALE as f64) as u64);
+    // Concurrently fetch real-time crypto prices from Hyperliquid and tokenized equities from NYSE/NASDAQ
+    let crypto_fut = async {
+        let payload = serde_json::json!({ "type": "allMids" });
+        let mut crypto_res = Vec::new();
+        if let Ok(res) = client.post("https://api.hyperliquid.xyz/info").json(&payload).send().await {
+            if let Ok(mids) = res.json::<std::collections::HashMap<String, String>>().await {
+                for crypto in ["AVAX", "BTC", "ETH", "SOL"] {
+                    if let Some(px_str) = mids.get(crypto) {
+                        if let Ok(px) = px_str.parse::<f64>() {
+                            crypto_res.push((crypto.to_string(), (px * PRICE_SCALE as f64) as u64));
+                        }
                     }
                 }
             }
         }
+        crypto_res
+    };
+
+    let equities_fut = futures_util::future::join_all(equities.iter().map(|&sym| {
+        let client = client.clone();
+        async move {
+            let url = format!("https://query1.finance.yahoo.com/v8/finance/chart/{}?interval=1d&range=1d", sym);
+            if let Ok(res) = client.get(&url).header("User-Agent", "Mozilla/5.0").send().await {
+                if let Ok(json) = res.json::<serde_json::Value>().await {
+                    if let Some(price) = json["chart"]["result"][0]["meta"]["regularMarketPrice"].as_f64() {
+                        return Some((sym.to_string(), (price * PRICE_SCALE as f64) as u64));
+                    }
+                }
+            }
+            None
+        }
+    }));
+
+    let (crypto_prices, equity_prices) = tokio::join!(crypto_fut, equities_fut);
+
+    for (k, v) in crypto_prices {
+        result.insert(k, v);
+    }
+    for opt in equity_prices {
+        if let Some((k, v)) = opt {
+            result.insert(k, v);
+        }
     }
 
-    // 3. Optional Pyth Hermes pull if PYTH_API_KEY environment variable is configured
+    // Optional Pyth Hermes pull if PYTH_API_KEY environment variable is configured
     if let Ok(api_key) = std::env::var("PYTH_API_KEY") {
         let pyth_url = "https://hermes.pyth.network/v2/updates/price/latest?ids[]=0x93da3352f9f1d105fdfe4971cfa80e9dd217f3046f1366ee68539271385236a3&ids[]=0xe62df6e80f4215897188b2758c33ccf600f933065e49449700f614f0791e7098";
         if let Ok(res) = client.get(pyth_url).bearer_auth(&api_key).send().await {

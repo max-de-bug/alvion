@@ -6,8 +6,13 @@ use crate::vault_mm::VaultMarketMaker;
 use crate::types::{
     AdaptiveFundingInfo, L2Depth, L4Depth, Order, Position, SequencerTickReport, Trade, PRICE_SCALE, USD_SCALE,
 };
-
 use crate::relayer::OnChainRelayer;
+use crate::ws::{ServerWsMessage, WsBroadcaster};
+
+pub const DEFAULT_MARKETS: &[&str] = &[
+    "SPY", "NVDA", "TSLA", "AAPL", "QQQ", "MSFT", "AMZN", "GOOGL", "META", "COIN", "MSTR",
+    "AVAX", "BTC", "ETH", "SOL",
+];
 
 pub struct ClobEngine {
     pub orderbooks: HashMap<String, OrderBook>,
@@ -18,6 +23,7 @@ pub struct ClobEngine {
     pub tick_counter: u64,
     pub sequence_counter: u64,
     pub latest_oracle_prices: HashMap<String, u64>,
+    pub broadcaster: Arc<WsBroadcaster>,
 }
 
 impl ClobEngine {
@@ -32,23 +38,27 @@ impl ClobEngine {
             tick_counter: 0,
             sequence_counter: 0,
             latest_oracle_prices: HashMap::new(),
+            broadcaster: Arc::new(WsBroadcaster::new()),
         };
 
-        // Initialize market order books & Vault Market Makers
-        // Support NYSE & NASDAQ Equities + Avalanche Crypto
-        for market in [
-            "SPY", "NVDA", "TSLA", "AAPL", "QQQ", "MSFT", "AMZN", "GOOGL", "META", "COIN", "MSTR",
-            "AVAX", "BTC", "ETH", "SOL",
-        ] {
-            engine.orderbooks.insert(market.to_string(), OrderBook::new(market.to_string()));
-            engine.vault_mm.insert(market.to_string(), VaultMarketMaker::new());
+        // Dynamically register default asset pairs (NYSE/NASDAQ Equities + Avalanche Crypto)
+        for &market in DEFAULT_MARKETS {
+            engine.register_market(market);
         }
 
-        // Zero hardcoded prices: Oracle prices start clean and are dynamically hydrated
-        // from live external oracle feeds (Hyperliquid L2 / NYSE feeds / Pyth Network)
-        // prior to processing client orders.
+        // Oracle prices start clean (0 hardcoded prices) and are dynamically hydrated
+        // from live external feeds (Hyperliquid L2 / NYSE feeds) prior to processing orders.
 
         engine
+    }
+
+    /// Dynamically register a new trading pair into the engine at runtime
+    pub fn register_market(&mut self, market: &str) {
+        let m = market.to_uppercase();
+        if !self.orderbooks.contains_key(&m) {
+            self.orderbooks.insert(m.clone(), OrderBook::new(m.clone()));
+            self.vault_mm.insert(m.clone(), VaultMarketMaker::new());
+        }
     }
 
     /// Dynamically update live oracle prices and recalibrate Percolator Vault MM spreads
@@ -60,6 +70,27 @@ impl ClobEngine {
                 net_oi as f64 / (self.risk_manager.total_vault_liquidity_usdc as f64)
             });
             self.refresh_vault_mm(market, *price, skew);
+
+            // Broadcast real-time TickerUpdate to all WebSocket subscribers
+            let price_f64 = (*price as f64) / PRICE_SCALE as f64;
+            let funding_info = self.risk_manager.calculate_adaptive_funding(market, *price, None, None);
+            self.broadcaster.broadcast(ServerWsMessage::TickerUpdate {
+                market: market.clone(),
+                oracle_price: price_f64,
+                mark_price: price_f64,
+                funding_1h_pct: funding_info.funding_rate_1h_pct,
+            });
+
+            // Broadcast updated orderbook snapshot reflecting fresh Vault MM quotes
+            self.sequence_counter += 1;
+            let seq = self.sequence_counter;
+            if let Some(book) = self.orderbooks.get(market) {
+                let depth = book.get_l4_depth(15, seq);
+                self.broadcaster.broadcast(ServerWsMessage::OrderbookSnapshot {
+                    market: market.clone(),
+                    depth: serde_json::to_value(depth).unwrap_or_default(),
+                });
+            }
         }
     }
 
@@ -77,8 +108,6 @@ impl ClobEngine {
             return (None, Vec::new());
         }
 
-        let book = self.orderbooks.entry(market.clone()).or_insert_with(|| OrderBook::new(market.clone()));
-
         let effective_oracle_price = if vault_oracle_price > 0 {
             vault_oracle_price
         } else {
@@ -90,9 +119,12 @@ impl ClobEngine {
             return (None, Vec::new());
         }
 
-        let trades = match order.order_type {
-            crate::types::OrderType::Limit => book.place_limit_order(order),
-            crate::types::OrderType::Market => book.place_market_order(order, effective_oracle_price),
+        let trades = {
+            let book = self.orderbooks.entry(market.clone()).or_insert_with(|| OrderBook::new(market.clone()));
+            match order.order_type {
+                crate::types::OrderType::Limit => book.place_limit_order(order),
+                crate::types::OrderType::Market => book.place_market_order(order, effective_oracle_price),
+            }
         };
 
         // If matched trades occurred, open position in isolated domain
@@ -106,7 +138,7 @@ impl ClobEngine {
 
             let pos = self.risk_manager.open_position(
                 trader,
-                market,
+                market.clone(),
                 side,
                 margin_usdc,
                 leverage,
@@ -121,9 +153,24 @@ impl ClobEngine {
         for trade in &trades {
             self.recent_trades.insert(0, trade.clone());
             self.relayer.enqueue_trade(trade.clone());
+            self.broadcaster.broadcast(ServerWsMessage::TradeBroadcast {
+                market: market.clone(),
+                trade: serde_json::to_value(trade).unwrap_or_default(),
+            });
         }
         if self.recent_trades.len() > 100 {
             self.recent_trades.truncate(100);
+        }
+
+        // Broadcast updated orderbook depth to subscribers
+        self.sequence_counter += 1;
+        let seq = self.sequence_counter;
+        if let Some(book) = self.orderbooks.get(&market) {
+            let depth = book.get_l4_depth(15, seq);
+            self.broadcaster.broadcast(ServerWsMessage::OrderbookSnapshot {
+                market: market.clone(),
+                depth: serde_json::to_value(depth).unwrap_or_default(),
+            });
         }
 
         (position, trades)
@@ -139,8 +186,19 @@ impl ClobEngine {
     }
 
     pub fn cancel_order(&mut self, market: &str, order_id: &str) -> bool {
-        if let Some(book) = self.orderbooks.get_mut(market) {
-            book.cancel_order(order_id)
+        let m = market.to_uppercase();
+        if let Some(book) = self.orderbooks.get_mut(&m) {
+            let cancelled = book.cancel_order(order_id);
+            if cancelled {
+                self.sequence_counter += 1;
+                let seq = self.sequence_counter;
+                let depth = book.get_l4_depth(15, seq);
+                self.broadcaster.broadcast(ServerWsMessage::OrderbookSnapshot {
+                    market: m,
+                    depth: serde_json::to_value(depth).unwrap_or_default(),
+                });
+            }
+            cancelled
         } else {
             false
         }
@@ -175,7 +233,9 @@ impl ClobEngine {
 
         // Phase 3: Purge expired orders (0 gas)
         let mut expired_count = 0;
-        for book in self.orderbooks.values_mut() {
+        let mut markets_to_notify = Vec::new();
+
+        for (m, book) in self.orderbooks.iter_mut() {
             let mut expired_ids = Vec::new();
             for queue in book.bids.values() {
                 for o in queue {
@@ -191,10 +251,27 @@ impl ClobEngine {
                     }
                 }
             }
+            let mut purged = false;
             for id in expired_ids {
                 if book.cancel_order(&id) {
                     expired_count += 1;
+                    purged = true;
                 }
+            }
+            if purged {
+                markets_to_notify.push(m.clone());
+            }
+        }
+
+        for m in markets_to_notify {
+            self.sequence_counter += 1;
+            let seq = self.sequence_counter;
+            if let Some(book) = self.orderbooks.get(&m) {
+                let depth = book.get_l4_depth(15, seq);
+                self.broadcaster.broadcast(ServerWsMessage::OrderbookSnapshot {
+                    market: m,
+                    depth: serde_json::to_value(depth).unwrap_or_default(),
+                });
             }
         }
 

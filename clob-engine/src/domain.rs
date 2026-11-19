@@ -1,5 +1,6 @@
 // Percolator-inspired Source-Domain Risk Firewall & Junior PnL Engine
 // Ensures profits from long-tail/volatile pairs cannot drain the primary USDC vault.
+#![allow(dead_code)]
 
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
