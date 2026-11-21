@@ -3,7 +3,8 @@
 #![allow(dead_code)]
 
 use serde::{Deserialize, Serialize};
-use std::collections::{BTreeMap, HashMap};
+use std::collections::BTreeMap;
+use rustc_hash::FxHashMap;
 
 pub const PRICE_SCALE: u64 = 1_000_000; // 6 decimals fixed-point for price
 pub const USD_SCALE: u64 = 1_000_000;   // 6 decimals for USD notional
@@ -223,8 +224,8 @@ pub struct SlabOrderBook {
     pub arena: SlabArena,
     pub bids: BTreeMap<u64, SlabLevel>,
     pub asks: BTreeMap<u64, SlabLevel>,
-    // O(1) index: order_id -> (Side, price, slab_idx)
-    pub order_index: HashMap<FixedId, (Side, u64, u32)>,
+    // O(1) index: order_id -> (Side, price, slab_idx) with FxHash
+    pub order_index: FxHashMap<FixedId, (Side, u64, u32)>,
 }
 
 impl SlabOrderBook {
@@ -234,7 +235,7 @@ impl SlabOrderBook {
             arena: SlabArena::with_capacity(initial_capacity),
             bids: BTreeMap::new(),
             asks: BTreeMap::new(),
-            order_index: HashMap::new(),
+            order_index: FxHashMap::default(),
         }
     }
 

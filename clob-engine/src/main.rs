@@ -355,8 +355,8 @@ async fn handle_get_l4_depth(
 
 async fn fetch_live_oracles(
     client: &reqwest::Client,
-) -> Option<std::collections::HashMap<String, u64>> {
-    let mut result = std::collections::HashMap::new();
+) -> Option<rustc_hash::FxHashMap<String, u64>> {
+    let mut result = rustc_hash::FxHashMap::default();
 
     let equities = [
         "SPY", "NVDA", "TSLA", "AAPL", "QQQ", "MSFT", "AMZN", "GOOGL", "META", "COIN", "MSTR",

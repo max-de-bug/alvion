@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use rustc_hash::FxHashMap;
 use std::sync::{Arc, Mutex};
 use crate::orderbook::OrderBook;
 use crate::domain::{DomainRiskManager, MarketDomain};
@@ -15,14 +15,14 @@ pub const DEFAULT_MARKETS: &[&str] = &[
 ];
 
 pub struct ClobEngine {
-    pub orderbooks: HashMap<String, OrderBook>,
+    pub orderbooks: FxHashMap<String, OrderBook>,
     pub risk_manager: DomainRiskManager,
-    pub vault_mm: HashMap<String, VaultMarketMaker>,
+    pub vault_mm: FxHashMap<String, VaultMarketMaker>,
     pub recent_trades: Vec<Trade>,
     pub relayer: OnChainRelayer,
     pub tick_counter: u64,
     pub sequence_counter: u64,
-    pub latest_oracle_prices: HashMap<String, u64>,
+    pub latest_oracle_prices: FxHashMap<String, u64>,
     pub broadcaster: Arc<WsBroadcaster>,
 }
 
@@ -30,14 +30,14 @@ impl ClobEngine {
     pub fn new() -> Self {
         let vault_liquidity = 5_250_000 * USD_SCALE;
         let mut engine = Self {
-            orderbooks: HashMap::new(),
+            orderbooks: FxHashMap::default(),
             risk_manager: DomainRiskManager::new(vault_liquidity),
-            vault_mm: HashMap::new(),
+            vault_mm: FxHashMap::default(),
             recent_trades: Vec::new(),
             relayer: OnChainRelayer::new("0xb3d1bcb79c7770f7d070ae6ac7b345a95372279e"),
             tick_counter: 0,
             sequence_counter: 0,
-            latest_oracle_prices: HashMap::new(),
+            latest_oracle_prices: FxHashMap::default(),
             broadcaster: Arc::new(WsBroadcaster::new()),
         };
 
@@ -62,7 +62,7 @@ impl ClobEngine {
     }
 
     /// Dynamically update live oracle prices and recalibrate Percolator Vault MM spreads
-    pub fn update_oracle_prices(&mut self, prices: &HashMap<String, u64>) {
+    pub fn update_oracle_prices(&mut self, prices: &FxHashMap<String, u64>) {
         for (market, price) in prices {
             self.latest_oracle_prices.insert(market.clone(), *price);
             let skew = self.risk_manager.domains.get(market).map_or(0.0, |d| {
@@ -223,7 +223,7 @@ impl ClobEngine {
     }
 
     /// Deterministic Sequencer Tick Loop (Phase 1 -> Phase 5)
-    pub fn execute_deterministic_tick(&mut self, oracle_prices: &HashMap<String, u64>) -> SequencerTickReport {
+    pub fn execute_deterministic_tick(&mut self, oracle_prices: &FxHashMap<String, u64>) -> SequencerTickReport {
         self.tick_counter += 1;
         let now = chrono::Utc::now().timestamp() as u64;
 

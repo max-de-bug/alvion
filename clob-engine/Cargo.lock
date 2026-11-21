@@ -11,6 +11,7 @@ dependencies = [
  "futures-util",
  "hex",
  "reqwest",
+ "rustc-hash",
  "serde",
  "serde_json",
  "tiny-keccak",

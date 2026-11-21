@@ -3,7 +3,7 @@
 #![allow(dead_code)]
 
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use rustc_hash::FxHashMap;
 use crate::types::{AdaptiveFundingInfo, Position, Side, PRICE_SCALE, USD_SCALE};
 use uuid::Uuid;
 
@@ -22,19 +22,19 @@ pub struct MarketDomain {
 pub use crate::error::DomainError;
 
 pub struct DomainRiskManager {
-    pub domains: HashMap<String, MarketDomain>,
-    pub positions: HashMap<String, Position>,
+    pub domains: FxHashMap<String, MarketDomain>,
+    pub positions: FxHashMap<String, Position>,
     pub total_vault_liquidity_usdc: u64,
-    pub trader_collateral_usdc: HashMap<String, u64>,
+    pub trader_collateral_usdc: FxHashMap<String, u64>,
 }
 
 impl DomainRiskManager {
     pub fn new(vault_liquidity_usdc: u64) -> Self {
         let mut manager = Self {
-            domains: HashMap::new(),
-            positions: HashMap::new(),
+            domains: FxHashMap::default(),
+            positions: FxHashMap::default(),
             total_vault_liquidity_usdc: vault_liquidity_usdc,
-            trader_collateral_usdc: HashMap::new(),
+            trader_collateral_usdc: FxHashMap::default(),
         };
 
         // Initialize risk domains for all 15 markets (Percolator Junior PnL firewalls)

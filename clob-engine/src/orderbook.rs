@@ -1,4 +1,5 @@
-use std::collections::{BTreeMap, HashMap, VecDeque};
+use std::collections::{BTreeMap, VecDeque};
+use rustc_hash::FxHashMap;
 use crate::types::{Order, OrderBookLevel, Side, Trade, L2Depth, L4Level, L4Depth, PRICE_SCALE, USD_SCALE};
 use uuid::Uuid;
 
@@ -8,8 +9,8 @@ pub struct OrderBook {
     pub bids: BTreeMap<u64, VecDeque<Order>>,
     // Asks sorted ascending (lowest price first)
     pub asks: BTreeMap<u64, VecDeque<Order>>,
-    // Index: order_id -> (Side, price) for O(1) order cancellation
-    pub order_index: HashMap<String, (Side, u64)>,
+    // Index: order_id -> (Side, price) for O(1) order cancellation using high-speed FxHash
+    pub order_index: FxHashMap<String, (Side, u64)>,
 }
 
 impl OrderBook {
@@ -18,7 +19,7 @@ impl OrderBook {
             market,
             bids: BTreeMap::new(),
             asks: BTreeMap::new(),
-            order_index: HashMap::new(),
+            order_index: FxHashMap::default(),
         }
     }
 
