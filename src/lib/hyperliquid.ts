@@ -41,9 +41,9 @@ export interface QuoteResult {
   borrowRatePerHour: number;
   tradingFeeUsdc: number;
   maxPayoutUsdc: number;
-  avalancheNetwork: {
+  robinhoodNetwork: {
     chainId: number;
-    name: string;
+    clearinghouse: string;
     usdcAddress: string;
     settlementToken: string;
   };
@@ -51,7 +51,7 @@ export interface QuoteResult {
 
 const HYPERLIQUID_API_URL = "https://api.hyperliquid.xyz/info";
 const DEFAULT_VAULT_LIQUIDITY_USDC = 5_000_000; // $5M USDC Single Vault simulation
-const AVALANCHE_USDC_ADDRESS = "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E";
+const ROBINHOOD_USDC_ADDRESS = "0x538d689255850901eC5A206A2a9d80d283A44919";
 
 export async function fetchNyseEquities(): Promise<MarketContext[]> {
   const equityDefs = [
@@ -137,7 +137,7 @@ export async function fetchHyperliquidMarkets(): Promise<MarketContext[]> {
 
     const featuredTokens = [
       "SPY", "NVDA", "TSLA", "AAPL", "QQQ", "MSFT", "AMZN", "GOOGL", "META", "COIN", "MSTR",
-      "AVAX", "BTC", "ETH", "SOL"
+      "SOL", "BTC", "ETH"
     ];
     const markets: MarketContext[] = [...nyseEquities];
 
@@ -179,7 +179,7 @@ export async function fetchHyperliquidMarkets(): Promise<MarketContext[]> {
       });
     }
 
-    // Prioritize NYSE Tokenized Equities & Avalanche Crypto
+    // Prioritize NYSE Tokenized Equities & Crypto
     return markets.sort((a, b) => {
       const aFeatured = featuredTokens.indexOf(a.name);
       const bFeatured = featuredTokens.indexOf(b.name);
@@ -252,19 +252,19 @@ export async function fetchHyperliquidMarkets(): Promise<MarketContext[]> {
         change24h: 0.39,
       },
       {
-        name: "AVAX",
+        name: "SOL",
         szDecimals: 2,
-        maxLeverage: 100,
-        oraclePx: 7.18,
-        markPx: 7.17,
-        midPx: 7.175,
-        impactBidPx: 7.165,
-        impactAskPx: 7.185,
-        fundingRate: -0.000016,
-        openInterest: 2420000,
-        dayVolumeUsd: 26500000,
-        prevDayPx: 7.49,
-        change24h: -4.1,
+        maxLeverage: 50,
+        oraclePx: 142.5,
+        markPx: 142.45,
+        midPx: 142.48,
+        impactBidPx: 142.35,
+        impactAskPx: 142.55,
+        fundingRate: 0.000012,
+        openInterest: 19800000,
+        dayVolumeUsd: 85200000,
+        prevDayPx: 139.8,
+        change24h: 1.9,
       },
       {
         name: "BTC",
@@ -383,11 +383,11 @@ export function calculateQuote(
     borrowRatePerHour,
     tradingFeeUsdc,
     maxPayoutUsdc,
-    avalancheNetwork: {
-      chainId: 43114, // Avalanche C-Chain
-      name: "Avalanche C-Chain",
-      usdcAddress: AVALANCHE_USDC_ADDRESS,
-      settlementToken: "USDC (Native Circle)",
+    robinhoodNetwork: {
+      chainId: 4663,
+      clearinghouse: "0x4663111111111111111111111111111111114663",
+      usdcAddress: "0x538d689255850901eC5A206A2a9d80d283A44919",
+      settlementToken: "USDC (Robinhood Chain L2)",
     },
   };
 }

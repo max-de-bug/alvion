@@ -34,7 +34,7 @@ impl VaultMarketMaker {
     pub fn new() -> Self {
         Self {
             config: VaultMmConfig::default(),
-            vault_address: "0xAlvionUsdcVaultMaker".to_string(),
+            vault_address: "0x4663111111111111111111111111111111114663".to_string(),
             active_quote_ids: Vec::new(),
         }
     }
@@ -87,6 +87,7 @@ impl VaultMarketMaker {
                 expiry: now + 300, // 5 min auto-refresh
                 signature: None,
                 created_at: now,
+                settlement_chain: crate::types::SettlementChain::RobinhoodChain,
             };
             book.place_limit_order(bid_order);
             self.active_quote_ids.push(bid_id);
@@ -108,6 +109,7 @@ impl VaultMarketMaker {
                 expiry: now + 300,
                 signature: None,
                 created_at: now,
+                settlement_chain: crate::types::SettlementChain::RobinhoodChain,
             };
             book.place_limit_order(ask_order);
             self.active_quote_ids.push(ask_id);

@@ -24,19 +24,19 @@ const EMPTY_ORDERS: SignedOrder[] = [];
 const EMPTY_TRADES: MatchedTrade[] = [];
 
 const DEFAULT_MARKET: MarketContext = {
-  name: "AVAX",
-  oraclePx: 7.18,
-  markPx: 7.17,
-  midPx: 7.175,
-  prevDayPx: 7.49,
-  change24h: -4.1,
-  fundingRate: -0.000016,
-  dayVolumeUsd: 26500000,
-  openInterest: 2420000,
+  name: "SOL",
+  oraclePx: 142.5,
+  markPx: 142.45,
+  midPx: 142.48,
+  prevDayPx: 139.8,
+  change24h: 1.9,
+  fundingRate: 0.000012,
+  dayVolumeUsd: 85200000,
+  openInterest: 19800000,
   szDecimals: 2,
-  maxLeverage: 100,
-  impactBidPx: 7.165,
-  impactAskPx: 7.185,
+  maxLeverage: 50,
+  impactBidPx: 142.35,
+  impactAskPx: 142.55,
 };
 
 export function useTradingDashboard() {
@@ -107,7 +107,7 @@ export function useTradingDashboard() {
     symbol: selectedMarketName,
     name: selectedMarketName,
     category: "CRYPTO",
-    exchangeBadge: "Avalanche C-Chain",
+    exchangeBadge: "Robinhood L2",
     maxLeverage: currentMarket.maxLeverage || 50,
     initialMarginPct: 5,
     is24x7: true,
@@ -273,12 +273,12 @@ export function useTradingDashboard() {
     const sizeUsd = marginUsdc * leverage;
 
     try {
-      let signature = "0xeip712mocksignature_avalanche_cchain";
-      const trader = (address || "0xUserAvalancheWallet") as string;
+      let signature = "0x" + "a1b2c3d4e5f67890".repeat(8) + "1b";
+      const trader = (address || "0x71C8364762A803325b335371b292723E59d64663") as string;
 
       if (isConnected && address) {
         try {
-          notify("Awaiting EIP-712 Order Signature in wallet...", 3000);
+          notify("Awaiting Order Signature in wallet...", 3000);
           const signRes = await signOrder({
             market: currentMarket.name,
             isLong,
@@ -308,6 +308,7 @@ export function useTradingDashboard() {
           marginUsdc,
           leverage,
           signature,
+          chain: "robinhood",
         }),
       });
 
@@ -339,7 +340,7 @@ export function useTradingDashboard() {
           );
         } else {
           notify(
-            `Limit order placed on CLOB Order Book! (Zero Gas • EIP-712 signed)`,
+            `Limit order placed on Robinhood Chain CLOB! (Zero Gas • EIP-712 signed)`,
             5000
           );
         }
@@ -409,7 +410,7 @@ export function useTradingDashboard() {
 
       const pnlFormatted =
         netPnlUsdc >= 0 ? `+$${netPnlUsdc.toFixed(2)}` : `-$${Math.abs(netPnlUsdc).toFixed(2)}`;
-      notify(`Position settled on Avalanche C-Chain for ${pnlFormatted} USDC.`, 5000);
+      notify(`Position settled on Robinhood Chain for ${pnlFormatted} USDC.`, 5000);
     },
     [positions, markets, currentMarket, setWalletBalance, removePosition, notify]
   );

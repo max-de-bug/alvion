@@ -38,7 +38,7 @@ impl DomainRiskManager {
         };
 
         // Initialize risk domains for all 15 markets (Percolator Junior PnL firewalls)
-        // NYSE & NASDAQ Tokenized Equities (24/7 on Avalanche)
+        // NYSE & NASDAQ Tokenized Equities (24/7 on Robinhood Chain)
         manager.add_domain_with_liquidity("SPY", 5_000_000 * USD_SCALE, 10_000_000 * USD_SCALE, 98_840_000 * USD_SCALE, 99_940_000 * USD_SCALE, 1_160_000 * USD_SCALE, 57_280 * USD_SCALE);
         manager.add_domain_with_liquidity("QQQ", 3_000_000 * USD_SCALE, 6_000_000 * USD_SCALE, 41_200_000 * USD_SCALE, 40_850_000 * USD_SCALE, 840_000 * USD_SCALE, 120_500 * USD_SCALE);
         manager.add_domain_with_liquidity("NVDA", 3_500_000 * USD_SCALE, 7_000_000 * USD_SCALE, 34_120_000 * USD_SCALE, 33_890_000 * USD_SCALE, 720_000 * USD_SCALE, 94_000 * USD_SCALE);
@@ -50,7 +50,7 @@ impl DomainRiskManager {
         manager.add_domain_with_liquidity("META", 2_000_000 * USD_SCALE, 4_000_000 * USD_SCALE, 16_700_000 * USD_SCALE, 16_900_000 * USD_SCALE, 430_000 * USD_SCALE, 61_000 * USD_SCALE);
         manager.add_domain_with_liquidity("COIN", 1_500_000 * USD_SCALE, 3_000_000 * USD_SCALE, 9_400_000 * USD_SCALE, 9_250_000 * USD_SCALE, 310_000 * USD_SCALE, 45_000 * USD_SCALE);
         manager.add_domain_with_liquidity("MSTR", 1_500_000 * USD_SCALE, 3_000_000 * USD_SCALE, 8_900_000 * USD_SCALE, 9_100_000 * USD_SCALE, 280_000 * USD_SCALE, 42_000 * USD_SCALE);
-        // Avalanche & Core Crypto
+        // Robinhood Chain & Core Crypto
         manager.add_domain_with_liquidity("AVAX", 2_000_000 * USD_SCALE, 4_000_000 * USD_SCALE, 12_450_000 * USD_SCALE, 11_800_000 * USD_SCALE, 650_000 * USD_SCALE, 85_000 * USD_SCALE);
         manager.add_domain_with_liquidity("BTC", 5_000_000 * USD_SCALE, 10_000_000 * USD_SCALE, 48_200_000 * USD_SCALE, 46_900_000 * USD_SCALE, 1_450_000 * USD_SCALE, 180_000 * USD_SCALE);
         manager.add_domain_with_liquidity("ETH", 4_000_000 * USD_SCALE, 8_000_000 * USD_SCALE, 28_400_000 * USD_SCALE, 29_100_000 * USD_SCALE, 980_000 * USD_SCALE, 140_000 * USD_SCALE);

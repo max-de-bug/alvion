@@ -2,7 +2,7 @@
 
 import { useAccount, useConnect, useDisconnect, useSignTypedData } from "wagmi";
 import { injected } from "wagmi/connectors";
-import { EIP712_DOMAIN, ORDER_TYPES, AVALANCHE_USDC_ADDRESS, ALVION_VAULT_ADDRESS } from "@/lib/wagmi";
+import { ROBINHOOD_CLEARINGHOUSE, ORDER_TYPES } from "@/lib/wagmi";
 import { useState, useCallback } from "react";
 
 export interface EIP712OrderPayload {
@@ -37,7 +37,7 @@ export function useAlvionTrading() {
       marginUsdc: number;
       leverage: number;
     }) => {
-      const traderAddress = (address || "0x71C8F39236357639C477759b353aE562c2C73875") as `0x${string}`;
+      const traderAddress = (address || "0x71C8364762A803325b335371b292723E59d64663") as `0x${string}`;
       const now = Math.floor(Date.now() / 1000);
       const nonce = BigInt(Date.now());
       const expiry = BigInt(now + 86400);
@@ -55,10 +55,10 @@ export function useAlvionTrading() {
       };
 
       if (!isConnected || !address) {
-        // Return valid mock signature in demo/simulated mode
+        // Return valid mock EIP-712 signature in demo mode
         return {
           message,
-          signature: "0xmock_eip712_demo_verified_signature",
+          signature: "0x" + "a1b2c3d4e5f67890".repeat(8) + "1b",
           isMock: true,
         };
       }
@@ -66,10 +66,10 @@ export function useAlvionTrading() {
       setIsSigning(true);
       try {
         const domain = {
-          name: "AlvionExchange",
-          version: "1.0",
-          chainId: chainId ? Number(chainId) : 43113,
-          verifyingContract: ALVION_VAULT_ADDRESS,
+          name: "Alvion Perpetuals",
+          version: "1",
+          chainId: chainId ? Number(chainId) : 4663,
+          verifyingContract: ROBINHOOD_CLEARINGHOUSE,
         };
 
         const signature = await signTypedDataAsync({
@@ -89,7 +89,7 @@ export function useAlvionTrading() {
         throw err;
       }
     },
-    [address, isConnected, signTypedDataAsync]
+    [address, isConnected, chainId, signTypedDataAsync]
   );
 
   return {
@@ -102,4 +102,3 @@ export function useAlvionTrading() {
     signOrder,
   };
 }
-

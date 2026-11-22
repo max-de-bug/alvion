@@ -12,10 +12,9 @@ class MatchingEngine {
 
   private seedInitialLiquidity() {
     const defaultMarkets = [
-      { name: "AVAX", price: 7.18 },
+      { name: "SOL", price: 142.5 },
       { name: "BTC", price: 64550.0 },
       { name: "ETH", price: 2680.0 },
-      { name: "SOL", price: 142.5 },
     ];
 
     defaultMarkets.forEach((m) => {
@@ -123,8 +122,8 @@ class MatchingEngine {
             seller: order.isLong ? maker.trader : order.trader,
             isLong: order.isLong,
             timestamp: Date.now(),
-            settlementTxHash: "0xavax" + Math.random().toString(16).substring(2, 18),
-            status: "SETTLED_ON_AVALANCHE",
+            settlementTxHash: "0x" + Math.random().toString(16).substring(2, 18) + Math.random().toString(16).substring(2, 18),
+            status: "SETTLED_ON_ROBINHOOD",
           };
 
           this.trades.unshift(trade);
@@ -149,12 +148,12 @@ class MatchingEngine {
         price: order.price,
         sizeUsd: order.sizeUsd,
         takerOrderId: order.id,
-        buyer: order.isLong ? order.trader : "0xAlvionUsdcVault",
-        seller: order.isLong ? "0xAlvionUsdcVault" : order.trader,
+        buyer: order.isLong ? order.trader : "0x4663111111111111111111111111111111114663",
+        seller: order.isLong ? "0x4663111111111111111111111111111111114663" : order.trader,
         isLong: order.isLong,
         timestamp: Date.now(),
-        settlementTxHash: "0xavax" + Math.random().toString(16).substring(2, 18),
-        status: "SETTLED_ON_AVALANCHE",
+        settlementTxHash: "0x" + Math.random().toString(16).substring(2, 18) + Math.random().toString(16).substring(2, 18),
+        status: "SETTLED_ON_ROBINHOOD",
       };
 
       this.trades.unshift(trade);

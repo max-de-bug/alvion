@@ -34,14 +34,14 @@ impl ClobEngine {
             risk_manager: DomainRiskManager::new(vault_liquidity),
             vault_mm: FxHashMap::default(),
             recent_trades: Vec::new(),
-            relayer: OnChainRelayer::new("0xb3d1bcb79c7770f7d070ae6ac7b345a95372279e"),
+            relayer: OnChainRelayer::new(crate::robinhood::ALVION_ROBINHOOD_CLEARINGHOUSE),
             tick_counter: 0,
             sequence_counter: 0,
             latest_oracle_prices: FxHashMap::default(),
             broadcaster: Arc::new(WsBroadcaster::new()),
         };
 
-        // Dynamically register default asset pairs (NYSE/NASDAQ Equities + Avalanche Crypto)
+        // Dynamically register default asset pairs (NYSE/NASDAQ Equities + Robinhood Chain Crypto)
         for &market in DEFAULT_MARKETS {
             engine.register_market(market);
         }

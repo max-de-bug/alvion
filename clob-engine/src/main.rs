@@ -4,7 +4,7 @@ mod orderbook;
 mod domain;
 mod vault_mm;
 mod slab;
-mod eip712;
+mod robinhood;
 mod engine;
 mod ws;
 mod relayer;
@@ -21,7 +21,7 @@ use ws::handle_ws_upgrade;
 use serde::{Deserialize, Serialize};
 use std::sync::{Arc, Mutex};
 use tower_http::cors::CorsLayer;
-use types::{Order, OrderType, Side, PRICE_SCALE, USD_SCALE};
+use types::{Order, OrderType, SettlementChain, Side, PRICE_SCALE, USD_SCALE};
 use uuid::Uuid;
 
 #[derive(Deserialize)]
@@ -35,6 +35,8 @@ struct SubmitOrderRequest {
     margin_usdc: f64,
     leverage: u32,
     signature: Option<String>,
+    #[allow(dead_code)]
+    chain: Option<String>, // "robinhood"
 }
 
 #[derive(Serialize)]
@@ -78,8 +80,8 @@ async fn main() {
         .build()
         .unwrap_or_default();
 
-    println!(">> Dynamic Initialization: Querying on-chain vault & live oracle feeds...");
-    println!("   Target On-Chain Vault: 0xb3d1bcb79c7770f7d070ae6ac7b345a95372279e");
+    println!(">> Dynamic Initialization: Querying on-chain Robinhood Chain clearinghouse & live oracle feeds...");
+    println!("   Target On-Chain Clearinghouse (Robinhood Chain L2): {}", robinhood::ALVION_ROBINHOOD_CLEARINGHOUSE);
 
     // Dynamic Warmup: Fetch real-time live oracle prices before opening engine to orders
     let initial_prices = fetch_live_oracles(&http_client).await;
@@ -107,7 +109,7 @@ async fn main() {
         loop {
             interval.tick().await;
 
-            // Ingest real-time live oracle prices: NYSE tokenized equities & Avalanche crypto
+            // Ingest real-time live oracle prices: NYSE tokenized equities & Robinhood Chain crypto
             let live_prices = fetch_live_oracles(&bg_client).await;
 
             let mut eng = bg_engine.lock().unwrap();
@@ -183,6 +185,7 @@ async fn handle_submit_order(
         expiry: chrono::Utc::now().timestamp() as u64 + 86400,
         signature: payload.signature,
         created_at: chrono::Utc::now().timestamp() as u64,
+        settlement_chain: SettlementChain::RobinhoodChain,
     };
 
     let oracle_price = eng.latest_oracle_prices.get(&payload.market.to_uppercase()).copied().unwrap_or(0);
@@ -453,7 +456,7 @@ async fn handle_get_funding(
             StatusCode::SERVICE_UNAVAILABLE,
             Json(serde_json::json!({
                 "success": false,
-                "error": "Waiting for live oracle price stream from NYSE / Avalanche"
+                "error": "Waiting for live oracle price stream from NYSE / Crypto feeds"
             })),
         ).into_response();
     }
@@ -475,7 +478,9 @@ async fn handle_get_sequencer_status(
         "tick_counter": eng.tick_counter,
         "sequence_counter": eng.sequence_counter,
         "recent_trades_count": eng.recent_trades.len(),
-        "settlement_chain": "Avalanche C-Chain",
+        "settlement_chain": "Robinhood Chain (Arbitrum L2)",
+        "robinhood_clearinghouse": robinhood::ALVION_ROBINHOOD_CLEARINGHOUSE,
+        "chain_id": robinhood::ROBINHOOD_CHAIN_ID,
         "tokenized_equities": "NYSE_ARCA_AND_NASDAQ_24_7",
         "dual_gate_clearinghouse": "ACTIVE_SOLVENCY_GUARD",
         "adaptive_skew_funding": "ACTIVE_PEER_TO_PEER_AND_VAULT",
@@ -491,8 +496,9 @@ async fn handle_get_relayer_status(
     let eng = engine.lock().unwrap();
     Json(serde_json::json!({
         "success": true,
-        "target_contract": eng.relayer.contract_address,
-        "target_network": "Avalanche C-Chain",
+        "target_clearinghouse": eng.relayer.clearinghouse_address,
+        "target_network": "Robinhood Chain (Arbitrum L2)",
+        "chain_id": eng.relayer.chain_id,
         "rpc_url": eng.relayer.rpc_url,
         "pending_trades_count": eng.relayer.pending_trades.len(),
         "committed_batches_count": eng.relayer.completed_batches.len(),
@@ -507,7 +513,7 @@ async fn handle_relayer_commit(
     if let Some(report) = eng.relayer.commit_batch() {
         (StatusCode::OK, Json(serde_json::json!({
             "success": true,
-            "message": "Batched settlement transaction committed to Avalanche C-Chain",
+            "message": "Batched settlement transaction committed to Robinhood Chain",
             "report": report
         })))
     } else {
@@ -522,13 +528,13 @@ fn run_benchmark(engine: &SharedEngine) {
     let start = std::time::Instant::now();
     let mut eng = engine.lock().unwrap();
 
-    let base_px = eng.latest_oracle_prices.get("AVAX").copied().unwrap_or(7_200_000);
+    let base_px = eng.latest_oracle_prices.get("SOL").copied().unwrap_or(70_000_000);
     let iterations = 10_000;
     for i in 0..iterations {
         let order = Order {
             id: format!("BENCH-{}", i),
-            trader: "0xBenchTrader".to_string(),
-            market: "AVAX".to_string(),
+            trader: "0x71C8364762A803325b335371b292723E59d64663".to_string(),
+            market: "SOL".to_string(),
             side: if i % 2 == 0 { Side::Buy } else { Side::Sell },
             order_type: OrderType::Limit,
             price: base_px + (i % 20) * 100,
@@ -540,6 +546,7 @@ fn run_benchmark(engine: &SharedEngine) {
             expiry: chrono::Utc::now().timestamp() as u64 + 86400,
             signature: None,
             created_at: chrono::Utc::now().timestamp() as u64,
+            settlement_chain: SettlementChain::RobinhoodChain,
         };
         eng.submit_order(order, base_px);
     }

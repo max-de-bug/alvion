@@ -4,6 +4,17 @@ pub const PRICE_SCALE: u64 = 1_000_000; // 6 decimals fixed point for price (e.g
 pub const USD_SCALE: u64 = 1_000_000;   // 6 decimals for USD notional & USDC
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum SettlementChain {
+    RobinhoodChain,
+}
+
+impl Default for SettlementChain {
+    fn default() -> Self {
+        Self::RobinhoodChain
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Side {
     Buy,
     Sell,
@@ -31,6 +42,8 @@ pub struct Order {
     pub expiry: u64,
     pub signature: Option<String>,
     pub created_at: u64,
+    #[serde(default)]
+    pub settlement_chain: SettlementChain,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -47,6 +60,8 @@ pub struct Trade {
     pub timestamp: u64,
     pub settlement_tx_hash: String,
     pub status: String,
+    #[serde(default)]
+    pub settlement_chain: SettlementChain,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

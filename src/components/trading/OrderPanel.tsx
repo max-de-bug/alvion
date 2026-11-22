@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { ListOrdered, TrendingUp, TrendingDown, Zap, CheckCircle2 } from "lucide-react";
 import { MarketContext, QuoteResult } from "@/lib/hyperliquid";
 
 interface OrderPanelProps {
@@ -53,92 +52,85 @@ export const OrderPanel = React.memo<OrderPanelProps>(function OrderPanel({
   onExecuteTrade,
 }) {
   return (
-    <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-4 flex flex-col gap-4 shadow-xl">
+    <div className="bg-slate-900 border border-slate-800 rounded-lg p-4 flex flex-col gap-4">
       {/* Order Type Selector */}
-      <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-        <span className="text-xs font-semibold text-slate-300 flex items-center gap-1">
-          <ListOrdered className="h-4 w-4 text-cyan-400" />
-          Option A Engine
-        </span>
-        <div className="flex items-center gap-1 bg-slate-950 p-0.5 rounded-lg border border-slate-800 text-xs">
-          <button
-            onClick={() => setOrderType("limit")}
-            className={`px-2.5 py-1 rounded font-medium transition ${
-              orderType === "limit"
-                ? "bg-cyan-500 text-black font-bold"
-                : "text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            Limit (CLOB 0-Gas)
-          </button>
-          <button
-            onClick={() => setOrderType("market")}
-            className={`px-2.5 py-1 rounded font-medium transition ${
-              orderType === "market"
-                ? "bg-cyan-500 text-black font-bold"
-                : "text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            Market (Vault Fill)
-          </button>
-        </div>
-      </div>
-
-      {/* Long / Short Selector */}
-      <div className="grid grid-cols-2 gap-2 p-1 bg-slate-950 rounded-xl border border-slate-800">
+      <div className="grid grid-cols-2 gap-1 bg-slate-950 p-1 rounded-md border border-slate-800 text-xs font-medium">
         <button
-          onClick={() => setIsLong(true)}
-          className={`flex items-center justify-center gap-2 py-2 rounded-lg font-bold text-sm transition ${
-            isLong
-              ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/30"
+          onClick={() => setOrderType("limit")}
+          className={`py-1.5 rounded transition-colors ${
+            orderType === "limit"
+              ? "bg-slate-800 text-white font-semibold"
               : "text-slate-400 hover:text-slate-200"
           }`}
         >
-          <TrendingUp className="h-4 w-4" />
-          Buy / Long
+          Limit
+        </button>
+        <button
+          onClick={() => setOrderType("market")}
+          className={`py-1.5 rounded transition-colors ${
+            orderType === "market"
+              ? "bg-slate-800 text-white font-semibold"
+              : "text-slate-400 hover:text-slate-200"
+          }`}
+        >
+          Market
+        </button>
+      </div>
+
+      {/* Buy / Sell Selector */}
+      <div className="grid grid-cols-2 gap-2">
+        <button
+          onClick={() => setIsLong(true)}
+          className={`py-2 rounded-md font-semibold text-xs transition-colors ${
+            isLong
+              ? "bg-emerald-500 text-slate-950"
+              : "bg-slate-800 text-slate-400 hover:text-slate-200"
+          }`}
+        >
+          Buy
         </button>
         <button
           onClick={() => setIsLong(false)}
-          className={`flex items-center justify-center gap-2 py-2 rounded-lg font-bold text-sm transition ${
+          className={`py-2 rounded-md font-semibold text-xs transition-colors ${
             !isLong
-              ? "bg-rose-600 text-white shadow-lg shadow-rose-600/30"
-              : "text-slate-400 hover:text-slate-200"
+              ? "bg-rose-500 text-white"
+              : "bg-slate-800 text-slate-400 hover:text-slate-200"
           }`}
         >
-          <TrendingDown className="h-4 w-4" />
-          Sell / Short
+          Sell
         </button>
       </div>
 
-      {/* Limit Price Input if Limit Order selected */}
+      {/* Limit Price Input */}
       {orderType === "limit" && (
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between text-xs">
-            <span className="text-slate-400 font-medium">Limit Price (USD)</span>
-            <span className="text-[10px] text-cyan-400 font-mono">
-              Mid: ${currentMarket.markPx.toFixed(4)}
+            <label htmlFor="limit-price-input" className="text-slate-400 font-medium">Limit price</label>
+            <span className="text-[11px] text-slate-500 font-mono">
+              Mid ${currentMarket.markPx.toFixed(4)}
             </span>
           </div>
           <div className="relative">
             <input
+              id="limit-price-input"
               type="number"
               step="0.0001"
               value={limitPrice}
               onChange={(e) => setLimitPrice(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm font-mono text-white focus:outline-none focus:border-cyan-500 pr-16"
+              className="w-full bg-slate-950 border border-slate-700 rounded-md px-3 py-2 text-sm font-mono text-white focus:outline-none focus:border-cyan-500 pr-14"
             />
-            <span className="absolute right-3 top-2.5 text-xs font-bold text-slate-400">
+            <span className="absolute right-3 top-2.5 text-xs text-slate-500 font-mono">
               USD
             </span>
           </div>
         </div>
       )}
 
-      {/* Leverage Slider (Up to 100x) */}
+      {/* Leverage Slider */}
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between text-xs">
           <span className="text-slate-400 font-medium">Leverage</span>
-          <span className="font-mono font-bold text-cyan-400 text-sm">
+          <span className="font-mono font-semibold text-slate-200">
             {leverage}x
           </span>
         </div>
@@ -150,6 +142,7 @@ export const OrderPanel = React.memo<OrderPanelProps>(function OrderPanel({
           step="1"
           value={leverage}
           onChange={(e) => setLeverage(Number(e.target.value))}
+          aria-label="Leverage slider"
           className="w-full accent-cyan-500 cursor-pointer"
         />
 
@@ -158,10 +151,10 @@ export const OrderPanel = React.memo<OrderPanelProps>(function OrderPanel({
             <button
               key={lev}
               onClick={() => setLeverage(lev)}
-              className={`text-[10px] font-mono px-2 py-1 rounded transition ${
+              className={`text-[10px] font-mono px-2 py-1 rounded transition-colors ${
                 leverage === lev
-                  ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold"
-                  : "bg-slate-800 text-slate-400 hover:text-slate-200"
+                  ? "bg-slate-800 text-white font-semibold border border-slate-700"
+                  : "bg-slate-950 text-slate-400 hover:text-slate-200"
               }`}
             >
               {lev}x
@@ -170,24 +163,25 @@ export const OrderPanel = React.memo<OrderPanelProps>(function OrderPanel({
         </div>
       </div>
 
-      {/* Margin Collateral (USDC) */}
+      {/* Margin Collateral */}
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center justify-between text-xs">
-          <span className="text-slate-400 font-medium">Collateral (USDC)</span>
+          <label htmlFor="margin-input" className="text-slate-400 font-medium">Collateral</label>
           <span className="text-[11px] text-slate-400 font-mono">
-            Avail: ${walletBalance.toFixed(2)}
+            Balance: ${walletBalance.toFixed(2)} USDC
           </span>
         </div>
         <div className="relative">
           <input
+            id="margin-input"
             type="number"
             min="10"
             max={walletBalance}
             value={marginUsdc}
             onChange={(e) => setMarginUsdc(Math.max(1, Number(e.target.value)))}
-            className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm font-mono text-white focus:outline-none focus:border-cyan-500 pr-16"
+            className="w-full bg-slate-950 border border-slate-700 rounded-md px-3 py-2 text-sm font-mono text-white focus:outline-none focus:border-cyan-500 pr-14"
           />
-          <span className="absolute right-3 top-2.5 text-xs font-bold text-slate-400">
+          <span className="absolute right-3 top-2.5 text-xs text-slate-500 font-mono">
             USDC
           </span>
         </div>
@@ -196,62 +190,62 @@ export const OrderPanel = React.memo<OrderPanelProps>(function OrderPanel({
             <button
               key={pct}
               onClick={() => setMarginUsdc(Math.floor(walletBalance * pct))}
-              className="flex-1 text-[10px] font-mono bg-slate-800 hover:bg-slate-700 text-slate-300 py-1 rounded border border-slate-700/50"
+              className="flex-1 text-[10px] font-mono bg-slate-950 hover:bg-slate-800 text-slate-300 py-1 rounded border border-slate-800 transition-colors"
             >
-              {pct === 1 ? "MAX" : `${pct * 100}%`}
+              {pct === 1 ? "100%" : `${pct * 100}%`}
             </button>
           ))}
         </div>
       </div>
 
       {/* Execution Details Breakdown */}
-      <div className="bg-slate-950/60 rounded-xl p-3 border border-slate-800/80 flex flex-col gap-2 text-xs font-mono">
+      <div className="bg-slate-950 rounded-md p-3 border border-slate-800 flex flex-col gap-2 text-xs font-mono">
         <div className="flex items-center justify-between text-slate-400">
-          <span>Order Size</span>
-          <span className="text-white font-semibold">
+          <span>Order size</span>
+          <span className="text-white font-medium">
             ${quote?.positionSizeUsdc.toLocaleString(undefined, { minimumFractionDigits: 2 }) || (marginUsdc * leverage).toFixed(2)} USDC
           </span>
         </div>
 
         <div className="flex items-center justify-between text-slate-400">
-          <span>Target Execution Price</span>
-          <span className="text-white font-bold">
-            ${orderType === "limit" && limitPrice ? Number(limitPrice).toFixed(4) : quote?.executionPrice.toFixed(4) || "..."}
+          <span>Target price</span>
+          <span className="text-white font-medium">
+            ${orderType === "limit" && limitPrice ? Number(limitPrice).toFixed(4) : quote?.executionPrice.toFixed(4) || "—"}
           </span>
         </div>
 
         <div className="flex items-center justify-between text-slate-400">
-          <span>Execution Route</span>
-          <span className="text-cyan-400">
-            {orderType === "limit" ? "EIP-712 CLOB Maker (0 Gas)" : "USDC Vault Instant Fill"}
+          <span>Route</span>
+          <span className="text-slate-300">
+            {orderType === "limit" ? "Order book" : "USDC vault"}
           </span>
         </div>
 
-        <div className="border-t border-slate-800/80 my-1"></div>
+        <div className="border-t border-slate-800 my-0.5" />
 
         <div className="flex items-center justify-between text-slate-400">
-          <span>Available Liquidity ({isLong ? "Long" : "Short"})</span>
-          <span className="text-emerald-400 font-semibold">
+          <span>Liquidity ({isLong ? "Long" : "Short"})</span>
+          <span className="text-slate-200">
             {formatUsdCompact(isLong ? availableLongLiq : availableShortLiq)}
           </span>
         </div>
 
         <div className="flex items-center justify-between text-slate-400">
-          <span>Est. 1h Funding</span>
+          <span>1h funding</span>
           <span className={isLong ? (longFundingRate >= 0 ? "text-emerald-400" : "text-rose-400") : (shortFundingRate >= 0 ? "text-emerald-400" : "text-rose-400")}>
             {isLong ? `${longFundingRate >= 0 ? "+" : ""}${longFundingRate.toFixed(4)}%/h` : `${shortFundingRate >= 0 ? "+" : ""}${shortFundingRate.toFixed(4)}%/h`}
           </span>
         </div>
 
         <div className="flex items-center justify-between text-slate-400">
-          <span>Liquidation Price</span>
-          <span className="text-rose-400 font-semibold">
-            ${quote?.liquidationPrice.toFixed(4) || "..."}
+          <span>Est. liquidation</span>
+          <span className="text-rose-400">
+            ${quote?.liquidationPrice.toFixed(4) || "—"}
           </span>
         </div>
 
         <div className="flex items-center justify-between text-slate-400">
-          <span>Trading Fee (USDC)</span>
+          <span>Trading fee</span>
           <span className="text-slate-300">
             ${quote?.tradingFeeUsdc.toFixed(2) || (marginUsdc * leverage * 0.0006).toFixed(2)} USDC
           </span>
@@ -262,21 +256,14 @@ export const OrderPanel = React.memo<OrderPanelProps>(function OrderPanel({
       <button
         onClick={onExecuteTrade}
         disabled={loadingQuote}
-        className={`w-full py-3 rounded-xl font-bold text-sm tracking-wide transition shadow-lg flex items-center justify-center gap-2 ${
+        className={`w-full py-2.5 rounded-md font-semibold text-sm transition-colors cursor-pointer ${
           isLong
-            ? "bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-emerald-500/20"
-            : "bg-rose-500 hover:bg-rose-400 text-white shadow-rose-500/20"
+            ? "bg-emerald-500 hover:bg-emerald-400 text-slate-950"
+            : "bg-rose-500 hover:bg-rose-400 text-white"
         }`}
       >
-        <Zap className="h-4 w-4 fill-current" />
-        {orderType === "limit" ? "Sign & Place Limit Order (0 Gas)" : `Execute ${isLong ? "Long" : "Short"} Against Vault`}
+        {orderType === "limit" ? `Place limit ${isLong ? "buy" : "sell"}` : `${isLong ? "Buy" : "Sell"} ${currentMarket.name}`}
       </button>
-
-      <div className="text-center text-[10px] text-slate-400 flex items-center justify-center gap-1">
-        <CheckCircle2 className="h-3 w-3 text-emerald-400" />
-        Option A • Avalanche C-Chain Native Circle USDC
-      </div>
     </div>
   );
 });
-

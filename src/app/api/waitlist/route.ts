@@ -96,7 +96,7 @@ function getTopLeaderboard(db: WaitlistDb) {
     { rank: 1, address: "0x71C8...3875", passId: "ALV-71C83875", tier: "DIAMOND", xp: 14200, referrals: 28, badge: "Founder #1" },
     { rank: 2, address: "0x89A1...D491", passId: "ALV-89A1D491", tier: "DIAMOND", xp: 11800, referrals: 22, badge: "Alpha Whale" },
     { rank: 3, address: "0x34F9...E21C", passId: "ALV-34F9E21C", tier: "DIAMOND", xp: 9500, referrals: 18, badge: "NYSE Arca MM" },
-    { rank: 4, address: "0xB201...99AF", passId: "ALV-B20199AF", tier: "PLATINUM", xp: 6200, referrals: 11, badge: "Avalanche Core" },
+    { rank: 4, address: "0xB201...99AF", passId: "ALV-B20199AF", tier: "PLATINUM", xp: 6200, referrals: 11, badge: "Robinhood Core" },
     { rank: 5, address: "0x981C...4031", passId: "ALV-981C4031", tier: "PLATINUM", xp: 5400, referrals: 9, badge: "Quant Lead" },
     { rank: 6, address: "0x442E...09B7", passId: "ALV-442E09B7", tier: "PLATINUM", xp: 4800, referrals: 8, badge: "Perp Pro" },
     { rank: 7, address: "0x127A...66D2", passId: "ALV-127A66D2", tier: "GOLD", xp: 2900, referrals: 4, badge: "VIP Trader" },
@@ -118,6 +118,7 @@ export async function GET(req: NextRequest) {
   const db = ensureDb();
   const { searchParams } = new URL(req.url);
   const address = searchParams.get("address")?.toLowerCase();
+  const emailParam = searchParams.get("email")?.toLowerCase().trim();
 
   const globalStats = {
     totalWaitlistMembers: db.totalCount + Object.keys(db.entries).length,
@@ -131,13 +132,13 @@ export async function GET(req: NextRequest) {
 
   const recentActivity = [
     { text: "0x71C8...3875 unlocked DIAMOND FOUNDER PASS", time: "1m ago", type: "diamond" },
-    { text: "0xA082...742D executed SPY testnet order on Fuji (+1,000 XP)", time: "3m ago", type: "trade" },
+    { text: "0xA082...742D executed SPY testnet order on Robinhood Chain (+1,000 XP)", time: "3m ago", type: "trade" },
     { text: "0x981C...4031 invited 3 traders -> Rank promoted to #5", time: "6m ago", type: "referral" },
-    { text: "0x442E...09B7 verified Avalanche EIP-712 signature (+500 XP)", time: "9m ago", type: "verify" },
+    { text: "0x442E...09B7 verified EIP-712 signature (+500 XP)", time: "9m ago", type: "verify" },
     { text: "0x127A...66D2 upgraded to GOLD PASS", time: "12m ago", type: "gold" },
   ];
 
-  if (!address) {
+  if (!address && !emailParam) {
     return NextResponse.json({
       success: true,
       stats: globalStats,
@@ -146,7 +147,13 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  const user = db.entries[address];
+  let user: WaitlistEntry | null = null;
+  if (address && db.entries[address]) {
+    user = db.entries[address];
+  } else if (emailParam) {
+    user = Object.values(db.entries).find((u) => u.email?.toLowerCase() === emailParam) || null;
+  }
+
   return NextResponse.json({
     success: true,
     exists: !!user,
@@ -162,31 +169,58 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { address, email, referredBy, questCompleted } = body;
 
-    if (!address) {
-      return NextResponse.json({ success: false, error: "Wallet address is required" }, { status: 400 });
+    const trimmedEmail = email ? String(email).trim().toLowerCase() : undefined;
+    if (!address && !trimmedEmail) {
+      return NextResponse.json({ success: false, error: "Email or wallet address is required" }, { status: 400 });
+    }
+
+    if (trimmedEmail) {
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (!emailRegex.test(trimmedEmail)) {
+        return NextResponse.json(
+          { success: false, error: "Please enter a valid email address (e.g. name@domain.com)" },
+          { status: 400 }
+        );
+      }
     }
 
     const db = ensureDb();
-    const normalizedAddr = address.toLowerCase();
 
-    let user = db.entries[normalizedAddr];
+    // Check if user already exists by wallet or email
+    let existingKey: string | null = null;
+    if (address && db.entries[address.toLowerCase()]) {
+      existingKey = address.toLowerCase();
+    } else if (trimmedEmail) {
+      const foundKey = Object.keys(db.entries).find(
+        (key) => db.entries[key].email?.toLowerCase() === trimmedEmail
+      );
+      if (foundKey) existingKey = foundKey;
+    }
+
+    // Hash email deterministically if no wallet address provided
+    const crypto = await import("crypto");
+    const emailHash = trimmedEmail ? crypto.createHash("sha256").update(trimmedEmail).digest("hex") : "";
+    const generatedAddr = "0x" + emailHash.slice(0, 40);
+
+    const lookupKey = existingKey || (address ? address.toLowerCase() : generatedAddr);
+    let user = db.entries[lookupKey];
     const isNew = !user;
 
     if (!user) {
-      const passId = generatePassId(normalizedAddr);
-      const referralCode = generateReferralCode(normalizedAddr);
+      const passId = generatePassId(lookupKey);
+      const referralCode = generateReferralCode(lookupKey);
       const userRank = db.totalCount + Object.keys(db.entries).length + 1;
 
       user = {
-        address: normalizedAddr,
-        email: email || undefined,
+        address: lookupKey,
+        email: trimmedEmail || undefined,
         referralCode,
         referredBy: referredBy ? referredBy.toLowerCase() : undefined,
         referralsCount: 0,
-        xp: 250, // 250 XP for connecting wallet
+        xp: address ? 250 : 200,
         tier: "BRONZE",
         quests: {
-          walletConnected: true,
+          walletConnected: !!address,
           signatureVerified: false,
           twitterFollowed: false,
           discordJoined: false,
@@ -199,7 +233,7 @@ export async function POST(req: NextRequest) {
       };
 
       // Credit referrer if applicable
-      if (referredBy && referredBy.toLowerCase() !== normalizedAddr) {
+      if (referredBy && referredBy.toLowerCase() !== lookupKey) {
         const referrerCode = referredBy.toLowerCase();
         const referrer = Object.values(db.entries).find(
           (u) => u.referralCode.toLowerCase() === referrerCode || u.address.toLowerCase() === referrerCode
@@ -216,9 +250,8 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    if (email) {
-      user.email = email;
-      user.xp += 100;
+    if (trimmedEmail) {
+      user.email = trimmedEmail;
     }
 
     if (questCompleted && questCompleted in user.quests) {
@@ -235,12 +268,13 @@ export async function POST(req: NextRequest) {
     }
 
     user.tier = calculateTier(user.xp, user.referralsCount);
-    db.entries[normalizedAddr] = user;
+    db.entries[lookupKey] = user;
     saveDb(db);
 
     return NextResponse.json({
       success: true,
       isNew,
+      alreadyJoined: !isNew,
       user,
       stats: {
         totalWaitlistMembers: db.totalCount + Object.keys(db.entries).length,

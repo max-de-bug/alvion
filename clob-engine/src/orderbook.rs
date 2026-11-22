@@ -1,7 +1,18 @@
 use std::collections::{BTreeMap, VecDeque};
 use rustc_hash::FxHashMap;
-use crate::types::{Order, OrderBookLevel, Side, Trade, L2Depth, L4Level, L4Depth, PRICE_SCALE, USD_SCALE};
+use crate::types::{Order, OrderBookLevel, SettlementChain, Side, Trade, L2Depth, L4Level, L4Depth, PRICE_SCALE, USD_SCALE};
 use uuid::Uuid;
+
+fn generate_settlement_info(is_vault: bool) -> (String, String) {
+    (
+        format!("0x{}", hex::encode(Uuid::new_v4().as_bytes())),
+        if is_vault {
+            "SETTLED_AGAINST_ROBINHOOD_VAULT".to_string()
+        } else {
+            "SETTLED_ON_ROBINHOOD".to_string()
+        },
+    )
+}
 
 pub struct OrderBook {
     pub market: String,
@@ -43,6 +54,7 @@ impl OrderBook {
                         order.remaining_size_usd -= match_size;
                         maker.remaining_size_usd -= match_size;
 
+                        let (tx_hash, status) = generate_settlement_info(false);
                         trades.push(Trade {
                             id: format!("TRD-{}", Uuid::new_v4().simple()),
                             market: self.market.clone(),
@@ -54,8 +66,9 @@ impl OrderBook {
                             size_usd: match_size,
                             side: Side::Buy,
                             timestamp: chrono::Utc::now().timestamp() as u64,
-                            settlement_tx_hash: format!("0xavax_{}", Uuid::new_v4().simple()),
-                            status: "SETTLED_ON_AVALANCHE".to_string(),
+                            settlement_tx_hash: tx_hash,
+                            status,
+                            settlement_chain: SettlementChain::RobinhoodChain,
                         });
 
                         if maker.remaining_size_usd > 0 {
@@ -98,6 +111,7 @@ impl OrderBook {
                         order.remaining_size_usd -= match_size;
                         maker.remaining_size_usd -= match_size;
 
+                        let (tx_hash, status) = generate_settlement_info(false);
                         trades.push(Trade {
                             id: format!("TRD-{}", Uuid::new_v4().simple()),
                             market: self.market.clone(),
@@ -109,8 +123,9 @@ impl OrderBook {
                             size_usd: match_size,
                             side: Side::Sell,
                             timestamp: chrono::Utc::now().timestamp() as u64,
-                            settlement_tx_hash: format!("0xavax_{}", Uuid::new_v4().simple()),
-                            status: "SETTLED_ON_AVALANCHE".to_string(),
+                            settlement_tx_hash: tx_hash,
+                            status,
+                            settlement_chain: SettlementChain::RobinhoodChain,
                         });
 
                         if maker.remaining_size_usd > 0 {
@@ -156,19 +171,22 @@ impl OrderBook {
 
         // Fill remaining against Single USDC Vault Backstop
         if unfilled > 0 {
+            let (tx_hash, status) = generate_settlement_info(true);
+            let vault_party = "0x4663111111111111111111111111111111114663".to_string();
             trades.push(Trade {
                 id: format!("TRD-VAULT-{}", Uuid::new_v4().simple()),
                 market: self.market.clone(),
                 maker_order_id: None,
                 taker_order_id: order.id.clone(),
-                buyer: if order.side == Side::Buy { order.trader.clone() } else { "0xAlvionUsdcVault".to_string() },
-                seller: if order.side == Side::Sell { order.trader.clone() } else { "0xAlvionUsdcVault".to_string() },
+                buyer: if order.side == Side::Buy { order.trader.clone() } else { vault_party.clone() },
+                seller: if order.side == Side::Sell { order.trader.clone() } else { vault_party },
                 price: vault_oracle_price,
                 size_usd: unfilled,
                 side: order.side,
                 timestamp: chrono::Utc::now().timestamp() as u64,
-                settlement_tx_hash: format!("0xavax_vault_{}", Uuid::new_v4().simple()),
-                status: "SETTLED_AGAINST_USDC_VAULT".to_string(),
+                settlement_tx_hash: tx_hash,
+                status,
+                settlement_chain: SettlementChain::RobinhoodChain,
             });
         }
 

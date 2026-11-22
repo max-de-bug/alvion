@@ -19,6 +19,63 @@
       "joinedAt": 1794786017236,
       "passId": "ALV-A082742D",
       "email": "trader@alvion.exchange"
+    },
+    "0x6d616b73696d757a7661333540676d61696c2e63": {
+      "address": "0x6d616b73696d757a7661333540676d61696c2e63",
+      "email": "maksimuzva35@gmail.com",
+      "referralCode": "6d616b",
+      "referralsCount": 0,
+      "xp": 250,
+      "tier": "BRONZE",
+      "quests": {
+        "walletConnected": false,
+        "signatureVerified": false,
+        "twitterFollowed": false,
+        "discordJoined": false,
+        "testnetTraded": false,
+        "peersInvited": false
+      },
+      "rank": 48922,
+      "joinedAt": 1795357451924,
+      "passId": "ALV-6D612E63"
+    },
+    "0x746573747573657240676d61696c2e636f6d0000": {
+      "address": "0x746573747573657240676d61696c2e636f6d0000",
+      "email": "testuser@gmail.com",
+      "referralCode": "746573",
+      "referralsCount": 0,
+      "xp": 350,
+      "tier": "BRONZE",
+      "quests": {
+        "walletConnected": false,
+        "signatureVerified": false,
+        "twitterFollowed": false,
+        "discordJoined": false,
+        "testnetTraded": false,
+        "peersInvited": false
+      },
+      "rank": 48923,
+      "joinedAt": 1795361807116,
+      "passId": "ALV-74650000"
+    },
+    "0xd2a1d3e47e783239ee5c1f190cfb467cb623f571": {
+      "address": "0xd2a1d3e47e783239ee5c1f190cfb467cb623f571",
+      "email": "trader.alex@gmail.com",
+      "referralCode": "d2a1d3",
+      "referralsCount": 0,
+      "xp": 200,
+      "tier": "BRONZE",
+      "quests": {
+        "walletConnected": false,
+        "signatureVerified": false,
+        "twitterFollowed": false,
+        "discordJoined": false,
+        "testnetTraded": false,
+        "peersInvited": false
+      },
+      "rank": 48924,
+      "joinedAt": 1795362202999,
+      "passId": "ALV-D2A1F571"
     }
   }
 }

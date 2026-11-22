@@ -26,7 +26,7 @@ export async function GET() {
 
     // High-precision fallback matching Percolator mathematical solvency invariant
     const vaultLiquidity = 5_250_000;
-    const domainInsuranceFunds = 2_500_000; // AVAX (250k) + BTC (1M) + ETH (750k) + SOL (500k)
+    const domainInsuranceFunds = 3_250_000; // SOL (1M) + BTC (1.5M) + ETH (750k)
     const totalAssets = vaultLiquidity + domainInsuranceFunds;
     const totalLiabilities = 420_000; // Margin locked across open domains
 
@@ -38,10 +38,9 @@ export async function GET() {
       solvency_ratio: ((totalAssets / totalLiabilities) * 100).toFixed(1) + "%",
       conservation_invariant: "VERIFIED_STOCK_RECONCILIATION",
       domains: [
-        { market: "AVAX", insurance_usdc: 250_000, max_pnl_cap_usdc: 500_000, status: "SECURE" },
-        { market: "BTC", insurance_usdc: 1_000_000, max_pnl_cap_usdc: 2_000_000, status: "SECURE" },
+        { market: "SOL", insurance_usdc: 1_000_000, max_pnl_cap_usdc: 2_000_000, status: "SECURE" },
+        { market: "BTC", insurance_usdc: 1_500_000, max_pnl_cap_usdc: 3_000_000, status: "SECURE" },
         { market: "ETH", insurance_usdc: 750_000, max_pnl_cap_usdc: 1_500_000, status: "SECURE" },
-        { market: "SOL", insurance_usdc: 500_000, max_pnl_cap_usdc: 1_000_000, status: "SECURE" },
       ],
       source: "FALLBACK_INVARIANT_VALIDATOR",
     });

@@ -110,20 +110,20 @@ export const MARKETS_METADATA: Record<string, MarketMetadata> = {
     initialMarginPct: 10,
     is24x7: true,
   },
-  AVAX: {
-    symbol: "AVAX",
-    name: "Avalanche",
+  SOL: {
+    symbol: "SOL",
+    name: "Solana",
     category: "CRYPTO",
-    exchangeBadge: "Avalanche C-Chain",
-    maxLeverage: 25,
-    initialMarginPct: 4,
+    exchangeBadge: "Robinhood Crypto",
+    maxLeverage: 50,
+    initialMarginPct: 2,
     is24x7: true,
   },
   BTC: {
     symbol: "BTC",
     name: "Bitcoin",
     category: "CRYPTO",
-    exchangeBadge: "Global Crypto",
+    exchangeBadge: "Robinhood Crypto",
     maxLeverage: 50,
     initialMarginPct: 2,
     is24x7: true,
@@ -132,7 +132,7 @@ export const MARKETS_METADATA: Record<string, MarketMetadata> = {
     symbol: "ETH",
     name: "Ethereum",
     category: "CRYPTO",
-    exchangeBadge: "Global Crypto",
+    exchangeBadge: "Robinhood Crypto",
     maxLeverage: 50,
     initialMarginPct: 2,
     is24x7: true,
@@ -209,7 +209,7 @@ let notificationTimer: NodeJS.Timeout | null = null;
 
 export const useTradingStore = create<TradingState>((set) => ({
   // Initial values
-  selectedMarketName: "AVAX",
+  selectedMarketName: "SOL",
   isLong: true,
   marginUsdc: 100,
   leverage: 25,

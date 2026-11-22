@@ -24,8 +24,8 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const {
-      trader = "0xUserAvalancheWallet",
-      market = "AVAX",
+      trader = "0x71C8364762A803325b335371b292723E59d64663",
+      market = "SOL",
       isLong = true,
       orderType = "LIMIT",
       price,
@@ -33,7 +33,8 @@ export async function POST(req: NextRequest) {
       marginUsdc,
       leverage = 20,
       expiry = Date.now() + 86400000,
-      signature = "0xeip712mocksignature",
+      signature = "0x" + "a1b2c3d4e5f67890".repeat(8) + "1b",
+      chain = "robinhood",
     } = body;
 
     if (!price || price <= 0) {
@@ -58,6 +59,7 @@ export async function POST(req: NextRequest) {
           margin_usdc: marginUsdc,
           leverage,
           signature,
+          chain,
         }),
         signal: AbortSignal.timeout(2000),
       });
@@ -79,13 +81,14 @@ export async function POST(req: NextRequest) {
             leverage,
             status: rustData.status,
             createdAt: Date.now(),
+            chain: "Robinhood Chain",
           },
           trades: rustData.trades,
           position: rustData.position,
           settlementMessage:
             rustData.trades_count > 0
-              ? `Matched in Rust Engine (${rustData.trades_count} fill) -> Settling to Avalanche C-Chain USDC Vault`
-              : "Order resting on Rust CLOB Book (0 Gas • EIP-712)",
+              ? `Matched in Rust Engine (${rustData.trades_count} fill) -> Settling to Robinhood Chain Clearinghouse Contract`
+              : `Order resting on Rust CLOB Book (0 Gas • EIP-712 signed)`,
         });
       }
     } catch {
@@ -114,7 +117,7 @@ export async function POST(req: NextRequest) {
       trades,
       settlementMessage:
         trades.length > 0
-          ? `Matched ${trades.length} fill(s) -> Settling to Avalanche C-Chain USDC Vault`
+          ? `Matched ${trades.length} fill(s) -> Settling to Robinhood Chain Clearinghouse Contract`
           : "Order resting on CLOB Order Book (0 Gas)",
     });
   } catch (error) {
@@ -129,7 +132,7 @@ export async function DELETE(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const orderId = searchParams.get("id");
-    const market = searchParams.get("market") || "AVAX";
+    const market = searchParams.get("market") || "SOL";
 
     if (!orderId) {
       return NextResponse.json({ success: false, error: "Order ID is required" }, { status: 400 });

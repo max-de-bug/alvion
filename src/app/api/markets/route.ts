@@ -7,7 +7,7 @@ export async function GET() {
     return NextResponse.json({
       success: true,
       timestamp: Date.now(),
-      network: "Avalanche C-Chain",
+      network: "Robinhood Chain (Arbitrum L2)",
       markets,
     });
   } catch (error) {

@@ -5,7 +5,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const {
-      market = "AVAX",
+      market = "SOL",
       isLong = true,
       marginUsdc = 100,
       leverage = 20,

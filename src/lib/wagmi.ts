@@ -1,31 +1,52 @@
 import { http, createConfig } from "wagmi";
-import { avalanche, avalancheFuji } from "wagmi/chains";
-import { injected, walletConnect } from "wagmi/connectors";
+import { defineChain } from "viem";
+import { injected } from "wagmi/connectors";
 
-export const AVALANCHE_USDC_ADDRESS = "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E" as const;
-export const FUJI_USDC_ADDRESS = "0x5425890298aed601595a70ab815c96711a31bc65" as const;
+export const robinhoodChain = defineChain({
+  id: 4663,
+  name: "Robinhood Chain",
+  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: {
+    default: { http: ["https://rpc.mainnet.chain.robinhood.com"] },
+  },
+  blockExplorers: {
+    default: { name: "Robinhood Explorer", url: "https://robinhoodchain.blockscout.com" },
+  },
+});
 
-export const ALVION_VAULT_ADDRESS = "0xb3d1bcb79c7770f7d070ae6ac7b345a95372279e" as const;
-export const FUJI_ALVION_VAULT_ADDRESS = "0xb3d1bcb79c7770f7d070ae6ac7b345a95372279e" as const;
+export const robinhoodTestnet = defineChain({
+  id: 46630,
+  name: "Robinhood Chain Testnet",
+  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: {
+    default: { http: ["https://rpc.testnet.chain.robinhood.com"] },
+  },
+  blockExplorers: {
+    default: { name: "Robinhood Explorer", url: "https://explorer.testnet.chain.robinhood.com" },
+  },
+});
+
+export const ROBINHOOD_CLEARINGHOUSE = "0x4663111111111111111111111111111111114663" as const;
+export const ROBINHOOD_USDC_ADDRESS = "0x538d689255850901eC5A206A2a9d80d283A44919" as const;
+export const ROBINHOOD_RPC_URL = "https://rpc.mainnet.chain.robinhood.com" as const;
 
 export const wagmiConfig = createConfig({
-  chains: [avalanche, avalancheFuji],
+  chains: [robinhoodChain, robinhoodTestnet],
   connectors: [
     injected(),
   ],
   transports: {
-    [avalanche.id]: http("https://api.avax.network/ext/bc/C/rpc"),
-    [avalancheFuji.id]: http("https://api.avax-test.network/ext/bc/C/rpc"),
+    [robinhoodChain.id]: http(),
+    [robinhoodTestnet.id]: http(),
   },
   ssr: true,
 });
 
-// EIP-712 Domain and Types matching AlvionPerpVault.sol
 export const EIP712_DOMAIN = {
-  name: "AlvionExchange",
-  version: "1.0",
-  chainId: 43114,
-  verifyingContract: ALVION_VAULT_ADDRESS,
+  name: "Alvion Perpetuals",
+  version: "1",
+  chainId: 4663,
+  verifyingContract: ROBINHOOD_CLEARINGHOUSE,
 } as const;
 
 export const ORDER_TYPES = {
@@ -41,4 +62,3 @@ export const ORDER_TYPES = {
     { name: "expiry", type: "uint256" },
   ],
 } as const;
-

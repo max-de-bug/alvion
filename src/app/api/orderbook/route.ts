@@ -19,7 +19,7 @@ const HYPERLIQUID_API_URL = "https://api.hyperliquid.xyz/info";
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const coin = searchParams.get("coin") || "AVAX";
+    const coin = searchParams.get("coin") || "SOL";
 
     const res = await fetch(HYPERLIQUID_API_URL, {
       method: "POST",

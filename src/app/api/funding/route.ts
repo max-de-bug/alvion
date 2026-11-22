@@ -5,7 +5,7 @@ const RUST_CLOB_URL = "http://127.0.0.1:8080";
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const market = (searchParams.get("market") || "AVAX").toUpperCase();
+    const market = (searchParams.get("market") || "SOL").toUpperCase();
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 1500);
@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
       NVDA: 162.85,
       TSLA: 390.22,
       AAPL: 356.27,
-      AVAX: 7.28,
+      SOL: 142.50,
       BTC: 65000.0,
       ETH: 1820.0,
     };

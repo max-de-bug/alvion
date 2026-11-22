@@ -223,7 +223,7 @@ export default function Home() {
           />
         )}
 
-        {/* Tab 4: Architecture & Avalanche Docs */}
+        {/* Tab 4: Architecture & Robinhood Chain Docs */}
         {activeTab === "docs" && <ArchitectureDocsTab />}
       </main>
 
