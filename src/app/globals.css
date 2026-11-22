@@ -132,7 +132,8 @@ input:-webkit-autofill:hover,
 input:-webkit-autofill:focus, 
 input:-webkit-autofill:active {
   -webkit-text-fill-color: inherit !important;
-  background-color: transparent !important;
+  -webkit-box-shadow: 0 0 0 1000px #DFE4DA inset !important;
+  box-shadow: 0 0 0 1000px #DFE4DA inset !important;
   transition: background-color 999999s ease-in-out 0s, color 999999s ease-in-out 0s !important;
 }
 
@@ -142,7 +143,8 @@ input:autofill:hover,
 input:autofill:focus,
 input:autofill:active {
   -webkit-text-fill-color: inherit !important;
-  background-color: transparent !important;
+  -webkit-box-shadow: 0 0 0 1000px #DFE4DA inset !important;
+  box-shadow: 0 0 0 1000px #DFE4DA inset !important;
   transition: background-color 999999s ease-in-out 0s, color 999999s ease-in-out 0s !important;
 }
 

@@ -11,11 +11,108 @@ interface UserEntryInfo {
   email?: string;
   passId?: string;
   rank?: number;
-  tier?: string;
+  tier?: "BRONZE" | "METAL" | "GOLD" | "PLATINUM" | "DIAMOND" | string;
   referralCode?: string;
   xp?: number;
   credits?: number;
+  referralsCount?: number;
 }
+
+export interface ProtocolTier {
+  id: "BRONZE" | "METAL" | "GOLD" | "PLATINUM" | "DIAMOND";
+  name: string;
+  role: string;
+  invites: number;
+  credits: number;
+  color: string;
+  badgeBg: string;
+  badgeBorder: string;
+  badgeText: string;
+  perks: string[];
+}
+
+export const PROTOCOL_TIERS: ProtocolTier[] = [
+  {
+    id: "BRONZE",
+    name: "Bronze",
+    role: "Scout",
+    invites: 0,
+    credits: 200,
+    color: "#97533B",
+    badgeBg: "rgba(151, 83, 59, 0.1)",
+    badgeBorder: "rgba(151, 83, 59, 0.28)",
+    badgeText: "#97533B",
+    perks: [
+      "Standard testnet queue access",
+      "1.0x liquidity vault yield multiplier",
+      "Real-time CLOB WebSocket market data feed",
+    ],
+  },
+  {
+    id: "METAL",
+    name: "Metal",
+    role: "Vanguard",
+    invites: 1,
+    credits: 800,
+    color: "#475569",
+    badgeBg: "rgba(71, 85, 105, 0.1)",
+    badgeBorder: "rgba(71, 85, 105, 0.28)",
+    badgeText: "#334155",
+    perks: [
+      "15% maker fee rebates on synthetic orders",
+      "Fast-lane priority testnet queue",
+      "1.25x Genesis allocation multiplier",
+    ],
+  },
+  {
+    id: "GOLD",
+    name: "Gold",
+    role: "Sovereign",
+    invites: 2,
+    credits: 1800,
+    color: "#B48220",
+    badgeBg: "rgba(180, 130, 32, 0.12)",
+    badgeBorder: "rgba(180, 130, 32, 0.3)",
+    badgeText: "#8C6010",
+    perks: [
+      "0% borrow fees on synthetic equities (SPY, TSLA, NVDA)",
+      "Guaranteed Wave 1 Genesis access pass",
+      "1.5x vault yield boost and direct relayer access",
+    ],
+  },
+  {
+    id: "PLATINUM",
+    name: "Platinum",
+    role: "Syndicate",
+    invites: 5,
+    credits: 3000,
+    color: "#1E6B7B",
+    badgeBg: "rgba(30, 107, 123, 0.12)",
+    badgeBorder: "rgba(30, 107, 123, 0.3)",
+    badgeText: "#15535F",
+    perks: [
+      "Sub-10ms low-latency private relayer gateway",
+      "Liquidation grace shield",
+      "Institutional co-vault liquidity allocation",
+    ],
+  },
+  {
+    id: "DIAMOND",
+    name: "Diamond",
+    role: "Council",
+    invites: 10,
+    credits: 5000,
+    color: "#23412E",
+    badgeBg: "rgba(35, 65, 46, 0.15)",
+    badgeBorder: "rgba(35, 65, 46, 0.35)",
+    badgeText: "#23412E",
+    perks: [
+      "Lifetime zero-spread execution guarantee",
+      "Direct revenue share from protocol settlement pool",
+      "2.5x Genesis token allocation and core architect access",
+    ],
+  },
+];
 
 export default function WaitlistPage() {
   const [email, setEmail] = useState("");
@@ -25,6 +122,7 @@ export default function WaitlistPage() {
   const [referralLink, setReferralLink] = useState("");
   const [copiedLink, setCopiedLink] = useState(false);
   const [userInfo, setUserInfo] = useState<UserEntryInfo | null>(null);
+  const [activeTierId, setActiveTierId] = useState<string>("BRONZE");
 
   const buttonRef = useRef<HTMLButtonElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -48,6 +146,7 @@ export default function WaitlistPage() {
             if (data.success && data.user) {
               setUserInfo(data.user);
               setIsJoined(true);
+              if (data.user.tier) setActiveTierId(data.user.tier);
               const code = data.user.referralCode || "EARLY";
               setReferralLink(`${window.location.origin}/waitlist?ref=${code}`);
             }
@@ -89,6 +188,7 @@ export default function WaitlistPage() {
       if (data.success && data.user) {
         setUserInfo(data.user);
         setIsJoined(true);
+        if (data.user.tier) setActiveTierId(data.user.tier);
         if (typeof window !== "undefined") {
           localStorage.setItem("alvion_waitlist_email", trimmedEmail);
         }
@@ -251,8 +351,8 @@ export default function WaitlistPage() {
         #waitlist-email-input:-webkit-autofill:active {
           -webkit-text-fill-color: #26241D !important;
           caret-color: #23412E !important;
-          background-color: transparent !important;
-          background: transparent !important;
+          -webkit-box-shadow: 0 0 0 1000px #DFE4DA inset !important;
+          box-shadow: 0 0 0 1000px #DFE4DA inset !important;
           transition: background-color 999999s ease-in-out 0s, color 999999s ease-in-out 0s !important;
           appearance: none !important;
           -webkit-appearance: none !important;
@@ -265,8 +365,8 @@ export default function WaitlistPage() {
         #waitlist-email-input:autofill:active {
           -webkit-text-fill-color: #26241D !important;
           caret-color: #23412E !important;
-          background-color: transparent !important;
-          background: transparent !important;
+          -webkit-box-shadow: 0 0 0 1000px #DFE4DA inset !important;
+          box-shadow: 0 0 0 1000px #DFE4DA inset !important;
           transition: background-color 999999s ease-in-out 0s, color 999999s ease-in-out 0s !important;
           appearance: none !important;
         }
@@ -434,13 +534,78 @@ export default function WaitlistPage() {
                   >
                     Occasional updates from Alvion on Robinhood Chain. Unsubscribe any time.
                   </p>
+
+                  {/* Pre-join Tier Privileges Preview */}
+                  <div className="pt-5 border-t border-[rgba(38,36,29,0.12)] space-y-2.5">
+                    <div className="flex items-center justify-between text-xs font-mono text-[rgba(38,36,29,0.65)]">
+                      <span>Protocol tiers & privileges</span>
+                      <span>Invite traders to advance</span>
+                    </div>
+
+                    {/* Tier selector tabs */}
+                    <div className="flex flex-wrap gap-1 p-1 rounded-xl bg-[rgba(38,36,29,0.05)] border border-[rgba(38,36,29,0.08)]">
+                      {PROTOCOL_TIERS.map((t) => {
+                        const isSelected = activeTierId === t.id;
+                        return (
+                          <button
+                            key={t.id}
+                            type="button"
+                            onClick={() => setActiveTierId(t.id)}
+                            className={`flex-1 min-w-[62px] py-1.5 px-2 rounded-lg text-xs font-mono text-center transition-all cursor-pointer ${
+                              isSelected
+                                ? "bg-white text-[#23412E] font-semibold shadow-xs"
+                                : "text-[rgba(38,36,29,0.6)] hover:text-[#26241D]"
+                            }`}
+                          >
+                            <span>{t.name}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Active Tier Details Card */}
+                    {(() => {
+                      const current = PROTOCOL_TIERS.find((t) => t.id === activeTierId) || PROTOCOL_TIERS[0];
+                      return (
+                        <div className="p-3.5 rounded-xl border border-[rgba(38,36,29,0.14)] bg-white/60 backdrop-blur-xs space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span
+                              style={{
+                                backgroundColor: current.badgeBg,
+                                borderColor: current.badgeBorder,
+                                color: current.badgeText,
+                              }}
+                              className="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full border"
+                            >
+                              {current.name} &middot; {current.role}
+                            </span>
+                            <span className="text-xs font-mono text-[rgba(38,36,29,0.6)]">
+                              {current.invites === 0
+                                ? "0 invites · 200 credits"
+                                : `${current.invites} ${current.invites === 1 ? "invite" : "invites"} · ${current.credits.toLocaleString()} credits`}
+                            </span>
+                          </div>
+
+                          <ul className="space-y-1.5 text-xs text-[rgba(38,36,29,0.8)]">
+                            {current.perks.map((perk, i) => (
+                              <li key={i} className="flex items-start gap-2">
+                                <span className="h-1.5 w-1.5 rounded-full bg-[#23412E] mt-1.5 shrink-0" />
+                                <span>{perk}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      );
+                    })()}
+                  </div>
                 </form>
               ) : (
                 /* Done Confirmation & Verified Priority Pass Card */
                 <div className="pt-2 space-y-4 animate-fadeIn">
-                  <div className="p-5 rounded-2xl border border-[rgba(38,36,29,0.2)] bg-white/75 backdrop-blur-md shadow-sm space-y-4">
+                  <div className="p-5 rounded-2xl border border-[rgba(38,36,29,0.2)] bg-white/80 backdrop-blur-md shadow-sm space-y-4">
+                    {/* Header */}
                     <div className="flex items-center justify-between border-b border-[rgba(38,36,29,0.12)] pb-3">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2.5">
                         <div className="h-7 w-7 rounded-full bg-[#23412E] text-[#DFE4DA] flex items-center justify-center">
                           <Check className="h-4 w-4" />
                         </div>
@@ -459,31 +624,164 @@ export default function WaitlistPage() {
                           </p>
                         </div>
                       </div>
-                      <span className="text-[11px] font-mono font-semibold px-2.5 py-1 rounded-full bg-[#23412E]/10 text-[#23412E]">
-                        {userInfo?.tier || "BRONZE"} TIER
-                      </span>
+
+                      {(() => {
+                        const userTier = PROTOCOL_TIERS.find((t) => t.id === (userInfo?.tier || "BRONZE")) || PROTOCOL_TIERS[0];
+                        return (
+                          <span
+                            style={{
+                              backgroundColor: userTier.badgeBg,
+                              borderColor: userTier.badgeBorder,
+                              color: userTier.badgeText,
+                            }}
+                            className="text-[11px] font-mono font-bold px-2.5 py-1 rounded-full border"
+                          >
+                            {userTier.name} &middot; {userTier.role}
+                          </span>
+                        );
+                      })()}
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3 text-xs">
+                    {/* 4-Stat Grid */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
                       <div className="p-3 rounded-xl bg-[rgba(35,65,46,0.04)] border border-[rgba(38,36,29,0.08)]">
-                        <div className="text-[11px] text-[rgba(38,36,29,0.55)]">Waitlist Rank</div>
+                        <div className="text-[11px] text-[rgba(38,36,29,0.55)]">Waitlist rank</div>
                         <div className="font-mono text-base font-bold text-[#23412E] mt-0.5">
                           #{userInfo?.rank?.toLocaleString() || "48,924"}
                         </div>
                       </div>
                       <div className="p-3 rounded-xl bg-[rgba(35,65,46,0.04)] border border-[rgba(38,36,29,0.08)]">
-                        <div className="text-[11px] text-[rgba(38,36,29,0.55)]">Pass Identifier</div>
+                        <div className="text-[11px] text-[rgba(38,36,29,0.55)]">Pass identifier</div>
                         <div className="font-mono text-base font-bold text-[#23412E] mt-0.5 truncate">
                           {userInfo?.passId || "ALV-PASS"}
                         </div>
                       </div>
+                      <div className="p-3 rounded-xl bg-[rgba(35,65,46,0.04)] border border-[rgba(38,36,29,0.08)]">
+                        <div className="text-[11px] text-[rgba(38,36,29,0.55)]">Earned credits</div>
+                        <div className="font-mono text-base font-bold text-[#23412E] mt-0.5">
+                          {(userInfo?.xp || userInfo?.credits || 200).toLocaleString()}
+                        </div>
+                      </div>
+                      <div className="p-3 rounded-xl bg-[rgba(35,65,46,0.04)] border border-[rgba(38,36,29,0.08)]">
+                        <div className="text-[11px] text-[rgba(38,36,29,0.55)]">Traders invited</div>
+                        <div className="font-mono text-base font-bold text-[#23412E] mt-0.5">
+                          {userInfo?.referralsCount || 0}
+                        </div>
+                      </div>
                     </div>
 
+                    {/* Next Tier Progression Bar */}
+                    {(() => {
+                      const userCredits = userInfo?.xp || userInfo?.credits || 200;
+                      const userReferrals = userInfo?.referralsCount || 0;
+                      const currentTierIndex = PROTOCOL_TIERS.findIndex((t) => t.id === (userInfo?.tier || "BRONZE"));
+                      const nextTier = PROTOCOL_TIERS[currentTierIndex + 1];
+
+                      if (!nextTier) {
+                        return (
+                          <div className="p-3 rounded-xl bg-[rgba(35,65,46,0.06)] border border-[#23412E]/20 text-xs font-mono text-[#23412E] flex items-center justify-between">
+                            <span>Highest tier unlocked: Diamond Council</span>
+                            <span className="font-bold">Max level</span>
+                          </div>
+                        );
+                      }
+
+                      const neededCredits = nextTier.credits;
+                      const prevCredits = PROTOCOL_TIERS[currentTierIndex]?.credits || 0;
+                      const progressPercent = Math.min(
+                        100,
+                        Math.max(10, Math.round(((userCredits - prevCredits) / (neededCredits - prevCredits)) * 100))
+                      );
+                      const invitesLeft = Math.max(1, nextTier.invites - userReferrals);
+
+                      return (
+                        <div className="p-3 rounded-xl bg-[rgba(35,65,46,0.04)] border border-[rgba(38,36,29,0.08)] space-y-1.5">
+                          <div className="flex items-center justify-between text-xs font-mono">
+                            <span className="text-[rgba(38,36,29,0.7)]">
+                              Next tier: <strong className="text-[#23412E]">{nextTier.name} &middot; {nextTier.role}</strong>
+                            </span>
+                            <span className="text-[11px] text-[rgba(38,36,29,0.6)]">
+                              {invitesLeft} {invitesLeft === 1 ? "invite" : "invites"} left
+                            </span>
+                          </div>
+                          <div className="h-2 w-full rounded-full bg-[rgba(38,36,29,0.1)] overflow-hidden">
+                            <div
+                              style={{ width: `${progressPercent}%` }}
+                              className="h-full bg-[#23412E] rounded-full transition-all duration-500"
+                            />
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* Interactive Tier Roadmap Tabs */}
+                    <div className="space-y-2 pt-1">
+                      <div className="text-[11px] font-mono text-[rgba(38,36,29,0.6)] uppercase tracking-wide">
+                        Tier Roadmap &amp; Privileges
+                      </div>
+                      <div className="flex flex-wrap gap-1 p-1 rounded-xl bg-[rgba(38,36,29,0.05)] border border-[rgba(38,36,29,0.08)]">
+                        {PROTOCOL_TIERS.map((t) => {
+                          const isSelected = activeTierId === t.id;
+                          const isUserCurrent = (userInfo?.tier || "BRONZE") === t.id;
+                          return (
+                            <button
+                              key={t.id}
+                              type="button"
+                              onClick={() => setActiveTierId(t.id)}
+                              className={`flex-1 min-w-[62px] py-1.5 px-2 rounded-lg text-xs font-mono text-center transition-all cursor-pointer ${
+                                isSelected
+                                  ? "bg-white text-[#23412E] font-semibold shadow-xs"
+                                  : "text-[rgba(38,36,29,0.6)] hover:text-[#26241D]"
+                              }`}
+                            >
+                              <span>{t.name}</span>
+                              {isUserCurrent && (
+                                <span className="block text-[9px] text-[#23412E] font-bold">You</span>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {(() => {
+                        const current = PROTOCOL_TIERS.find((t) => t.id === activeTierId) || PROTOCOL_TIERS[0];
+                        return (
+                          <div className="p-3.5 rounded-xl border border-[rgba(38,36,29,0.12)] bg-[rgba(35,65,46,0.02)] space-y-2">
+                            <div className="flex items-center justify-between text-xs">
+                              <span
+                                style={{
+                                  backgroundColor: current.badgeBg,
+                                  borderColor: current.badgeBorder,
+                                  color: current.badgeText,
+                                }}
+                                className="text-[11px] font-mono font-bold px-2 py-0.5 rounded-full border"
+                              >
+                                {current.name} &middot; {current.role}
+                              </span>
+                              <span className="font-mono text-[11px] text-[rgba(38,36,29,0.6)]">
+                                {current.invites === 0
+                                  ? "0 invites · 200 credits"
+                                  : `${current.invites} ${current.invites === 1 ? "invite" : "invites"} · ${current.credits.toLocaleString()} credits`}
+                              </span>
+                            </div>
+                            <ul className="space-y-1 text-xs text-[rgba(38,36,29,0.85)]">
+                              {current.perks.map((p, i) => (
+                                <li key={i} className="flex items-start gap-2">
+                                  <span className="h-1.5 w-1.5 rounded-full bg-[#23412E] mt-1.5 shrink-0" />
+                                  <span>{p}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        );
+                      })()}
+                    </div>
+
+                    {/* Referral Link Share Box */}
                     {referralLink && (
                       <div className="space-y-1.5 pt-1">
-                        <div className="text-[11px] font-medium text-[rgba(38,36,29,0.6)] flex items-center gap-1.5">
-                          <Sparkles className="h-3 w-3 text-[#23412E]" />
-                          <span>Share your link to climb ranks & upgrade allocation</span>
+                        <div className="text-[11px] font-medium text-[rgba(38,36,29,0.6)] flex items-center justify-between">
+                          <span>Your personal invite link (+500 credits per trader):</span>
                         </div>
                         <div className="p-2.5 rounded-xl border border-[rgba(38,36,29,0.18)] bg-[rgba(35,65,46,0.03)] flex items-center justify-between gap-3 text-xs">
                           <span className="font-mono text-[#26241D] truncate">
@@ -500,6 +798,7 @@ export default function WaitlistPage() {
                       </div>
                     )}
 
+                    {/* Reset Button */}
                     <div className="pt-2 flex items-center justify-between border-t border-[rgba(38,36,29,0.1)] text-xs text-[rgba(38,36,29,0.6)]">
                       <button
                         type="button"
