@@ -14,6 +14,7 @@ interface UserEntryInfo {
   tier?: string;
   referralCode?: string;
   xp?: number;
+  credits?: number;
 }
 
 export default function WaitlistPage() {

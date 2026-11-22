@@ -76,6 +76,26 @@
       "rank": 48924,
       "joinedAt": 1795362202999,
       "passId": "ALV-D2A1F571"
+    },
+    "0xac1704efea5e405a740a1b7fc49224f054d02b7d": {
+      "address": "0xac1704efea5e405a740a1b7fc49224f054d02b7d",
+      "email": "new.institutional@alvion.fi",
+      "referralCode": "ac1704",
+      "referredBy": "early",
+      "referralsCount": 0,
+      "xp": 200,
+      "tier": "BRONZE",
+      "quests": {
+        "walletConnected": false,
+        "signatureVerified": false,
+        "twitterFollowed": false,
+        "discordJoined": false,
+        "testnetTraded": false,
+        "peersInvited": false
+      },
+      "rank": 48925,
+      "joinedAt": 1795372385274,
+      "passId": "ALV-AC172B7D"
     }
   }
 }

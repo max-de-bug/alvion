@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
+import {
+  sendWaitlistConfirmation,
+  sendWaitlistUpgrade,
+  fireAndForgetEmail,
+} from "@/lib/email/emailService";
 
 const DATA_DIR = path.resolve(process.cwd(), "data");
 const WAITLIST_FILE = path.join(DATA_DIR, "waitlist.json");
@@ -132,9 +137,9 @@ export async function GET(req: NextRequest) {
 
   const recentActivity = [
     { text: "0x71C8...3875 unlocked DIAMOND FOUNDER PASS", time: "1m ago", type: "diamond" },
-    { text: "0xA082...742D executed SPY testnet order on Robinhood Chain (+1,000 XP)", time: "3m ago", type: "trade" },
+    { text: "0xA082...742D executed SPY testnet order on Robinhood Chain (+1,000 Credits)", time: "3m ago", type: "trade" },
     { text: "0x981C...4031 invited 3 traders -> Rank promoted to #5", time: "6m ago", type: "referral" },
-    { text: "0x442E...09B7 verified EIP-712 signature (+500 XP)", time: "9m ago", type: "verify" },
+    { text: "0x442E...09B7 verified EIP-712 signature (+500 Credits)", time: "9m ago", type: "verify" },
     { text: "0x127A...66D2 upgraded to GOLD PASS", time: "12m ago", type: "gold" },
   ];
 
@@ -239,6 +244,7 @@ export async function POST(req: NextRequest) {
           (u) => u.referralCode.toLowerCase() === referrerCode || u.address.toLowerCase() === referrerCode
         );
         if (referrer) {
+          const prevTier = referrer.tier;
           referrer.referralsCount += 1;
           referrer.xp += 500;
           if (referrer.referralsCount >= 3) {
@@ -246,6 +252,28 @@ export async function POST(req: NextRequest) {
           }
           referrer.tier = calculateTier(referrer.xp, referrer.referralsCount);
           referrer.rank = Math.max(1, referrer.rank - 150);
+
+          // If referrer has registered an email, dispatch upgrade notification
+          if (referrer.email) {
+            const origin = req.nextUrl?.origin || process.env.NEXT_PUBLIC_APP_URL || "https://alvion.fi";
+            const refLink = `${origin}/waitlist?ref=${referrer.referralCode}`;
+            fireAndForgetEmail(
+              sendWaitlistUpgrade({
+                email: referrer.email,
+                passId: referrer.passId,
+                rank: referrer.rank,
+                tier: referrer.tier,
+                newTier: referrer.tier,
+                previousTier: prevTier,
+                referralCode: referrer.referralCode,
+                referralLink: refLink,
+                xp: referrer.xp,
+                referralsCount: referrer.referralsCount,
+                ranksClimbed: 150,
+                xpEarned: 500,
+              })
+            );
+          }
         }
       }
     }
@@ -270,6 +298,23 @@ export async function POST(req: NextRequest) {
     user.tier = calculateTier(user.xp, user.referralsCount);
     db.entries[lookupKey] = user;
     saveDb(db);
+
+    // Dispatch priority pass confirmation email on new sign-up or explicit resend
+    if (trimmedEmail && (isNew || body.resendEmail)) {
+      const origin = req.nextUrl?.origin || process.env.NEXT_PUBLIC_APP_URL || "https://alvion.fi";
+      const refLink = `${origin}/waitlist?ref=${user.referralCode}`;
+      fireAndForgetEmail(
+        sendWaitlistConfirmation({
+          email: trimmedEmail,
+          passId: user.passId,
+          rank: user.rank,
+          tier: user.tier,
+          referralCode: user.referralCode,
+          referralLink: refLink,
+          xp: user.xp,
+        })
+      );
+    }
 
     return NextResponse.json({
       success: true,
