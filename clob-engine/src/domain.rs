@@ -227,6 +227,14 @@ impl DomainRiskManager {
         *entry += amount_usdc;
     }
 
+    /// Prune closed/settled positions in-place using FxHashMap::retain
+    /// Keeps solvency verification and margin checks O(active_positions)
+    pub fn prune_closed_positions(&mut self) -> usize {
+        let initial_len = self.positions.len();
+        self.positions.retain(|_, p| p.is_open);
+        initial_len - self.positions.len()
+    }
+
     /// Alvion Adaptive Skew Funding Engine
     /// Combines CLOB Impact Premium with Single USDC Vault Skew compensation
     pub fn calculate_adaptive_funding(
@@ -358,6 +366,43 @@ mod tests {
         // Closing again should return PositionClosed error
         let res2 = manager.close_position_with_junior_pnl(&pos.id, 12 * PRICE_SCALE);
         assert_eq!(res2.unwrap_err(), DomainError::position_closed(&pos.id));
+    }
+
+    #[test]
+    fn test_prune_closed_positions_retain() {
+        let mut manager = DomainRiskManager::new(1_000_000 * USD_SCALE);
+        let pos1 = manager.open_position(
+            "0xTrader1".to_string(),
+            "AVAX".to_string(),
+            Side::Buy,
+            100 * USD_SCALE,
+            10,
+            1000 * USD_SCALE,
+            10 * PRICE_SCALE,
+        ).expect("should open pos1");
+
+        let pos2 = manager.open_position(
+            "0xTrader2".to_string(),
+            "BTC".to_string(),
+            Side::Buy,
+            100 * USD_SCALE,
+            10,
+            1000 * USD_SCALE,
+            10 * PRICE_SCALE,
+        ).expect("should open pos2");
+
+        assert_eq!(manager.positions.len(), 2);
+
+        // Close pos1
+        manager.close_position_with_junior_pnl(&pos1.id, 11 * PRICE_SCALE).expect("should close pos1");
+        assert_eq!(manager.positions.len(), 2, "Closed position still in map prior to prune");
+
+        // Prune with retain
+        let pruned = manager.prune_closed_positions();
+        assert_eq!(pruned, 1, "Should prune exactly 1 closed position");
+        assert_eq!(manager.positions.len(), 1, "Only 1 active position should remain");
+        assert!(!manager.positions.contains_key(&pos1.id));
+        assert!(manager.positions.contains_key(&pos2.id));
     }
 }
 

@@ -231,36 +231,21 @@ impl ClobEngine {
         self.latest_oracle_prices = oracle_prices.clone();
         let (solvent, _, _) = self.risk_manager.verify_solvency_invariant();
 
-        // Phase 3: Purge expired orders (0 gas)
+        // Phase 3: Purge expired orders in-place using VecDeque::retain (zero heap allocs, O(N))
         let mut expired_count = 0;
         let mut markets_to_notify = Vec::new();
 
         for (m, book) in self.orderbooks.iter_mut() {
-            let mut expired_ids = Vec::new();
-            for queue in book.bids.values() {
-                for o in queue {
-                    if o.expiry > 0 && o.expiry < now {
-                        expired_ids.push(o.id.clone());
-                    }
-                }
-            }
-            for queue in book.asks.values() {
-                for o in queue {
-                    if o.expiry > 0 && o.expiry < now {
-                        expired_ids.push(o.id.clone());
-                    }
-                }
-            }
-            let mut purged = false;
-            for id in expired_ids {
-                if book.cancel_order(&id) {
-                    expired_count += 1;
-                    purged = true;
-                }
-            }
-            if purged {
+            let purged = book.purge_expired_orders(now);
+            if purged > 0 {
+                expired_count += purged;
                 markets_to_notify.push(m.clone());
             }
+        }
+
+        // Periodically (every 10 ticks) prune closed/settled positions using HashMap::retain
+        if self.tick_counter % 10 == 0 {
+            self.risk_manager.prune_closed_positions();
         }
 
         for m in markets_to_notify {
@@ -315,3 +300,50 @@ impl ClobEngine {
 }
 
 pub type SharedEngine = Arc<Mutex<ClobEngine>>;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::types::{Order, OrderType, SettlementChain, Side, PRICE_SCALE, USD_SCALE};
+
+    #[test]
+    fn test_sequencer_tick_purges_expired_with_retain() {
+        let mut engine = ClobEngine::new();
+        let now = chrono::Utc::now().timestamp() as u64;
+
+        // Place an expired order directly into orderbook
+        let expired_order = Order {
+            id: "EXPIRED-TICK-1".to_string(),
+            trader: "0xTrader1".to_string(),
+            market: "AVAX".to_string(),
+            side: Side::Buy,
+            order_type: OrderType::Limit,
+            price: 25 * PRICE_SCALE,
+            size_usd: 1000 * USD_SCALE,
+            remaining_size_usd: 1000 * USD_SCALE,
+            margin_usdc: 100 * USD_SCALE,
+            leverage: 10,
+            nonce: 1,
+            expiry: now.saturating_sub(60), // Expired 1 min ago
+            signature: None,
+            created_at: now.saturating_sub(120),
+            settlement_chain: SettlementChain::RobinhoodChain,
+        };
+
+        let book = engine.orderbooks.entry("AVAX".to_string()).or_insert_with(|| OrderBook::new("AVAX".to_string()));
+        book.place_limit_order(expired_order);
+        assert!(book.order_index.contains_key("EXPIRED-TICK-1"));
+
+        let mut oracle_prices = FxHashMap::default();
+        oracle_prices.insert("AVAX".to_string(), 25 * PRICE_SCALE);
+
+        // Execute sequencer tick: expired order is purged, and Phase 4 places fresh Vault MM quotes
+        let report = engine.execute_deterministic_tick(&oracle_prices);
+        assert_eq!(report.expired_orders_purged, 1);
+
+        let book_after = engine.orderbooks.get("AVAX").unwrap();
+        assert!(!book_after.order_index.contains_key("EXPIRED-TICK-1"), "Expired order must be evicted from order index");
+        // Bids now consist of the automated Vault MM quotes placed in Phase 4
+        assert!(book_after.bids.values().all(|queue| queue.iter().all(|o| o.id != "EXPIRED-TICK-1")));
+    }
+}

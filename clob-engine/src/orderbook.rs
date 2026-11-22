@@ -220,6 +220,40 @@ impl OrderBook {
         false
     }
 
+    /// Purge expired orders in-place using VecDeque::retain and BTreeMap::retain (Zero heap allocations, single O(N) pass)
+    pub fn purge_expired_orders(&mut self, now: u64) -> u32 {
+        let mut purged_count = 0;
+        let order_index = &mut self.order_index;
+
+        for queue in self.bids.values_mut() {
+            queue.retain(|o| {
+                if o.expiry > 0 && o.expiry < now {
+                    order_index.remove(&o.id);
+                    purged_count += 1;
+                    false
+                } else {
+                    true
+                }
+            });
+        }
+        self.bids.retain(|_, queue| !queue.is_empty());
+
+        for queue in self.asks.values_mut() {
+            queue.retain(|o| {
+                if o.expiry > 0 && o.expiry < now {
+                    order_index.remove(&o.id);
+                    purged_count += 1;
+                    false
+                } else {
+                    true
+                }
+            });
+        }
+        self.asks.retain(|_, queue| !queue.is_empty());
+
+        purged_count
+    }
+
     /// Extract L2 Depth snapshot
     pub fn get_l2_depth(&self, max_levels: usize) -> L2Depth {
         let bids: Vec<OrderBookLevel> = self.bids.iter().rev().take(max_levels).map(|(&p, q)| {
@@ -359,5 +393,114 @@ impl OrderBook {
             impact_ask,
             spread_bps,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::types::OrderType;
+
+    #[test]
+    fn test_orderbook_retain_purge_expired() {
+        let mut book = OrderBook::new("BTC-USD".to_string());
+        let now = 1000;
+
+        let order1 = Order {
+            id: "ORD-1".to_string(),
+            trader: "0xTrader1".to_string(),
+            market: "BTC-USD".to_string(),
+            side: Side::Buy,
+            order_type: OrderType::Limit,
+            price: 50_000 * PRICE_SCALE,
+            size_usd: 1000 * USD_SCALE,
+            remaining_size_usd: 1000 * USD_SCALE,
+            margin_usdc: 100 * USD_SCALE,
+            leverage: 10,
+            nonce: 1,
+            expiry: 900, // Expired
+            signature: None,
+            created_at: 800,
+            settlement_chain: SettlementChain::RobinhoodChain,
+        };
+        let order2 = Order {
+            id: "ORD-2".to_string(),
+            trader: "0xTrader2".to_string(),
+            market: "BTC-USD".to_string(),
+            side: Side::Buy,
+            order_type: OrderType::Limit,
+            price: 50_000 * PRICE_SCALE,
+            size_usd: 1000 * USD_SCALE,
+            remaining_size_usd: 1000 * USD_SCALE,
+            margin_usdc: 100 * USD_SCALE,
+            leverage: 10,
+            nonce: 2,
+            expiry: 1100, // Still valid
+            signature: None,
+            created_at: 800,
+            settlement_chain: SettlementChain::RobinhoodChain,
+        };
+        let order3 = Order {
+            id: "ORD-3".to_string(),
+            trader: "0xTrader3".to_string(),
+            market: "BTC-USD".to_string(),
+            side: Side::Buy,
+            order_type: OrderType::Limit,
+            price: 50_000 * PRICE_SCALE,
+            size_usd: 1000 * USD_SCALE,
+            remaining_size_usd: 1000 * USD_SCALE,
+            margin_usdc: 100 * USD_SCALE,
+            leverage: 10,
+            nonce: 3,
+            expiry: 0, // GTC (Good-Til-Cancelled)
+            signature: None,
+            created_at: 800,
+            settlement_chain: SettlementChain::RobinhoodChain,
+        };
+        let order4 = Order {
+            id: "ORD-4".to_string(),
+            trader: "0xTrader4".to_string(),
+            market: "BTC-USD".to_string(),
+            side: Side::Sell,
+            order_type: OrderType::Limit,
+            price: 51_000 * PRICE_SCALE,
+            size_usd: 1000 * USD_SCALE,
+            remaining_size_usd: 1000 * USD_SCALE,
+            margin_usdc: 100 * USD_SCALE,
+            leverage: 10,
+            nonce: 4,
+            expiry: 950, // Expired
+            signature: None,
+            created_at: 800,
+            settlement_chain: SettlementChain::RobinhoodChain,
+        };
+
+        book.place_limit_order(order1);
+        book.place_limit_order(order2);
+        book.place_limit_order(order3);
+        book.place_limit_order(order4);
+
+        assert_eq!(book.order_index.len(), 4);
+        assert_eq!(book.bids.len(), 1);
+        assert_eq!(book.asks.len(), 1);
+
+        // Purge expired at now = 1000
+        let purged = book.purge_expired_orders(now);
+        assert_eq!(purged, 2, "Should purge exactly 2 expired orders (ORD-1 and ORD-4)");
+
+        // ORD-1 and ORD-4 should be removed from order_index
+        assert!(!book.order_index.contains_key("ORD-1"));
+        assert!(book.order_index.contains_key("ORD-2"));
+        assert!(book.order_index.contains_key("ORD-3"));
+        assert!(!book.order_index.contains_key("ORD-4"));
+
+        // Ask level at 51000 was empty and should be pruned via retain
+        assert_eq!(book.asks.len(), 0);
+
+        // Bid level at 50000 should still have 2 orders (ORD-2 and ORD-3)
+        let bid_queue = book.bids.get(&(50_000 * PRICE_SCALE)).expect("price level exists");
+        assert_eq!(bid_queue.len(), 2);
+        assert_eq!(bid_queue[0].id, "ORD-2");
+        assert_eq!(bid_queue[1].id, "ORD-3");
     }
 }
