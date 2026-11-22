@@ -1,19 +1,76 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
+import { MessageSquareText, Globe, ExternalLink, ShieldCheck } from "lucide-react";
 import { AlvionBirdLogo } from "@/components/brand/AlvionBirdLogo";
 
 export const TradingFooter = React.memo(function TradingFooter() {
   return (
-    <footer className="border-t border-slate-900 bg-slate-950 px-4 py-3 text-xs text-slate-500">
-      <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+    <footer
+      role="contentinfo"
+      className="flex items-center justify-between gap-4 mx-3 mb-3 px-5 py-3 rounded-[18px] border border-[var(--border)] bg-[var(--surface)] text-[var(--t1)] select-none"
+    >
+      {/* Left: Brand & Latency */}
+      <div className="flex items-center gap-3">
         <div className="flex items-center gap-2">
-          <AlvionBirdLogo size={16} variant="light" className="opacity-70" />
-          <span>Alvion Exchange</span>
+          <AlvionBirdLogo size={18} variant="light" className="opacity-90" />
+          <span className="text-[12px] font-semibold tracking-[-0.01em] text-[var(--t1)]">
+            © 2026 Alvion
+          </span>
         </div>
-        <span className="font-mono text-[11px] text-slate-500">
-          Clearinghouse: <code className="text-slate-400">0x4663111111111111111111111111111111114663</code> (Robinhood Chain L2)
-        </span>
+
+        <span className="text-[var(--border-strong)]">|</span>
+
+        {/* API Latency */}
+        <div
+          title="API round-trip latency"
+          aria-label="API round-trip latency"
+          className="flex items-center gap-1.5 text-[11.5px] font-mono text-[var(--t3)]"
+        >
+          <span
+            aria-hidden="true"
+            className="inline-block size-1.5 rounded-full bg-[var(--fixed-green)] animate-pulse"
+          />
+          <span className="tabular-nums">54 ms</span>
+        </div>
+
+        <span className="hidden md:inline text-[var(--border-strong)]">|</span>
+
+        {/* Chain & Settlement Engine */}
+        <div className="hidden md:flex items-center gap-1.5 text-[11px] text-[var(--t3)] font-mono">
+          <ShieldCheck className="w-3.5 h-3.5 text-[var(--fixed-green)]" />
+          <span>Robinhood Chain &bull; High-Performance L2</span>
+        </div>
+      </div>
+
+      {/* Right: Quick Links */}
+      <div className="flex items-center gap-2">
+        <Link
+          href="/waitlist"
+          title="Waitlist"
+          className="grid size-[28px] place-items-center rounded-full text-[var(--t3)] hover:text-[var(--t1)] hover:bg-[var(--hover)] transition-colors cursor-pointer"
+        >
+          <Globe className="w-3.5 h-3.5" />
+        </Link>
+
+        <a
+          href="https://github.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Documentation & GitHub"
+          className="grid size-[28px] place-items-center rounded-full text-[var(--t3)] hover:text-[var(--t1)] hover:bg-[var(--hover)] transition-colors cursor-pointer"
+        >
+          <ExternalLink className="w-3.5 h-3.5" />
+        </a>
+
+        <a
+          href="mailto:support@alvion.exchange"
+          title="Contact & Feedback"
+          className="grid size-[28px] place-items-center rounded-full text-[var(--t3)] hover:text-[var(--t1)] hover:bg-[var(--hover)] transition-colors cursor-pointer"
+        >
+          <MessageSquareText className="w-3.5 h-3.5" />
+        </a>
       </div>
     </footer>
   );

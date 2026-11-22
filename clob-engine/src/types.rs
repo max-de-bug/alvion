@@ -3,9 +3,10 @@ use serde::{Deserialize, Serialize};
 pub const PRICE_SCALE: u64 = 1_000_000; // 6 decimals fixed point for price (e.g. $7.18 -> 7_180_000)
 pub const USD_SCALE: u64 = 1_000_000;   // 6 decimals for USD notional & USDC
 
+#[repr(u8)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum SettlementChain {
-    RobinhoodChain,
+    RobinhoodChain = 0,
 }
 
 impl Default for SettlementChain {
@@ -14,16 +15,18 @@ impl Default for SettlementChain {
     }
 }
 
+#[repr(u8)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Side {
-    Buy,
-    Sell,
+    Buy = 0,
+    Sell = 1,
 }
 
+#[repr(u8)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum OrderType {
-    Limit,
-    Market,
+    Limit = 0,
+    Market = 1,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -37,7 +40,7 @@ pub struct Order {
     pub size_usd: u64, // Scaled by USD_SCALE
     pub remaining_size_usd: u64,
     pub margin_usdc: u64,
-    pub leverage: u32,
+    pub leverage: u16,
     pub nonce: u64,
     pub expiry: u64,
     pub signature: Option<String>,
@@ -71,7 +74,7 @@ pub struct Position {
     pub market: String,
     pub side: Side,
     pub margin_usdc: u64,
-    pub leverage: u32,
+    pub leverage: u16,
     pub size_usd: u64,
     pub entry_price: u64,
     pub open_timestamp: u64,
@@ -82,7 +85,7 @@ pub struct Position {
 pub struct OrderBookLevel {
     pub price: f64,
     pub size: f64,
-    pub order_count: usize,
+    pub order_count: u32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -98,7 +101,7 @@ pub struct L2Depth {
 pub struct L4Level {
     pub price: f64,
     pub size: f64,
-    pub order_count: usize,
+    pub order_count: u32,
     pub is_vault_mm: bool,
 }
 
@@ -135,10 +138,25 @@ pub struct AdaptiveFundingInfo {
 pub struct SequencerTickReport {
     pub tick_id: u64,
     pub timestamp: u64,
-    pub active_markets: usize,
-    pub expired_orders_purged: usize,
-    pub vault_mm_quotes_active: usize,
+    pub active_markets: u32,
+    pub expired_orders_purged: u32,
+    pub vault_mm_quotes_active: u32,
     pub solvency_verified: bool,
     pub phase: String,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::mem::size_of;
+
+    #[test]
+    fn test_compact_type_sizes() {
+        // OrderBookLevel: price (8) + size (8) + order_count (4) + 4 padding = 24 bytes
+        assert_eq!(size_of::<OrderBookLevel>(), 24);
+
+        // L4Level: price (8) + size (8) + order_count (4) + is_vault_mm (1) + 3 padding = 24 bytes
+        assert_eq!(size_of::<L4Level>(), 24);
+    }
 }
 

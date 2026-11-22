@@ -24,19 +24,19 @@ const EMPTY_ORDERS: SignedOrder[] = [];
 const EMPTY_TRADES: MatchedTrade[] = [];
 
 const DEFAULT_MARKET: MarketContext = {
-  name: "SOL",
-  oraclePx: 142.5,
-  markPx: 142.45,
-  midPx: 142.48,
-  prevDayPx: 139.8,
-  change24h: 1.9,
+  name: "BTC",
+  oraclePx: 67450.0,
+  markPx: 67448.5,
+  midPx: 67449.2,
+  prevDayPx: 65800.0,
+  change24h: 2.51,
   fundingRate: 0.000012,
-  dayVolumeUsd: 85200000,
-  openInterest: 19800000,
-  szDecimals: 2,
+  dayVolumeUsd: 184500000,
+  openInterest: 42800000,
+  szDecimals: 4,
   maxLeverage: 50,
-  impactBidPx: 142.35,
-  impactAskPx: 142.55,
+  impactBidPx: 67445.0,
+  impactAskPx: 67452.0,
 };
 
 export function useTradingDashboard() {
@@ -44,6 +44,8 @@ export function useTradingDashboard() {
 
   // Global client state via Zustand
   const {
+    tradingMode,
+    setTradingMode,
     selectedMarketName,
     setSelectedMarketName,
     isLong,
@@ -417,6 +419,8 @@ export function useTradingDashboard() {
 
   return {
     // State from store
+    tradingMode,
+    setTradingMode,
     selectedMarketName,
     setSelectedMarketName,
     isLong,

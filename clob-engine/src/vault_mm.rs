@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct VaultMmConfig {
     pub base_spread_bps: u64, // e.g. 20 bps (0.20%)
-    pub ladder_levels: usize, // e.g. 3 levels
+    pub ladder_levels: u16,   // e.g. 3 levels
     pub size_per_level_usd: u64, // e.g. $50,000
     pub max_skew_tolerance_bps: i64,
 }

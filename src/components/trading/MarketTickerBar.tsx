@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
+import { ChevronDown } from "lucide-react";
 import { MarketContext } from "@/lib/hyperliquid";
 import { MarketMetadata } from "@/stores/useTradingStore";
 
@@ -39,122 +40,157 @@ export const MarketTickerBar = React.memo<MarketTickerBarProps>(function MarketT
   availableShortLiq,
   formatUsdCompact,
 }) {
+  const [showMarketMenu, setShowMarketMenu] = useState(false);
+
+  const countdownFormatted = `00:${minutesToFunding.toString().padStart(2, "0")}:18`;
+  const markPriceFormatted = currentMarket.markPx > 10
+    ? currentMarket.markPx.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })
+    : currentMarket.markPx.toFixed(4);
+
+  const oraclePriceFormatted = currentMarket.oraclePx > 10
+    ? currentMarket.oraclePx.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })
+    : currentMarket.oraclePx.toFixed(4);
+
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-lg p-3 flex flex-wrap items-center justify-between gap-4">
-      <div className="flex items-center gap-4 flex-wrap">
-        <div className="flex items-center gap-2">
-          <select
-            value={selectedMarketName}
-            onChange={(e) => setSelectedMarketName(e.target.value)}
-            className="bg-slate-800 border border-slate-700 text-white font-semibold text-sm px-2.5 py-1.5 rounded-md focus:outline-none focus:border-cyan-500 cursor-pointer"
-          >
-            <optgroup label="Tokenized Equities">
-              <option value="SPY">SPY · S&P 500 ETF (20x)</option>
-              <option value="QQQ">QQQ · Nasdaq-100 ETF (20x)</option>
-              <option value="NVDA">NVDA · NVIDIA Corp (10x)</option>
-              <option value="TSLA">TSLA · Tesla, Inc. (10x)</option>
-              <option value="AAPL">AAPL · Apple Inc. (10x)</option>
-              <option value="MSFT">MSFT · Microsoft Corp (10x)</option>
-              <option value="AMZN">AMZN · Amazon.com Inc (10x)</option>
-              <option value="GOOGL">GOOGL · Alphabet Google (10x)</option>
-              <option value="META">META · Meta Platforms (10x)</option>
-              <option value="COIN">COIN · Coinbase Global (10x)</option>
-              <option value="MSTR">MSTR · MicroStrategy Inc (10x)</option>
-            </optgroup>
-            <optgroup label="Crypto">
-              <option value="SOL">SOL · Solana (50x)</option>
-              <option value="BTC">BTC · Bitcoin (50x)</option>
-              <option value="ETH">ETH · Ethereum (50x)</option>
-            </optgroup>
-          </select>
-          {isEquity && (
-            <span className="text-[11px] font-mono text-slate-400 bg-slate-800 px-2 py-0.5 rounded border border-slate-700">
-              {marketMeta.exchangeBadge}
-            </span>
-          )}
-        </div>
-
-        <div className="h-5 w-[1px] bg-slate-800 hidden md:block" />
-
-        {/* Mark Price */}
-        <div>
-          <div className="text-[10px] text-slate-400 font-medium">Mark</div>
-          <div className="text-base font-mono font-semibold text-white flex items-center gap-1.5">
-            ${currentMarket.markPx > 10 ? currentMarket.markPx.toLocaleString(undefined, { minimumFractionDigits: 2 }) : currentMarket.markPx.toFixed(4)}
-            <span
-              className={`text-xs font-semibold ${
-                currentMarket.change24h >= 0 ? "text-emerald-400" : "text-rose-400"
-              }`}
+    <div className="container-in container-in-1 relative z-20 shrink-0 mb-3">
+      <div className="h-[60px] rounded-[18px] border border-[var(--border)] bg-[var(--surface)] shadow-lg">
+        <div className="strip-scroll flex h-full items-center gap-4 px-3 overflow-x-auto [scrollbar-width:none]">
+          {/* Market Selector Pill */}
+          <div className="shrink-0 relative">
+            <button
+              type="button"
+              onClick={() => setShowMarketMenu((prev) => !prev)}
+              className="flex items-center gap-2 px-3 py-2 rounded-full border border-transparent hover:bg-[var(--surface-3)] hover:border-[var(--border)] transition-colors cursor-pointer"
             >
-              {currentMarket.change24h >= 0 ? "+" : ""}
-              {currentMarket.change24h.toFixed(2)}%
+              <div className="flex items-center">
+                <div className="w-[22px] h-[22px] rounded-full bg-amber-500/90 flex items-center justify-center text-[11px] font-bold text-black border border-slate-900 shadow-sm">
+                  ₿
+                </div>
+                <div className="w-[22px] h-[22px] rounded-full bg-[#4ECCA3] flex items-center justify-center text-[10px] font-bold text-[#0A1612] border border-slate-900 shadow-sm -ml-1.5">
+                  $
+                </div>
+              </div>
+              <span className="font-semibold tracking-[-0.01em] text-[var(--t1)] text-[14.5px]">
+                {selectedMarketName}-USDCX
+              </span>
+              <span className="lev-tag" aria-label="Up to 20x leverage">
+                {marketMeta.maxLeverage || 20}x
+              </span>
+              <ChevronDown className="w-4 h-4 text-[var(--t3)]" />
+            </button>
+
+            {showMarketMenu && (
+              <div className="absolute top-12 left-0 z-50 w-64 bg-[var(--surface)] border border-[var(--border-strong)] rounded-2xl p-2 shadow-2xl text-xs flex flex-col gap-1">
+                <div className="px-2.5 py-1 text-[10px] font-semibold text-[var(--t3)] uppercase tracking-wider">
+                  Select Perpetual Market
+                </div>
+                {[
+                  { sym: "BTC", name: "Bitcoin", lev: "50x" },
+                  { sym: "ETH", name: "Ethereum", lev: "50x" },
+                  { sym: "SOL", name: "Solana", lev: "50x" },
+                  { sym: "SPY", name: "S&P 500 ETF", lev: "20x" },
+                  { sym: "NVDA", name: "NVIDIA Corp", lev: "10x" },
+                  { sym: "TSLA", name: "Tesla Inc", lev: "10x" },
+                  { sym: "AAPL", name: "Apple Inc", lev: "10x" },
+                ].map((item) => (
+                  <button
+                    key={item.sym}
+                    onClick={() => {
+                      setSelectedMarketName(item.sym);
+                      setShowMarketMenu(false);
+                    }}
+                    className={`flex items-center justify-between px-3 py-2 rounded-xl text-left transition-colors cursor-pointer ${
+                      selectedMarketName === item.sym
+                        ? "bg-[var(--surface-3)] text-[#4ECCA3] font-semibold"
+                        : "text-[var(--t1)] hover:bg-[var(--hover)]"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold">{item.sym}-USDCX</span>
+                      <span className="text-[11px] text-[var(--t3)]">{item.name}</span>
+                    </div>
+                    <span className="lev-tag">{item.lev}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Mark Price */}
+          <div className="flex shrink-0 items-center">
+            <span className="flex flex-col gap-px leading-[1.15]">
+              <span className="text-[9.5px] font-mono tracking-[.07em] text-[var(--t3)] font-semibold whitespace-nowrap">
+                Mark
+              </span>
+              <span className="strip-mark text-[12px] font-mono tabular-nums font-semibold text-[var(--t1)]">
+                ${markPriceFormatted}
+              </span>
             </span>
           </div>
-        </div>
 
-        {/* Oracle Price */}
-        <div>
-          <div className="text-[10px] text-slate-400 font-medium">Oracle</div>
-          <div className="text-sm font-mono text-slate-200">
-            ${currentMarket.oraclePx > 10 ? currentMarket.oraclePx.toLocaleString(undefined, { minimumFractionDigits: 2 }) : currentMarket.oraclePx.toFixed(4)}
+          {/* Stats Cluster */}
+          <div className="strip-stats flex min-w-[150px] items-center gap-5 overflow-x-auto [scrollbar-width:none]">
+            <div className="flex shrink-0 flex-col gap-px leading-[1.15]">
+              <span className="text-[9.5px] font-mono tracking-[.07em] text-[var(--t3)] font-semibold whitespace-nowrap">
+                Index
+              </span>
+              <span className="text-[12px] font-mono tabular-nums font-semibold text-[var(--t1)]">
+                {oraclePriceFormatted}
+              </span>
+            </div>
+
+            <div className="flex shrink-0 flex-col gap-px leading-[1.15]">
+              <span className="text-[9.5px] font-mono tracking-[.07em] text-[var(--t3)] font-semibold whitespace-nowrap">
+                24h Change
+              </span>
+              <span
+                className={`text-[12px] font-mono tabular-nums font-semibold ${
+                  currentMarket.change24h >= 0 ? "text-[var(--green)]" : "text-[var(--red)]"
+                }`}
+              >
+                {currentMarket.change24h >= 0 ? "+" : ""}
+                {(currentMarket.change24h * 598).toFixed(0)} / {currentMarket.change24h >= 0 ? "+" : ""}
+                {currentMarket.change24h.toFixed(2)}%
+              </span>
+            </div>
+
+            <div className="flex shrink-0 flex-col gap-px leading-[1.15] cursor-help">
+              <span className="text-[9.5px] font-mono tracking-[.07em] text-[var(--t3)] font-semibold whitespace-nowrap">
+                24h Vol
+              </span>
+              <span className="text-[12px] font-mono tabular-nums font-semibold text-[var(--t1)]">
+                ${(currentMarket.dayVolumeUsd / 1_000_000).toFixed(1)}M
+              </span>
+            </div>
+
+            <div className="flex shrink-0 flex-col gap-px leading-[1.15]">
+              <span className="text-[9.5px] font-mono tracking-[.07em] text-[var(--t3)] font-semibold whitespace-nowrap">
+                Open Int.
+              </span>
+              <span className="text-[12px] font-mono tabular-nums font-semibold text-[var(--t1)]">
+                {formatUsdCompact(longOi + shortOi)}
+              </span>
+            </div>
+
+            <div className="flex shrink-0 flex-col gap-px leading-[1.15] cursor-help">
+              <span className="text-[9.5px] font-mono tracking-[.07em] text-[var(--t3)] font-semibold whitespace-nowrap">
+                Funding (1h)
+              </span>
+              <span className="text-[12px] font-mono tabular-nums font-semibold text-[var(--warn)]">
+                {(longFundingRate * 100).toFixed(4)}%
+              </span>
+            </div>
+
+            <div className="flex shrink-0 flex-col gap-px leading-[1.15]">
+              <span className="text-[9.5px] font-mono tracking-[.07em] text-[var(--t3)] font-semibold whitespace-nowrap">
+                Countdown
+              </span>
+              <span className="text-[12px] font-mono tabular-nums font-semibold text-[var(--t1)]">
+                {countdownFormatted}
+              </span>
+            </div>
           </div>
         </div>
-
-        {/* Open Interest */}
-        <div className="flex flex-col min-w-[130px]">
-          <div className="text-[10px] text-slate-400 font-medium flex items-center justify-between">
-            <span>Open interest</span>
-            <span className="font-mono text-[10px] text-slate-400">
-              {longOiRatio.toFixed(0)}% / {shortOiRatio.toFixed(0)}%
-            </span>
-          </div>
-          <div className="text-xs font-mono font-medium text-slate-200 mt-0.5 flex items-center gap-1">
-            <span className="text-emerald-400">{formatUsdCompact(longOi)}</span>
-            <span className="text-slate-600">/</span>
-            <span className="text-rose-400">{formatUsdCompact(shortOi)}</span>
-          </div>
-        </div>
-
-        {/* Funding /h */}
-        <div className="flex flex-col min-w-[120px]">
-          <div className="text-[10px] text-slate-400 font-medium flex items-center justify-between">
-            <span>Funding (1h)</span>
-            <span className="text-[10px] text-slate-500 font-mono">in {minutesToFunding}m</span>
-          </div>
-          <div className="text-xs font-mono font-medium mt-0.5 flex items-center gap-1">
-            <span className={longFundingRate >= 0 ? "text-emerald-400" : "text-rose-400"}>
-              {longFundingRate >= 0 ? "+" : ""}{longFundingRate.toFixed(4)}%
-            </span>
-            <span className="text-slate-600">/</span>
-            <span className={shortFundingRate >= 0 ? "text-emerald-400" : "text-rose-400"}>
-              {shortFundingRate >= 0 ? "+" : ""}{shortFundingRate.toFixed(4)}%
-            </span>
-          </div>
-        </div>
-
-        {/* Available Liquidity */}
-        <div className="flex flex-col min-w-[120px]">
-          <div className="text-[10px] text-slate-400 font-medium">Available liquidity</div>
-          <div className="text-xs font-mono font-medium text-slate-200 mt-0.5 flex items-center gap-1">
-            <span className="text-emerald-400">{formatUsdCompact(availableLongLiq)}</span>
-            <span className="text-slate-600">/</span>
-            <span className="text-rose-400">{formatUsdCompact(availableShortLiq)}</span>
-          </div>
-        </div>
-
-        {/* 24h Volume */}
-        <div>
-          <div className="text-[10px] text-slate-400 font-medium">24h volume</div>
-          <div className="text-sm font-mono text-slate-200">
-            ${(currentMarket.dayVolumeUsd / 1_000_000).toFixed(2)}M
-          </div>
-        </div>
-      </div>
-
-      {/* Engine Status */}
-      <div className="flex items-center gap-2 text-xs text-slate-400 font-mono">
-        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-        <span>CLOB online</span>
       </div>
     </div>
   );

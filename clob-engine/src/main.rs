@@ -33,7 +33,7 @@ struct SubmitOrderRequest {
     price: f64,
     size_usd: f64,
     margin_usdc: f64,
-    leverage: u32,
+    leverage: u16,
     signature: Option<String>,
     #[allow(dead_code)]
     chain: Option<String>, // "robinhood"
@@ -44,7 +44,7 @@ struct SubmitOrderResponse {
     success: bool,
     order_id: String,
     status: String,
-    trades_count: usize,
+    trades_count: u32,
     trades: Vec<types::Trade>,
     position: Option<types::Position>,
 }
@@ -214,7 +214,7 @@ async fn handle_submit_order(
             success: true,
             order_id,
             status: status.to_string(),
-            trades_count: trades.len(),
+            trades_count: trades.len() as u32,
             trades,
             position,
         }),

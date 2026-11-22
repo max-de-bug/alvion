@@ -28,14 +28,14 @@ impl FixedId {
     }
 }
 
-#[repr(C)]
+#[repr(u8)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Side {
     Buy = 0,
     Sell = 1,
 }
 
-#[repr(C)]
+#[repr(u8)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum OrderType {
     Limit = 0,
@@ -44,22 +44,23 @@ pub enum OrderType {
 }
 
 /// Zero-copy fixed-layout order node with intrusive linked-list pointers.
+/// Optimized memory layout: 8-byte aligned fields followed by packed smaller integers to eliminate struct padding.
 #[repr(C)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SlabOrder {
     pub id: FixedId,
     pub trader_id: FixedId,
-    pub side: Side,
-    pub order_type: OrderType,
     pub price: u64,
     pub size_usd: u64,
     pub remaining_size_usd: u64,
     pub margin_usdc: u64,
-    pub leverage: u16,
     pub created_at: u64,
     // Intrusive queue indices (links within SlabArena)
     pub prev_idx: u32,
     pub next_idx: u32,
+    pub leverage: u16,
+    pub side: Side,
+    pub order_type: OrderType,
 }
 
 /// Price level tracking intrusive FIFO queue boundaries and aggregated liquidity.
@@ -546,5 +547,17 @@ mod tests {
         let level = book.asks.get(&price).unwrap();
         assert_eq!(level.order_count, 1);
         assert_eq!(level.total_size_usd, 150 * USD_SCALE);
+    }
+
+    #[test]
+    fn test_slab_order_compact_memory_layout() {
+        use std::mem::{size_of, align_of};
+        // Verify struct packing eliminates dead padding (reduced from 96 to 88 bytes)
+        assert_eq!(size_of::<SlabOrder>(), 88);
+        assert_eq!(align_of::<SlabOrder>(), 8);
+
+        // Verify SlabLevel is exactly 32 bytes (half a 64-byte cache line)
+        assert_eq!(size_of::<SlabLevel>(), 32);
+        assert_eq!(align_of::<SlabLevel>(), 8);
     }
 }

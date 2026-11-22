@@ -6,7 +6,7 @@ use uuid::Uuid;
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RelayerBatchReport {
     pub batch_id: String,
-    pub trade_count: usize,
+    pub trade_count: u32,
     pub chain: String,
     pub target_clearinghouse: String,
     pub settlement_tx_hash: String,
@@ -58,7 +58,7 @@ impl OnChainRelayer {
 
         let report = RelayerBatchReport {
             batch_id,
-            trade_count: batch.len(),
+            trade_count: batch.len() as u32,
             chain: "Robinhood Chain (Arbitrum L2)".to_string(),
             target_clearinghouse: self.clearinghouse_address.clone(),
             settlement_tx_hash: tx_hash,

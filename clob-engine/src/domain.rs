@@ -103,7 +103,7 @@ impl DomainRiskManager {
         market: String,
         side: Side,
         margin_usdc: u64,
-        leverage: u32,
+        leverage: u16,
         size_usd: u64,
         entry_price: u64,
     ) -> Result<Position, DomainError> {

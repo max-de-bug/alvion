@@ -1,9 +1,19 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
-import { Wallet } from "lucide-react";
+import {
+  X,
+  CandlestickChart,
+  Wallet,
+  Trophy,
+  Zap,
+  SlidersHorizontal,
+  Settings,
+  ChevronDown,
+} from "lucide-react";
 import { AlvionBirdLogo } from "@/components/brand/AlvionBirdLogo";
+import { useTradingStore } from "@/stores/useTradingStore";
 
 interface TradingHeaderProps {
   activeTab: "trade" | "orderbook" | "vault" | "docs";
@@ -27,105 +37,169 @@ export const TradingHeader = React.memo<TradingHeaderProps>(function TradingHead
   connectWallet,
   disconnect,
 }) {
+  const { tradingMode, setTradingMode } = useTradingStore();
+  const [showWarning, setShowWarning] = useState(true);
+
   return (
-    <header className="border-b border-slate-800 bg-slate-950 sticky top-0 z-50 px-4 py-2.5">
-      <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-        <div className="flex items-center gap-6">
-          <Link href="/" className="flex items-center gap-2.5 group">
+    <div className="sticky top-0 z-40 flex flex-col">
+      {/* 1. Dismissible Testnet Banner */}
+      {showWarning && (
+        <div
+          role="status"
+          className="relative z-20 flex items-center justify-center gap-2 border-b border-[var(--border)] bg-[var(--warn-soft)] px-10 py-[6px]"
+        >
+          <span className="text-[12px] font-semibold tracking-[0.02em] text-[var(--warn)]">
+            Testnet environment: funds and data are not real
+          </span>
+          <button
+            type="button"
+            aria-label="Dismiss"
+            onClick={() => setShowWarning(false)}
+            className="absolute right-2 grid size-[24px] cursor-pointer place-items-center rounded-full text-[var(--warn)] transition-colors hover:bg-[var(--hover)] focus-visible:outline-none"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
+      {/* 2. Main Header */}
+      <header
+        role="banner"
+        className="flex items-center justify-between gap-[14px] px-[12px] sm:px-[20px] h-[var(--header-h)] border-b border-[var(--border)] bg-[rgba(10,10,12,0.85)] [backdrop-filter:blur(14px)_saturate(1.8)] [-webkit-backdrop-filter:blur(14px)_saturate(1.8)]"
+      >
+        {/* Left: Alvion Brand Lockup & Nav Tabs */}
+        <div className="flex items-center gap-[16px] min-w-0">
+          <Link
+            href="/"
+            aria-label="Alvion home"
+            className="brand-lockup flex items-center gap-2.5 shrink-0 rounded-[10px] cursor-pointer font-semibold tracking-[-0.01em] text-[var(--t1)] group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--fixed-green)]"
+          >
             <AlvionBirdLogo
               size={28}
               variant="light"
               className="transition-transform duration-300 group-hover:scale-110"
             />
-            <span className="font-bold text-base text-white tracking-tight group-hover:text-emerald-400 transition-colors">
+            <span className="text-[16px] font-bold tracking-[-0.015em] text-white group-hover:text-[#4ECCA3] transition-colors">
               ALVION
             </span>
           </Link>
 
-          {/* Navigation Tabs */}
-          <nav className="flex items-center gap-1">
+          {/* Navigation Pill Container */}
+          <nav
+            aria-label="Primary"
+            className="hidden md:flex items-center gap-[2px] p-[3px] rounded-full bg-[var(--surface-3)]"
+          >
             <button
               onClick={() => setActiveTab("trade")}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+              aria-label="Trade"
+              aria-current={activeTab === "trade" ? "page" : undefined}
+              className={`group inline-flex items-center gap-[6px] px-[13px] py-[6px] rounded-full text-[13px] tracking-[-0.005em] transition-all duration-200 cursor-pointer ${
                 activeTab === "trade"
-                  ? "bg-slate-800 text-white font-semibold"
-                  : "text-slate-400 hover:text-slate-200"
+                  ? "bg-[var(--surface)] text-[var(--t1)] font-semibold shadow-[0_1px_3px_rgba(0,0,0,.25)]"
+                  : "text-[var(--t2)] hover:text-[var(--t1)] hover:font-medium font-normal"
               }`}
             >
-              Trade
+              <CandlestickChart className="w-3.5 h-3.5 transition-transform duration-200 group-hover:scale-110 text-[#4ECCA3]" />
+              <span>Trade</span>
             </button>
-            <button
-              onClick={() => setActiveTab("orderbook")}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                activeTab === "orderbook"
-                  ? "bg-slate-800 text-white font-semibold"
-                  : "text-slate-400 hover:text-slate-200"
-              }`}
-            >
-              Order book
-            </button>
+
             <button
               onClick={() => setActiveTab("vault")}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+              aria-label="Portfolio"
+              className={`group inline-flex items-center gap-[6px] px-[13px] py-[6px] rounded-full text-[13px] tracking-[-0.005em] transition-all duration-200 cursor-pointer ${
                 activeTab === "vault"
-                  ? "bg-slate-800 text-white font-semibold"
-                  : "text-slate-400 hover:text-slate-200"
+                  ? "bg-[var(--surface)] text-[var(--t1)] font-semibold shadow-[0_1px_3px_rgba(0,0,0,.25)]"
+                  : "text-[var(--t2)] hover:text-[var(--t1)] hover:font-medium font-normal"
               }`}
             >
-              Vault
+              <Wallet className="w-3.5 h-3.5 transition-transform duration-200 group-hover:scale-110 text-cyan-400" />
+              <span>Vault</span>
             </button>
-            <button
-              onClick={() => setActiveTab("docs")}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                activeTab === "docs"
-                  ? "bg-slate-800 text-white font-semibold"
-                  : "text-slate-400 hover:text-slate-200"
-              }`}
-            >
-              Docs
-            </button>
+
             <Link
               href="/waitlist"
-              className="px-3 py-1.5 text-xs font-medium text-slate-400 hover:text-slate-200 transition-colors"
+              className="group inline-flex items-center gap-[6px] px-[13px] py-[6px] rounded-full text-[13px] tracking-[-0.005em] transition-all duration-200 cursor-pointer text-[var(--t2)] hover:text-[var(--t1)] hover:font-medium font-normal"
             >
-              Waitlist
+              <Trophy className="w-3.5 h-3.5 transition-transform duration-200 group-hover:scale-110 text-amber-400" />
+              <span>Rewards</span>
+            </Link>
+
+            <Link
+              href="/waitlist"
+              className="group inline-flex items-center gap-[6px] px-[13px] py-[6px] rounded-full text-[13px] tracking-[-0.005em] transition-all duration-200 cursor-pointer text-[var(--t2)] hover:text-[var(--t1)] hover:font-medium font-normal"
+            >
+              <Zap className="w-3.5 h-3.5 transition-transform duration-200 group-hover:scale-110 text-[#4ECCA3]" />
+              <span>Waitlist</span>
             </Link>
           </nav>
         </div>
 
-        {/* Right side: Network & Wallet */}
-        <div className="flex items-center gap-3">
-          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-900 border border-slate-800 text-xs text-slate-300">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-            <span>Robinhood Chain</span>
+        {/* Right: Controls & Wallet */}
+        <div className="flex items-center gap-[10px] min-w-0">
+          {/* Dual Experience Mode Switcher (Consumer / Pro) */}
+          <div className="flex items-center bg-[var(--surface-3)] p-[3px] rounded-full border border-[var(--border)] text-xs">
+            <button
+              onClick={() => setTradingMode("consumer")}
+              className={`px-3 py-1 rounded-full font-medium transition-all flex items-center gap-1.5 ${
+                tradingMode === "consumer"
+                  ? "bg-[var(--surface)] text-[#4ECCA3] font-semibold shadow-sm"
+                  : "text-[var(--t3)] hover:text-[var(--t1)]"
+              }`}
+              title="Consumer Mode: 3-step simple trading"
+            >
+              <Zap className="w-3 h-3 text-[#4ECCA3]" />
+              <span className="text-[12px]">Consumer</span>
+            </button>
+            <button
+              onClick={() => setTradingMode("pro")}
+              className={`px-3 py-1 rounded-full font-medium transition-all flex items-center gap-1.5 ${
+                tradingMode === "pro"
+                  ? "bg-[var(--surface)] text-white font-semibold shadow-sm"
+                  : "text-[var(--t3)] hover:text-[var(--t1)]"
+              }`}
+              title="Pro Mode: Deep CLOB order book, leverage isolation & full optionality"
+            >
+              <SlidersHorizontal className="w-3 h-3 text-cyan-400" />
+              <span className="text-[12px]">Pro</span>
+            </button>
           </div>
 
-          <div className="flex items-center gap-2 bg-slate-900 px-3 py-1.5 rounded-md border border-slate-800">
+          {/* Faucet Balance Pill */}
+          <div className="hidden sm:flex items-center gap-2 pl-3 pr-1.5 py-1 rounded-full bg-[var(--surface-3)] border border-[var(--border)]">
             <div className="text-right">
-              <span className="text-xs font-mono font-semibold text-slate-100">
+              <span className="text-xs font-mono font-semibold text-[var(--t1)]">
                 ${walletBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>
-              <span className="text-[11px] text-slate-400 ml-1">USDC</span>
+              <span className="text-[11px] text-[#4ECCA3] font-mono ml-1 font-semibold">USDCx</span>
             </div>
             <button
-              onClick={() => faucetWallet(1000)}
-              title="Add 1,000 test USDC"
-              className="ml-1 text-[11px] text-cyan-400 hover:text-cyan-300 px-1.5 py-0.5 rounded border border-slate-700 hover:border-slate-600 transition-colors"
+              onClick={() => faucetWallet(10000)}
+              title="Claim 10,000 test USDCx"
+              className="text-[10.5px] font-semibold text-[#4ECCA3] hover:text-[#3db890] px-2 py-0.5 rounded-full border border-[#4ECCA3]/30 bg-[#162922] transition-colors"
             >
               +Faucet
             </button>
           </div>
 
-          {/* Wallet Connect / Status */}
+          {/* Settings Icon Button */}
+          <button
+            type="button"
+            aria-label="Settings"
+            className="grid place-items-center size-[var(--header-ctl-h)] rounded-full bg-[var(--surface-3)] text-[var(--t2)] hover:text-[var(--t1)] hover:bg-[var(--hover)] transition-colors cursor-pointer border border-[var(--border)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--fixed-green)]"
+          >
+            <Settings className="w-4 h-4" />
+          </button>
+
+          {/* Connect / Wallet Button */}
           {isConnected && address ? (
-            <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-2.5 py-1.5 rounded-md text-xs font-mono">
-              <span className="text-slate-300 font-medium">
+            <div className="flex items-center gap-2 bg-[var(--surface-3)] border border-[var(--border)] px-3 py-1.5 rounded-full text-xs font-mono">
+              <span className="text-[var(--t1)] font-medium">
                 {address.slice(0, 6)}...{address.slice(-4)}
               </span>
               <button
                 onClick={() => disconnect()}
                 title="Disconnect wallet"
-                className="text-slate-400 hover:text-rose-400 text-xs ml-1"
+                className="text-[var(--t3)] hover:text-rose-400 text-xs ml-1"
                 aria-label="Disconnect wallet"
               >
                 ✕
@@ -134,14 +208,15 @@ export const TradingHeader = React.memo<TradingHeaderProps>(function TradingHead
           ) : (
             <button
               onClick={connectWallet}
-              className="flex items-center gap-1.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold text-xs px-3 py-1.5 rounded-md transition-colors cursor-pointer"
+              className="btn-chrome flex items-center gap-1.5 h-[var(--header-ctl-h)] px-[16px] rounded-full text-[11.5px] font-semibold uppercase tracking-[0.05em] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--fixed-green)] cursor-pointer shrink-0"
+              aria-label="Connect Wallet"
             >
-              <Wallet className="h-3.5 w-3.5" />
+              <Wallet className="w-3.5 h-3.5 text-[#4ECCA3]" />
               <span>Connect</span>
             </button>
           )}
         </div>
-      </div>
-    </header>
+      </header>
+    </div>
   );
 });

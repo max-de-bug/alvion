@@ -290,9 +290,9 @@ impl ClobEngine {
         SequencerTickReport {
             tick_id: self.tick_counter,
             timestamp: now,
-            active_markets: self.orderbooks.len(),
-            expired_orders_purged: expired_count,
-            vault_mm_quotes_active: mm_quotes_active,
+            active_markets: self.orderbooks.len() as u32,
+            expired_orders_purged: expired_count as u32,
+            vault_mm_quotes_active: mm_quotes_active as u32,
             solvency_verified: solvent,
             phase: "DETERMINISTIC_EXECUTION_CYCLE_COMPLETE".to_string(),
         }

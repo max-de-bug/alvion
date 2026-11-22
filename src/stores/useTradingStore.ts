@@ -154,11 +154,29 @@ export interface Position {
 }
 
 export type OrderType = "market" | "limit";
+export type ProOrderType = "market" | "limit" | "stop_market" | "stop_limit" | "trailing_stop" | "twap";
+export type TradingMode = "consumer" | "pro";
+export type MarginMode = "isolated" | "cross";
+export type CollateralMode = "unified" | "isolated";
 export type BottomTab = "positions" | "openOrders" | "trades";
 export type ActiveTab = "trade" | "orderbook" | "vault" | "docs";
-export type Timeframe = "1m" | "5m" | "15m" | "1h";
+export type Timeframe = "1s" | "1m" | "3m" | "5m" | "15m" | "30m" | "1h" | "4h" | "1D" | "1W";
 
 interface TradingState {
+  // Trading Experience Mode
+  tradingMode: TradingMode;
+  setTradingMode: (mode: TradingMode) => void;
+
+  // Margin & Account Modes (Pro)
+  marginMode: MarginMode;
+  setMarginMode: (mode: MarginMode) => void;
+  collateralMode: CollateralMode;
+  setCollateralMode: (mode: CollateralMode) => void;
+  proOrderType: ProOrderType;
+  setProOrderType: (t: ProOrderType) => void;
+  sizeMode: "USDC" | "ASSET";
+  setSizeMode: (mode: "USDC" | "ASSET") => void;
+
   // Trade Form & Trader Preferences
   selectedMarketName: string;
   isLong: boolean;
@@ -207,15 +225,53 @@ interface TradingState {
 
 let notificationTimer: NodeJS.Timeout | null = null;
 
+const getSavedTradingMode = (): TradingMode => {
+  if (typeof window !== "undefined") {
+    try {
+      const saved = localStorage.getItem("alvion_trading_mode");
+      if (saved === "consumer" || saved === "pro") return saved;
+    } catch {
+      // ignore
+    }
+  }
+  return "pro";
+};
+
 export const useTradingStore = create<TradingState>((set) => ({
+  // Trading Experience Mode
+  tradingMode: getSavedTradingMode(),
+  setTradingMode: (tradingMode) => {
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("alvion_trading_mode", tradingMode);
+      } catch {
+        // ignore
+      }
+    }
+    set({ tradingMode });
+  },
+
+  // Margin & Account Modes
+  marginMode: "isolated",
+  setMarginMode: (marginMode) => set({ marginMode }),
+  collateralMode: "unified",
+  setCollateralMode: (collateralMode) => set({ collateralMode }),
+  proOrderType: "market",
+  setProOrderType: (proOrderType) => set({
+    proOrderType,
+    orderType: proOrderType === "limit" ? "limit" : "market",
+  }),
+  sizeMode: "USDC",
+  setSizeMode: (sizeMode) => set({ sizeMode }),
+
   // Initial values
-  selectedMarketName: "SOL",
+  selectedMarketName: "BTC",
   isLong: true,
-  marginUsdc: 100,
-  leverage: 25,
-  orderType: "limit",
+  marginUsdc: 250,
+  leverage: 5,
+  orderType: "market",
   limitPrice: "",
-  walletBalance: 5000,
+  walletBalance: 10000,
   positions: [],
 
   bottomTab: "positions",

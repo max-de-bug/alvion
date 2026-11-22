@@ -227,7 +227,7 @@ impl OrderBook {
             OrderBookLevel {
                 price: p as f64 / PRICE_SCALE as f64,
                 size: total_size as f64 / USD_SCALE as f64,
-                order_count: q.len(),
+                order_count: q.len() as u32,
             }
         }).collect();
 
@@ -236,7 +236,7 @@ impl OrderBook {
             OrderBookLevel {
                 price: p as f64 / PRICE_SCALE as f64,
                 size: total_size as f64 / USD_SCALE as f64,
-                order_count: q.len(),
+                order_count: q.len() as u32,
             }
         }).collect();
 
@@ -324,7 +324,7 @@ impl OrderBook {
             L4Level {
                 price: p as f64 / PRICE_SCALE as f64,
                 size: total_size as f64 / USD_SCALE as f64,
-                order_count: q.len(),
+                order_count: q.len() as u32,
                 is_vault_mm,
             }
         }).collect();
@@ -335,7 +335,7 @@ impl OrderBook {
             L4Level {
                 price: p as f64 / PRICE_SCALE as f64,
                 size: total_size as f64 / USD_SCALE as f64,
-                order_count: q.len(),
+                order_count: q.len() as u32,
                 is_vault_mm,
             }
         }).collect();

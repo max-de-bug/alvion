@@ -35,6 +35,7 @@ const ArchitectureDocsTab = dynamic(
 export default function Home() {
   const {
     // State
+    tradingMode,
     selectedMarketName,
     setSelectedMarketName,
     isLong,
@@ -100,7 +101,7 @@ export default function Home() {
   } = useTradingDashboard();
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-black">
+    <div className="min-h-screen bg-[var(--bg)] text-[var(--t1)] flex flex-col font-sans selection:bg-[#4ECCA3] selection:text-black">
       {/* 1. Header & Navigation */}
       <TradingHeader
         activeTab={activeTab}
@@ -118,113 +119,149 @@ export default function Home() {
       <NotificationToast notification={notification} />
 
       {/* 3. Main Dashboard Body */}
-      <main className="max-w-7xl mx-auto w-full p-4 flex-1 flex flex-col gap-4">
-        {/* Ticker Bar: Market Info, Oracle & TitanX Institutional Metrics */}
-        <MarketTickerBar
-          selectedMarketName={selectedMarketName}
-          setSelectedMarketName={setSelectedMarketName}
-          currentMarket={currentMarket}
-          marketMeta={marketMeta}
-          isEquity={isEquity}
-          longOi={longOi}
-          shortOi={shortOi}
-          longOiRatio={longOiRatio}
-          shortOiRatio={shortOiRatio}
-          longFundingRate={longFundingRate}
-          shortFundingRate={shortFundingRate}
-          minutesToFunding={minutesToFunding}
-          availableLongLiq={availableLongLiq}
-          availableShortLiq={availableShortLiq}
-          formatUsdCompact={formatUsdCompact}
-        />
-
-        {/* Percolator Architecture & Risk Firewall Bar */}
-        <RiskFirewallBar
-          domainInfo={domainInfo}
-          vaultLiquidity={vaultLiquidity}
-          vaultNetSkew={vaultNetSkew}
-          solvency={solvency}
-        />
-
-        {/* Tab 1: Trading Terminal */}
+      <main className="flex-1 flex flex-col min-w-0">
+        {/* Tab 1: Primary Trading Interface */}
         {activeTab === "trade" && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-            {/* Left 8 cols: Chart + Order Book + Positions & Orders */}
-            <div className="lg:col-span-8 flex flex-col gap-4">
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-                <TradingChart
-                  currentMarketName={currentMarket.name}
-                  timeframe={timeframe}
-                  setTimeframe={setTimeframe}
+          <div className="flex flex-col bg-[var(--bg)] text-[var(--t1)] flex-1">
+            <div className="flex p-3 max-md:flex-col max-md:gap-3 flex-1">
+              {/* Left Column: Ticker + Chart + (Order Book) + Positions */}
+              <div className="flex flex-col flex-1 min-w-0">
+                <div className="flex min-h-[660px] max-md:flex-col h-[82vh]">
+                  {/* Chart Column */}
+                  <div className="@container flex flex-col flex-1 min-w-0 h-full min-h-0">
+                    <div className="container-in container-in-1 relative z-20 shrink-0 mb-3">
+                      <MarketTickerBar
+                        selectedMarketName={selectedMarketName}
+                        setSelectedMarketName={setSelectedMarketName}
+                        currentMarket={currentMarket}
+                        marketMeta={marketMeta}
+                        isEquity={isEquity}
+                        longOi={longOi}
+                        shortOi={shortOi}
+                        longOiRatio={longOiRatio}
+                        shortOiRatio={shortOiRatio}
+                        longFundingRate={longFundingRate}
+                        shortFundingRate={shortFundingRate}
+                        minutesToFunding={minutesToFunding}
+                        availableLongLiq={availableLongLiq}
+                        availableShortLiq={availableShortLiq}
+                        formatUsdCompact={formatUsdCompact}
+                      />
+                    </div>
+
+                    <TradingChart
+                      currentMarketName={currentMarket.name}
+                      timeframe={timeframe}
+                      setTimeframe={setTimeframe}
+                      className="flex-1 w-full h-full min-h-0"
+                    />
+                  </div>
+
+                  {/* Pro CLOB Order Book */}
+                  {tradingMode === "pro" && (
+                    <>
+                      <div
+                        className="resize-handle w-3 max-md:hidden"
+                        data-axis="x"
+                        role="separator"
+                        aria-orientation="vertical"
+                      />
+                      <OrderBookView
+                        orderBook={orderBook}
+                        markPrice={currentMarket.markPx}
+                        onSelectPrice={setLimitPrice}
+                      />
+                    </>
+                  )}
+                </div>
+
+                {/* Horizontal Divider */}
+                <div
+                  className="resize-handle h-3"
+                  data-axis="y"
+                  role="separator"
+                  aria-orientation="horizontal"
                 />
-                <OrderBookView
-                  orderBook={orderBook}
-                  markPrice={currentMarket.markPx}
-                  onSelectPrice={setLimitPrice}
+
+                {/* Bottom Drawer: Positions, Balances, Orders */}
+                <PositionsPanel
+                  bottomTab={bottomTab}
+                  setBottomTab={setBottomTab}
+                  positions={positions}
+                  openOrders={openOrders}
+                  recentTrades={recentTrades}
+                  markets={markets}
+                  currentMarket={currentMarket}
+                  onClosePosition={handleClosePosition}
+                  onCancelOrder={handleCancelOrder}
                 />
               </div>
 
-              <PositionsPanel
-                bottomTab={bottomTab}
-                setBottomTab={setBottomTab}
-                positions={positions}
-                openOrders={openOrders}
-                recentTrades={recentTrades}
-                markets={markets}
-                currentMarket={currentMarket}
-                onClosePosition={handleClosePosition}
-                onCancelOrder={handleCancelOrder}
+              {/* Vertical Divider */}
+              <div
+                className="resize-handle self-stretch w-3 max-md:hidden"
+                data-axis="x"
+                role="separator"
+                aria-orientation="vertical"
               />
-            </div>
 
-            {/* Right 4 cols: Order Execution & Leverage Panel */}
-            <div className="lg:col-span-4 flex flex-col gap-4">
-              <OrderPanel
-                orderType={orderType}
-                setOrderType={setOrderType}
-                isLong={isLong}
-                setIsLong={setIsLong}
-                limitPrice={limitPrice}
-                setLimitPrice={setLimitPrice}
-                currentMarket={currentMarket}
-                leverage={leverage}
-                setLeverage={setLeverage}
-                marginUsdc={marginUsdc}
-                setMarginUsdc={setMarginUsdc}
-                walletBalance={walletBalance}
-                quote={quote}
-                loadingQuote={loadingQuote}
-                availableLongLiq={availableLongLiq}
-                availableShortLiq={availableShortLiq}
-                longFundingRate={longFundingRate}
-                shortFundingRate={shortFundingRate}
-                formatUsdCompact={formatUsdCompact}
-                onExecuteTrade={handleExecuteTrade}
-              />
+              {/* Right Column: Order Entry Form */}
+              <div className="w-[300px] shrink-0 max-md:w-full flex flex-col">
+                <OrderPanel
+                  orderType={orderType}
+                  setOrderType={setOrderType}
+                  isLong={isLong}
+                  setIsLong={setIsLong}
+                  limitPrice={limitPrice}
+                  setLimitPrice={setLimitPrice}
+                  currentMarket={currentMarket}
+                  leverage={leverage}
+                  setLeverage={setLeverage}
+                  marginUsdc={marginUsdc}
+                  setMarginUsdc={setMarginUsdc}
+                  walletBalance={walletBalance}
+                  quote={quote}
+                  loadingQuote={loadingQuote}
+                  availableLongLiq={availableLongLiq}
+                  availableShortLiq={availableShortLiq}
+                  longFundingRate={longFundingRate}
+                  shortFundingRate={shortFundingRate}
+                  formatUsdCompact={formatUsdCompact}
+                  onExecuteTrade={handleExecuteTrade}
+                />
+              </div>
             </div>
           </div>
         )}
 
         {/* Tab 2: Full CLOB Depth View */}
         {activeTab === "orderbook" && (
-          <FullOrderBookTab
-            currentMarket={currentMarket}
-            orderBook={orderBook}
-          />
+          <div className="p-3 max-w-7xl mx-auto w-full">
+            <FullOrderBookTab
+              currentMarket={currentMarket}
+              orderBook={orderBook}
+            />
+          </div>
         )}
 
         {/* Tab 3: Single USDC Liquidity Vault & Percolator Backstop */}
         {activeTab === "vault" && (
-          <VaultBackstopTab
-            vaultLiquidity={vaultLiquidity}
-            vaultNetSkew={vaultNetSkew}
-            vaultApr={vaultApr}
-            solvency={solvency}
-          />
+          <div className="p-3 max-w-7xl mx-auto w-full">
+            <VaultBackstopTab
+              vaultLiquidity={vaultLiquidity}
+              vaultNetSkew={vaultNetSkew}
+              vaultApr={vaultApr}
+              solvency={solvency}
+            />
+          </div>
         )}
 
         {/* Tab 4: Architecture & Robinhood Chain Docs */}
-        {activeTab === "docs" && <ArchitectureDocsTab />}
+        {activeTab === "docs" && (
+          <div className="p-3 max-w-7xl mx-auto w-full">
+            <ArchitectureDocsTab />
+          </div>
+        )}
       </main>
 
       {/* 4. Footer */}

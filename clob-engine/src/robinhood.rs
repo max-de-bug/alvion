@@ -17,7 +17,7 @@ pub struct RobinhoodOrderPayload {
     pub is_long: bool,
     pub price: f64,
     pub size_usd: f64,
-    pub leverage: u32,
+    pub leverage: u16,
     pub nonce: u64,
     pub signature: Option<String>, // EIP-712 secp256k1 signature
 }
@@ -25,7 +25,7 @@ pub struct RobinhoodOrderPayload {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RobinhoodBatchReport {
     pub batch_id: String,
-    pub trade_count: usize,
+    pub trade_count: u32,
     pub target_clearinghouse: String,
     pub settlement_tx_hash: String,
     pub status: String,
