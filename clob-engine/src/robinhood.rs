@@ -43,21 +43,18 @@ pub fn keccak256(data: &[u8]) -> [u8; 32] {
 }
 
 /// Verify if a string is a valid Ethereum/Robinhood Chain hex address (0x + 40 hex chars)
+/// Bounds-check-free and panic-safe against arbitrary UTF-8 / malformed user inputs
 pub fn is_valid_robinhood_address(address: &str) -> bool {
-    if !address.starts_with("0x") && !address.starts_with("0X") {
-        return false;
-    }
-    let hex_part = &address[2..];
+    let hex_part = match address.strip_prefix("0x").or_else(|| address.strip_prefix("0X")) {
+        Some(h) => h,
+        None => return false,
+    };
     hex_part.len() == 40 && hex_part.chars().all(|c| c.is_ascii_hexdigit())
 }
 
 /// Verify format of an EIP-712 signature (0x + 130 hex characters or 65 bytes)
 pub fn is_valid_eip712_signature(sig: &str) -> bool {
-    let clean = if let Some(stripped) = sig.strip_prefix("0x") {
-        stripped
-    } else {
-        sig
-    };
+    let clean = sig.strip_prefix("0x").or_else(|| sig.strip_prefix("0X")).unwrap_or(sig);
     clean.len() == 130 && clean.chars().all(|c| c.is_ascii_hexdigit())
 }
 
@@ -68,9 +65,14 @@ mod tests {
     #[test]
     fn test_robinhood_address_validation() {
         assert!(is_valid_robinhood_address("0x4663111111111111111111111111111111114663"));
-        assert!(is_valid_robinhood_address("0x71C8364762A803325b335371b292723E59d64663"));
+        assert!(is_valid_robinhood_address("0X71C8364762A803325b335371b292723E59d64663"));
         assert!(!is_valid_robinhood_address("invalid_address"));
         assert!(!is_valid_robinhood_address("9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"));
+        // Boundary and malformed UTF-8 safety tests
+        assert!(!is_valid_robinhood_address(""));
+        assert!(!is_valid_robinhood_address("0"));
+        assert!(!is_valid_robinhood_address("0x"));
+        assert!(!is_valid_robinhood_address("0x🚀malformed_unicode_length"));
     }
 
     #[test]
