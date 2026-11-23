@@ -195,6 +195,8 @@ export function useTradingDashboard() {
       const data = await res.json();
       return data.success ? (data.quote as QuoteResult) : null;
     },
+    // Vercel Best Practice: async-cheap-condition-before-await (skip network call when inputs are invalid)
+    enabled: marginUsdc > 0 && leverage > 0,
     staleTime: 500,
   });
 

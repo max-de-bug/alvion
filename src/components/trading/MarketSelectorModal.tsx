@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef, useDeferredValue } from "react";
 import { createPortal } from "react-dom";
 import { Search, X, Star, ArrowUpDown, ChevronUp, ChevronDown } from "lucide-react";
 import { MarketContext } from "@/lib/hyperliquid";
@@ -30,10 +30,14 @@ export const MarketSelectorModal = React.memo<MarketSelectorModalProps>(function
 }) {
   const [mounted, setMounted] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const deferredSearchQuery = useDeferredValue(searchQuery);
   const [selectedCategory, setSelectedCategory] = useState<MarketCategory>("ALL");
   const [sortField, setSortField] = useState<SortField>("volume");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [favorites, setFavorites] = useState<string[]>(DEFAULT_FAVORITES);
+
+  // Fast O(1) favorites lookup set (Vercel Best Practice: js-set-map-lookups)
+  const favoritesSet = useMemo(() => new Set(favorites), [favorites]);
 
   const searchInputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -159,42 +163,48 @@ export const MarketSelectorModal = React.memo<MarketSelectorModalProps>(function
     return list;
   }, [markets]);
 
-  // Category counts
+  // Category counts in a single pass (Vercel Best Practice: js-combine-iterations)
   const categoryCounts = useMemo(() => {
+    let crypto = 0;
+    let commodities = 0;
+    let equity = 0;
+    let favs = 0;
+    for (let i = 0; i < fullMarketList.length; i++) {
+      const m = fullMarketList[i];
+      if (favoritesSet.has(m.name)) favs++;
+      const cat = m.meta.category;
+      if (cat === "CRYPTO") crypto++;
+      else if (cat === "COMMODITIES") commodities++;
+      else if (cat === "EQUITY") equity++;
+    }
     return {
       ALL: fullMarketList.length,
-      FAVORITES: fullMarketList.filter((m) => favorites.includes(m.name)).length,
-      CRYPTO: fullMarketList.filter((m) => m.meta.category === "CRYPTO").length,
-      COMMODITIES: fullMarketList.filter((m) => m.meta.category === "COMMODITIES").length,
-      EQUITY: fullMarketList.filter((m) => m.meta.category === "EQUITY").length,
+      FAVORITES: favs,
+      CRYPTO: crypto,
+      COMMODITIES: commodities,
+      EQUITY: equity,
     };
-  }, [fullMarketList, favorites]);
+  }, [fullMarketList, favoritesSet]);
 
-  // Filter and sort markets
+  // Filter and sort markets with useDeferredValue (Vercel Best Practice: rerender-use-deferred-value)
   const filteredMarkets = useMemo(() => {
-    let result = [...fullMarketList];
+    const q = deferredSearchQuery.toLowerCase().trim();
+    const isFavTab = selectedCategory === "FAVORITES";
+    const hasCategoryFilter = selectedCategory !== "ALL" && !isFavTab;
 
-    // Filter by category
-    if (selectedCategory === "FAVORITES") {
-      result = result.filter((m) => favorites.includes(m.name));
-    } else if (selectedCategory === "CRYPTO") {
-      result = result.filter((m) => m.meta.category === "CRYPTO");
-    } else if (selectedCategory === "COMMODITIES") {
-      result = result.filter((m) => m.meta.category === "COMMODITIES");
-    } else if (selectedCategory === "EQUITY") {
-      result = result.filter((m) => m.meta.category === "EQUITY");
-    }
-
-    // Filter by search query
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase().trim();
-      result = result.filter(
-        (m) =>
+    // Single-pass filter
+    const result = fullMarketList.filter((m) => {
+      if (isFavTab && !favoritesSet.has(m.name)) return false;
+      if (hasCategoryFilter && m.meta.category !== selectedCategory) return false;
+      if (q) {
+        return (
           m.name.toLowerCase().includes(q) ||
           m.meta.name.toLowerCase().includes(q) ||
           m.meta.exchangeBadge.toLowerCase().includes(q)
-      );
-    }
+        );
+      }
+      return true;
+    });
 
     // Sort
     result.sort((a, b) => {
@@ -212,7 +222,7 @@ export const MarketSelectorModal = React.memo<MarketSelectorModalProps>(function
     });
 
     return result;
-  }, [fullMarketList, selectedCategory, favorites, searchQuery, sortField, sortDirection]);
+  }, [fullMarketList, selectedCategory, favoritesSet, deferredSearchQuery, sortField, sortDirection]);
 
   const handleHeaderSort = (field: SortField) => {
     if (sortField === field) {
@@ -483,7 +493,7 @@ export const MarketSelectorModal = React.memo<MarketSelectorModalProps>(function
           ) : (
             filteredMarkets.map((m) => {
               const isSelected = selectedMarketName === m.name;
-              const isFav = favorites.includes(m.name);
+              const isFav = favoritesSet.has(m.name);
               const isPositive = m.change24h >= 0;
 
               return (
@@ -493,6 +503,7 @@ export const MarketSelectorModal = React.memo<MarketSelectorModalProps>(function
                     onSelectMarket(m.name);
                     onClose();
                   }}
+                  style={{ contentVisibility: "auto", containIntrinsicSize: "0 49px" }}
                   className={`grid grid-cols-[36px_1.6fr_1fr_1fr_1fr] px-4 py-3 items-center transition-colors cursor-pointer ${isSelected
                       ? "bg-[#142320] border-l-2 border-[#4ECCA3]"
                       : "hover:bg-[#141D22] border-l-2 border-transparent"

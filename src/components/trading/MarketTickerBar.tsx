@@ -1,10 +1,16 @@
 "use client";
 
 import React, { useState } from "react";
+import dynamic from "next/dynamic";
 import { ChevronDown } from "lucide-react";
 import { MarketContext } from "@/lib/hyperliquid";
 import { MarketMetadata } from "@/stores/useTradingStore";
-import { MarketSelectorModal } from "./MarketSelectorModal";
+
+// Vercel Best Practice: bundle-dynamic-imports (lazy load 600-line modal)
+const MarketSelectorModal = dynamic(
+  () => import("./MarketSelectorModal").then((m) => m.MarketSelectorModal),
+  { ssr: false }
+);
 
 interface MarketTickerBarProps {
   selectedMarketName: string;
@@ -114,14 +120,16 @@ export const MarketTickerBar = React.memo<MarketTickerBarProps>(function MarketT
               />
             </button>
 
-            {/* QFEX-Style Market Selection Popover */}
-            <MarketSelectorModal
-              isOpen={showMarketMenu}
-              onClose={() => setShowMarketMenu(false)}
-              selectedMarketName={selectedMarketName}
-              onSelectMarket={setSelectedMarketName}
-              markets={markets}
-            />
+            {/* QFEX-Style Market Selection Popover (Vercel Best Practice: bundle-conditional & rendering-conditional-render) */}
+            {showMarketMenu ? (
+              <MarketSelectorModal
+                isOpen={showMarketMenu}
+                onClose={() => setShowMarketMenu(false)}
+                selectedMarketName={selectedMarketName}
+                onSelectMarket={setSelectedMarketName}
+                markets={markets}
+              />
+            ) : null}
           </div>
 
           {/* Mark Price */}

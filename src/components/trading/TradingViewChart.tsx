@@ -198,7 +198,7 @@ export const TradingViewChart = React.memo<TradingViewChartProps>(function Tradi
   return (
     <div className={`relative w-full h-full min-h-[460px] overflow-hidden bg-[#10171a] ${className}`}>
       {/* Loading Skeleton matching Alvion Theme */}
-      {isLoading && (
+      {isLoading ? (
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[#10171a] text-[var(--t3)] gap-3 pointer-events-none transition-opacity duration-300">
           <Loader2 className="w-7 h-7 text-[#4ECCA3] animate-spin" />
           <div className="flex items-center gap-2 text-xs font-mono">
@@ -206,7 +206,7 @@ export const TradingViewChart = React.memo<TradingViewChartProps>(function Tradi
             <span className="text-white font-semibold">{tvSymbol}</span>
           </div>
         </div>
-      )}
+      ) : null}
 
       {/* TradingView Target Mount Node: Full Edge-to-Edge Size */}
       <div
@@ -216,11 +216,11 @@ export const TradingViewChart = React.memo<TradingViewChartProps>(function Tradi
       />
 
       {/* QFEX-Style Teal Floating Toggle Tab on the bottom-left edge */}
-      {setShowDrawingTools && (
+      {setShowDrawingTools ? (
         <button
           type="button"
           onClick={() => setShowDrawingTools((prev) => !prev)}
-          className="absolute bottom-6 left-0 z-20 flex items-center justify-center w-4 h-7 rounded-r-md bg-[#4ECCA3] text-[#0a1815] hover:bg-[#3fb892] shadow-lg transition-all cursor-pointer group"
+          className="absolute bottom-6 left-0 z-20 flex items-center justify-center w-4 h-7 rounded-none bg-[#4ECCA3] text-[#0a1815] hover:bg-[#3fb892] shadow-lg transition-all cursor-pointer group"
           title={showDrawingTools ? "Hide drawing tools" : "Show drawing tools"}
         >
           <ChevronRight
@@ -229,7 +229,7 @@ export const TradingViewChart = React.memo<TradingViewChartProps>(function Tradi
             }`}
           />
         </button>
-      )}
+      ) : null}
     </div>
   );
 });

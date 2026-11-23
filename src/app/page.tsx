@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import dynamic from "next/dynamic";
 import { useTradingDashboard } from "@/hooks/useTradingDashboard";
 import {
@@ -127,7 +127,7 @@ export default function Home() {
       {/* 3. Main Dashboard Body */}
       <main className="flex-1 flex flex-col min-w-0">
         {/* Tab 1: Primary Trading Interface */}
-        {activeTab === "trade" && (
+        {activeTab === "trade" ? (
           <div className="flex flex-col bg-[var(--bg)] text-[var(--t1)] flex-1">
             <div className="flex p-3 max-md:flex-col max-md:gap-3 flex-1">
               {/* Left Column: Ticker + Chart + (Order Book) + Positions */}
@@ -165,7 +165,7 @@ export default function Home() {
                   </div>
 
                   {/* Pro CLOB Order Book */}
-                  {tradingMode === "pro" && (
+                  {tradingMode === "pro" ? (
                     <>
                       <div
                         className="resize-handle w-3 max-md:hidden"
@@ -179,7 +179,7 @@ export default function Home() {
                         onSelectPrice={setLimitPrice}
                       />
                     </>
-                  )}
+                  ) : null}
                 </div>
 
                 {/* Horizontal Divider */}
@@ -239,47 +239,47 @@ export default function Home() {
               </div>
             </div>
           </div>
-        )}
-
-        {/* Tab 2: Full CLOB Depth View */}
-        {activeTab === "orderbook" && (
+        ) : activeTab === "orderbook" ? (
+          /* Tab 2: Full CLOB Depth View */
           <div className="p-3 max-w-7xl mx-auto w-full">
-            <FullOrderBookTab
-              currentMarket={currentMarket}
-              orderBook={orderBook}
-            />
+            <Suspense fallback={<div className="p-8 text-center text-xs font-mono text-slate-500">Loading Order Book...</div>}>
+              <FullOrderBookTab
+                currentMarket={currentMarket}
+                orderBook={orderBook}
+              />
+            </Suspense>
           </div>
-        )}
-
-        {/* Tab 3: Single USDC Liquidity Vault & Percolator Backstop */}
-        {activeTab === "vault" && (
+        ) : activeTab === "vault" ? (
+          /* Tab 3: Single USDC Liquidity Vault & Percolator Backstop */
           <div className="p-3 max-w-7xl mx-auto w-full">
-            <VaultBackstopTab
-              vaultLiquidity={vaultLiquidity}
-              vaultNetSkew={vaultNetSkew}
-              vaultApr={vaultApr}
-              solvency={solvency}
-            />
+            <Suspense fallback={<div className="p-8 text-center text-xs font-mono text-slate-500">Loading Liquidity Vault...</div>}>
+              <VaultBackstopTab
+                vaultLiquidity={vaultLiquidity}
+                vaultNetSkew={vaultNetSkew}
+                vaultApr={vaultApr}
+                solvency={solvency}
+              />
+            </Suspense>
           </div>
-        )}
-
-        {/* Tab 4: Alvion Credits Rewards Program */}
-        {activeTab === "credits" && (
+        ) : activeTab === "credits" ? (
+          /* Tab 4: Alvion Credits Rewards Program */
           <div className="p-3 max-w-7xl mx-auto w-full">
-            <CreditsTab
-              credits={credits}
-              onNavigateTrade={() => setActiveTab("trade")}
-              onNavigateVault={() => setActiveTab("vault")}
-            />
+            <Suspense fallback={<div className="p-8 text-center text-xs font-mono text-slate-500">Loading Credits Rewards...</div>}>
+              <CreditsTab
+                credits={credits}
+                onNavigateTrade={() => setActiveTab("trade")}
+                onNavigateVault={() => setActiveTab("vault")}
+              />
+            </Suspense>
           </div>
-        )}
-
-        {/* Tab 5: Architecture & Robinhood Chain Docs */}
-        {activeTab === "docs" && (
+        ) : activeTab === "docs" ? (
+          /* Tab 5: Architecture & Robinhood Chain Docs */
           <div className="p-3 max-w-7xl mx-auto w-full">
-            <ArchitectureDocsTab />
+            <Suspense fallback={<div className="p-8 text-center text-xs font-mono text-slate-500">Loading Documentation...</div>}>
+              <ArchitectureDocsTab />
+            </Suspense>
           </div>
-        )}
+        ) : null}
       </main>
 
       {/* 4. Footer */}

@@ -10,6 +10,34 @@ interface OrderBookViewProps {
   onSelectPrice: (px: string) => void;
 }
 
+// Vercel Best Practice: server-hoist-static-io & rerender-memo-with-default-value
+// Hoisted static book levels to prevent allocating 20+ objects on every render
+const DEFAULT_ASKS = [
+  { px: "60,720", sz: "1.74436", tot: "15.17609", w: "87.4%" },
+  { px: "60,711", sz: "1.54588", tot: "13.43173", w: "77.4%" },
+  { px: "60,710", sz: "2.07128", tot: "11.88585", w: "68.5%" },
+  { px: "60,709", sz: "1.75125", tot: "9.81457", w: "56.5%" },
+  { px: "60,708", sz: "1.64129", tot: "8.06332", w: "46.5%" },
+  { px: "60,707", sz: "1.63985", tot: "6.42203", w: "37.0%" },
+  { px: "60,706", sz: "1.43318", tot: "4.78218", w: "27.6%" },
+  { px: "60,705", sz: "1.28451", tot: "3.34900", w: "19.3%" },
+  { px: "60,704", sz: "0.57233", tot: "2.06449", w: "11.9%" },
+  { px: "60,703", sz: "0.54152", tot: "1.49216", w: "8.6%" },
+];
+
+const DEFAULT_BIDS = [
+  { px: "60,699", sz: "0.77033", tot: "0.77033", w: "4.4%" },
+  { px: "60,698", sz: "0.89469", tot: "1.66502", w: "9.6%" },
+  { px: "60,697", sz: "1.03252", tot: "2.69754", w: "15.5%" },
+  { px: "60,696", sz: "1.31097", tot: "4.00851", w: "23.1%" },
+  { px: "60,695", sz: "2.31310", tot: "6.32161", w: "36.4%" },
+  { px: "60,694", sz: "2.33382", tot: "8.65543", w: "49.9%" },
+  { px: "60,693", sz: "1.51532", tot: "10.17075", w: "58.6%" },
+  { px: "60,692", sz: "2.47804", tot: "12.64879", w: "72.9%" },
+  { px: "60,690", sz: "1.92028", tot: "14.56907", w: "83.9%" },
+  { px: "60,688", sz: "0.27817", tot: "14.84724", w: "85.5%" },
+];
+
 export const OrderBookView = React.memo<OrderBookViewProps>(function OrderBookView({
   orderBook,
   markPrice,
@@ -18,31 +46,8 @@ export const OrderBookView = React.memo<OrderBookViewProps>(function OrderBookVi
   const [activeTab, setActiveTab] = useState<"book" | "trades">("book");
   const [precision, setPrecision] = useState<"1" | "5" | "10">("1");
 
-  const asks = [
-    { px: "60,720", sz: "1.74436", tot: "15.17609", w: "87.4%" },
-    { px: "60,711", sz: "1.54588", tot: "13.43173", w: "77.4%" },
-    { px: "60,710", sz: "2.07128", tot: "11.88585", w: "68.5%" },
-    { px: "60,709", sz: "1.75125", tot: "9.81457", w: "56.5%" },
-    { px: "60,708", sz: "1.64129", tot: "8.06332", w: "46.5%" },
-    { px: "60,707", sz: "1.63985", tot: "6.42203", w: "37.0%" },
-    { px: "60,706", sz: "1.43318", tot: "4.78218", w: "27.6%" },
-    { px: "60,705", sz: "1.28451", tot: "3.34900", w: "19.3%" },
-    { px: "60,704", sz: "0.57233", tot: "2.06449", w: "11.9%" },
-    { px: "60,703", sz: "0.54152", tot: "1.49216", w: "8.6%" },
-  ];
-
-  const bids = [
-    { px: "60,699", sz: "0.77033", tot: "0.77033", w: "4.4%" },
-    { px: "60,698", sz: "0.89469", tot: "1.66502", w: "9.6%" },
-    { px: "60,697", sz: "1.03252", tot: "2.69754", w: "15.5%" },
-    { px: "60,696", sz: "1.31097", tot: "4.00851", w: "23.1%" },
-    { px: "60,695", sz: "2.31310", tot: "6.32161", w: "36.4%" },
-    { px: "60,694", sz: "2.33382", tot: "8.65543", w: "49.9%" },
-    { px: "60,693", sz: "1.51532", tot: "10.17075", w: "58.6%" },
-    { px: "60,692", sz: "2.47804", tot: "12.64879", w: "72.9%" },
-    { px: "60,690", sz: "1.92028", tot: "14.56907", w: "83.9%" },
-    { px: "60,688", sz: "0.27817", tot: "14.84724", w: "85.5%" },
-  ];
+  const asks = DEFAULT_ASKS;
+  const bids = DEFAULT_BIDS;
 
   return (
     <div
@@ -130,6 +135,7 @@ export const OrderBookView = React.memo<OrderBookViewProps>(function OrderBookVi
                   key={`ask-${i}`}
                   type="button"
                   onClick={() => onSelectPrice(ask.px.replace(",", ""))}
+                  style={{ contentVisibility: "auto", containIntrinsicSize: "0 22px" }}
                   className="ob-grid px-3 py-[2.5px] relative text-left hover:bg-[var(--hover)] cursor-pointer"
                 >
                   <span className="text-[var(--red)] z-10 font-medium">{ask.px}</span>
@@ -160,6 +166,7 @@ export const OrderBookView = React.memo<OrderBookViewProps>(function OrderBookVi
                   key={`bid-${i}`}
                   type="button"
                   onClick={() => onSelectPrice(bid.px.replace(",", ""))}
+                  style={{ contentVisibility: "auto", containIntrinsicSize: "0 22px" }}
                   className="ob-grid px-3 py-[2.5px] relative text-left hover:bg-[var(--hover)] cursor-pointer"
                 >
                   <span className="text-[var(--green)] z-10 font-medium">{bid.px}</span>

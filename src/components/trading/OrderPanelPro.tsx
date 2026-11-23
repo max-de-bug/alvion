@@ -9,6 +9,7 @@ import {
   Maximize2,
 } from "lucide-react";
 import { MarketContext, QuoteResult } from "@/lib/hyperliquid";
+import { useShallow } from "zustand/react/shallow";
 import {
   useTradingStore,
   type ProOrderType,
@@ -67,6 +68,7 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
   const marginInputId = useId();
   const limitPriceInputId = useId();
 
+  // Vercel Best Practice: rerender-defer-reads & shallow store subscription
   const {
     marginMode,
     setMarginMode,
@@ -77,7 +79,19 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
     sizeMode,
     setSizeMode,
     positions,
-  } = useTradingStore();
+  } = useTradingStore(
+    useShallow((s) => ({
+      marginMode: s.marginMode,
+      setMarginMode: s.setMarginMode,
+      collateralMode: s.collateralMode,
+      setCollateralMode: s.setCollateralMode,
+      proOrderType: s.proOrderType,
+      setProOrderType: s.setProOrderType,
+      sizeMode: s.sizeMode,
+      setSizeMode: s.setSizeMode,
+      positions: s.positions,
+    }))
+  );
 
   // Modal / Dropdown state
   const [showMarginModal, setShowMarginModal] = useState(false);

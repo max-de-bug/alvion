@@ -8,6 +8,7 @@ import {
   Settings,
 } from "lucide-react";
 import { AlvionBirdLogo } from "@/components/brand/AlvionBirdLogo";
+import { useShallow } from "zustand/react/shallow";
 import { useTradingStore, type ActiveTab } from "@/stores/useTradingStore";
 
 interface TradingHeaderProps {
@@ -32,7 +33,14 @@ export const TradingHeader = React.memo<TradingHeaderProps>(function TradingHead
   connectWallet,
   disconnect,
 }) {
-  const { tradingMode, setTradingMode, credits } = useTradingStore();
+  // Vercel Best Practice: rerender-defer-reads & shallow store subscription
+  const { tradingMode, setTradingMode, credits } = useTradingStore(
+    useShallow((s) => ({
+      tradingMode: s.tradingMode,
+      setTradingMode: s.setTradingMode,
+      credits: s.credits,
+    }))
+  );
   const [showWarning, setShowWarning] = useState(true);
   const headerRef = useRef<HTMLDivElement>(null);
   const [headerHeight, setHeaderHeight] = useState<number>(showWarning ? 88 : 56);

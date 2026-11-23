@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import { MarketContext } from "@/lib/hyperliquid";
 import { SignedOrder, MatchedTrade } from "@/lib/orderTypes";
 import { Position } from "@/stores/useTradingStore";
@@ -28,6 +28,11 @@ export const PositionsPanel = React.memo<PositionsPanelProps>(function Positions
   onClosePosition,
   onCancelOrder,
 }) {
+  // Fast O(1) market lookup map (Vercel Best Practice: js-index-maps)
+  const marketMap = useMemo(
+    () => new Map(markets.map((m) => [m.name, m])),
+    [markets]
+  );
   return (
     <div className="bg-[#0C1215] border border-[#1E272B] rounded-none p-4 flex flex-col shadow-xl select-none text-slate-200">
       <div className="flex items-center justify-between border-b border-[#1E272B] pb-2 mb-3">
@@ -97,8 +102,7 @@ export const PositionsPanel = React.memo<PositionsPanelProps>(function Positions
                 </thead>
                 <tbody className="divide-y divide-[#1A242A] font-mono">
                   {positions.map((pos) => {
-                    const market =
-                      markets.find((m) => m.name === pos.market) || currentMarket;
+                    const market = marketMap.get(pos.market) || currentMarket;
                     const currentPx = market.markPx;
 
                     const pnlRatio = pos.isLong
@@ -108,14 +112,18 @@ export const PositionsPanel = React.memo<PositionsPanelProps>(function Positions
                     const pnlPct = pnlRatio * pos.leverage * 100;
 
                     return (
-                      <tr key={pos.id} className="hover:bg-[#121A1E] transition-colors">
+                      <tr
+                        key={pos.id}
+                        style={{ contentVisibility: "auto", containIntrinsicSize: "0 45px" }}
+                        className="hover:bg-[#121A1E] transition-colors"
+                      >
                         <td className="py-3 font-bold text-white font-sans flex items-center gap-1.5">
                           <span className="w-1.5 h-1.5 rounded-none bg-[#4ECCA3]" />
                           <span>{pos.market}-USDCx</span>
                         </td>
                         <td className="py-3">
                           <span
-                            className={`font-semibold px-2 py-0.5 rounded text-[11px] ${pos.isLong
+                            className={`font-semibold px-2 py-0.5 rounded-none text-[11px] ${pos.isLong
                                 ? "bg-[#142921] text-[#4ECCA3] border border-[#4ECCA3]/30"
                                 : "bg-[#281318] text-[#F43F5E] border border-[#F43F5E]/30"
                               }`}
@@ -184,7 +192,11 @@ export const PositionsPanel = React.memo<PositionsPanelProps>(function Positions
                 </thead>
                 <tbody className="divide-y divide-[#1A242A] font-mono">
                   {openOrders.map((ord) => (
-                    <tr key={ord.id} className="hover:bg-[#121A1E] transition-colors">
+                    <tr
+                      key={ord.id}
+                      style={{ contentVisibility: "auto", containIntrinsicSize: "0 38px" }}
+                      className="hover:bg-[#121A1E] transition-colors"
+                    >
                       <td className="py-2.5 text-slate-400">{ord.id.slice(0, 10)}...</td>
                       <td className="py-2.5 font-bold text-white font-sans">{ord.market}-USDCx</td>
                       <td className="py-2.5">
@@ -207,7 +219,7 @@ export const PositionsPanel = React.memo<PositionsPanelProps>(function Positions
                       <td className="py-2.5 text-right font-sans">
                         <button
                           onClick={() => onCancelOrder(ord.id)}
-                          className="px-2.5 py-1 rounded bg-[#182125] hover:bg-rose-500/20 hover:text-rose-300 text-slate-300 text-xs border border-[#232F35] transition-colors cursor-pointer"
+                          className="px-2.5 py-1 rounded-none bg-[#182125] hover:bg-rose-500/20 hover:text-rose-300 text-slate-300 text-xs border border-[#232F35] transition-colors cursor-pointer"
                         >
                           Cancel
                         </button>
