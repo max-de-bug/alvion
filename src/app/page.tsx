@@ -152,6 +152,7 @@ export default function Home() {
                         availableLongLiq={availableLongLiq}
                         availableShortLiq={availableShortLiq}
                         formatUsdCompact={formatUsdCompact}
+                        markets={markets}
                       />
                     </div>
 

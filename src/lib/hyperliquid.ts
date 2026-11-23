@@ -66,6 +66,15 @@ export async function fetchNyseEquities(): Promise<MarketContext[]> {
     { name: "META", maxLeverage: 10, fallbackPx: 642.80, szDecimals: 2 },
     { name: "COIN", maxLeverage: 10, fallbackPx: 228.60, szDecimals: 2 },
     { name: "MSTR", maxLeverage: 10, fallbackPx: 320.10, szDecimals: 2 },
+    { name: "APLD", maxLeverage: 10, fallbackPx: 28.45, szDecimals: 2 },
+    { name: "HOOD", maxLeverage: 10, fallbackPx: 37.85, szDecimals: 2 },
+    { name: "PLTR", maxLeverage: 10, fallbackPx: 65.40, szDecimals: 2 },
+    { name: "AMD", maxLeverage: 10, fallbackPx: 142.10, szDecimals: 2 },
+    { name: "NFLX", maxLeverage: 10, fallbackPx: 875.20, szDecimals: 2 },
+    { name: "NATGAS", maxLeverage: 50, fallbackPx: 2.842, szDecimals: 3 },
+    { name: "CRUDE", maxLeverage: 50, fallbackPx: 71.24, szDecimals: 2 },
+    { name: "GOLD", maxLeverage: 50, fallbackPx: 2742.60, szDecimals: 2 },
+    { name: "SILVER", maxLeverage: 50, fallbackPx: 31.85, szDecimals: 3 },
   ];
 
   const results: MarketContext[] = [];
@@ -136,8 +145,9 @@ export async function fetchHyperliquidMarkets(): Promise<MarketContext[]> {
     ]);
 
     const featuredTokens = [
+      "BTC", "ETH", "SOL", "NATGAS", "CRUDE", "GOLD", "SILVER",
       "SPY", "NVDA", "TSLA", "AAPL", "QQQ", "MSFT", "AMZN", "GOOGL", "META", "COIN", "MSTR",
-      "SOL", "BTC", "ETH"
+      "APLD", "HOOD", "PLTR", "AMD", "NFLX"
     ];
     const markets: MarketContext[] = [...nyseEquities];
 

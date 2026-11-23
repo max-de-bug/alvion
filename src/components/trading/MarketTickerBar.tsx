@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { MarketContext } from "@/lib/hyperliquid";
 import { MarketMetadata } from "@/stores/useTradingStore";
+import { MarketSelectorModal } from "./MarketSelectorModal";
 
 interface MarketTickerBarProps {
   selectedMarketName: string;
@@ -21,6 +22,7 @@ interface MarketTickerBarProps {
   availableLongLiq: number;
   availableShortLiq: number;
   formatUsdCompact: (val: number) => string;
+  markets?: MarketContext[];
 }
 
 export const MarketTickerBar = React.memo<MarketTickerBarProps>(function MarketTickerBar({
@@ -39,6 +41,7 @@ export const MarketTickerBar = React.memo<MarketTickerBarProps>(function MarketT
   availableLongLiq,
   availableShortLiq,
   formatUsdCompact,
+  markets = [],
 }) {
   const [showMarketMenu, setShowMarketMenu] = useState(false);
 
@@ -51,6 +54,28 @@ export const MarketTickerBar = React.memo<MarketTickerBarProps>(function MarketT
     ? currentMarket.oraclePx.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })
     : currentMarket.oraclePx.toFixed(4);
 
+  // Asset icon badge
+  const getAssetIcon = (sym: string) => {
+    switch (sym) {
+      case "BTC":
+        return "₿";
+      case "ETH":
+        return "Ξ";
+      case "SOL":
+        return "◎";
+      case "NATGAS":
+        return "🔥";
+      case "CRUDE":
+        return "🛢";
+      case "GOLD":
+        return "✦";
+      case "SILVER":
+        return "◇";
+      default:
+        return sym.slice(0, 1);
+    }
+  };
+
   return (
     <div className="container-in container-in-1 relative z-20 shrink-0 mb-3">
       <div className="h-[60px] rounded-none border border-[var(--border)] bg-[var(--surface)] shadow-lg">
@@ -60,11 +85,17 @@ export const MarketTickerBar = React.memo<MarketTickerBarProps>(function MarketT
             <button
               type="button"
               onClick={() => setShowMarketMenu((prev) => !prev)}
-              className="flex items-center gap-2 px-3 py-2 rounded-none border border-transparent hover:bg-[var(--surface-3)] hover:border-[var(--border)] transition-colors cursor-pointer"
+              aria-haspopup="dialog"
+              aria-expanded={showMarketMenu}
+              className={`flex items-center gap-2 px-3 py-2 rounded-none border transition-colors cursor-pointer ${
+                showMarketMenu
+                  ? "bg-[var(--surface-3)] border-[var(--border-strong)]"
+                  : "border-transparent hover:bg-[var(--surface-3)] hover:border-[var(--border)]"
+              }`}
             >
               <div className="flex items-center">
                 <div className="w-[22px] h-[22px] rounded-none bg-amber-500/90 flex items-center justify-center text-[11px] font-bold text-black border border-slate-900 shadow-sm">
-                  ₿
+                  {getAssetIcon(selectedMarketName)}
                 </div>
                 <div className="w-[22px] h-[22px] rounded-none bg-[#4ECCA3] flex items-center justify-center text-[10px] font-bold text-[#0A1612] border border-slate-900 shadow-sm -ml-1.5">
                   $
@@ -73,44 +104,24 @@ export const MarketTickerBar = React.memo<MarketTickerBarProps>(function MarketT
               <span className="font-semibold tracking-[-0.01em] text-[var(--t1)] text-[14.5px]">
                 {selectedMarketName}-USDCX
               </span>
-              <span className="lev-tag" aria-label="Up to 20x leverage">
+              <span className="lev-tag" aria-label={`Up to ${marketMeta.maxLeverage || 20}x leverage`}>
                 {marketMeta.maxLeverage || 20}x
               </span>
-              <ChevronDown className="w-4 h-4 text-[var(--t3)]" />
+              <ChevronDown
+                className={`w-4 h-4 text-[var(--t3)] transition-transform duration-200 ${
+                  showMarketMenu ? "rotate-180 text-white" : ""
+                }`}
+              />
             </button>
 
-            {showMarketMenu && (
-              <div className="absolute top-12 left-0 z-50 w-64 bg-[var(--surface)] border border-[var(--border-strong)] rounded-none p-2 shadow-2xl text-xs flex flex-col gap-1">
-                {[
-                  { sym: "BTC", name: "Bitcoin", lev: "50x" },
-                  { sym: "ETH", name: "Ethereum", lev: "50x" },
-                  { sym: "SOL", name: "Solana", lev: "50x" },
-                  { sym: "SPY", name: "S&P 500 ETF", lev: "20x" },
-                  { sym: "NVDA", name: "NVIDIA Corp", lev: "10x" },
-                  { sym: "TSLA", name: "Tesla Inc", lev: "10x" },
-                  { sym: "AAPL", name: "Apple Inc", lev: "10x" },
-                ].map((item) => (
-                  <button
-                    key={item.sym}
-                    onClick={() => {
-                      setSelectedMarketName(item.sym);
-                      setShowMarketMenu(false);
-                    }}
-                    className={`flex items-center justify-between px-3 py-2 rounded-none text-left transition-colors cursor-pointer ${
-                      selectedMarketName === item.sym
-                        ? "bg-[var(--surface-3)] text-[#4ECCA3] font-semibold"
-                        : "text-[var(--t1)] hover:bg-[var(--hover)]"
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold">{item.sym}-USDCX</span>
-                      <span className="text-[11px] text-[var(--t3)]">{item.name}</span>
-                    </div>
-                    <span className="lev-tag">{item.lev}</span>
-                  </button>
-                ))}
-              </div>
-            )}
+            {/* QFEX-Style Market Selection Popover */}
+            <MarketSelectorModal
+              isOpen={showMarketMenu}
+              onClose={() => setShowMarketMenu(false)}
+              selectedMarketName={selectedMarketName}
+              onSelectMarket={setSelectedMarketName}
+              markets={markets}
+            />
           </div>
 
           {/* Mark Price */}

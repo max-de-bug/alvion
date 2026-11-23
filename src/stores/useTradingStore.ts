@@ -3,7 +3,7 @@ import { create } from "zustand";
 export interface MarketMetadata {
   symbol: string;
   name: string;
-  category: "EQUITY" | "CRYPTO";
+  category: "EQUITY" | "CRYPTO" | "COMMODITIES";
   exchangeBadge: string;
   maxLeverage: number;
   initialMarginPct: number;
@@ -110,6 +110,51 @@ export const MARKETS_METADATA: Record<string, MarketMetadata> = {
     initialMarginPct: 10,
     is24x7: true,
   },
+  APLD: {
+    symbol: "APLD",
+    name: "Applied Digital Corporation",
+    category: "EQUITY",
+    exchangeBadge: "Robinhood Chain",
+    maxLeverage: 10,
+    initialMarginPct: 10,
+    is24x7: true,
+  },
+  HOOD: {
+    symbol: "HOOD",
+    name: "Robinhood Markets, Inc.",
+    category: "EQUITY",
+    exchangeBadge: "Robinhood Chain",
+    maxLeverage: 10,
+    initialMarginPct: 10,
+    is24x7: true,
+  },
+  PLTR: {
+    symbol: "PLTR",
+    name: "Palantir Technologies Inc.",
+    category: "EQUITY",
+    exchangeBadge: "Robinhood Chain",
+    maxLeverage: 10,
+    initialMarginPct: 10,
+    is24x7: true,
+  },
+  AMD: {
+    symbol: "AMD",
+    name: "Advanced Micro Devices, Inc.",
+    category: "EQUITY",
+    exchangeBadge: "Robinhood Chain",
+    maxLeverage: 10,
+    initialMarginPct: 10,
+    is24x7: true,
+  },
+  NFLX: {
+    symbol: "NFLX",
+    name: "Netflix, Inc.",
+    category: "EQUITY",
+    exchangeBadge: "Robinhood Chain",
+    maxLeverage: 10,
+    initialMarginPct: 10,
+    is24x7: true,
+  },
   SOL: {
     symbol: "SOL",
     name: "Solana",
@@ -133,6 +178,42 @@ export const MARKETS_METADATA: Record<string, MarketMetadata> = {
     name: "Ethereum",
     category: "CRYPTO",
     exchangeBadge: "Robinhood Crypto",
+    maxLeverage: 50,
+    initialMarginPct: 2,
+    is24x7: true,
+  },
+  NATGAS: {
+    symbol: "NATGAS",
+    name: "Natural Gas (Henry Hub)",
+    category: "COMMODITIES",
+    exchangeBadge: "NYMEX",
+    maxLeverage: 50,
+    initialMarginPct: 2,
+    is24x7: true,
+  },
+  CRUDE: {
+    symbol: "CRUDE",
+    name: "WTI Crude Oil",
+    category: "COMMODITIES",
+    exchangeBadge: "NYMEX",
+    maxLeverage: 50,
+    initialMarginPct: 2,
+    is24x7: true,
+  },
+  GOLD: {
+    symbol: "GOLD",
+    name: "Gold Spot / Comex",
+    category: "COMMODITIES",
+    exchangeBadge: "COMEX",
+    maxLeverage: 50,
+    initialMarginPct: 2,
+    is24x7: true,
+  },
+  SILVER: {
+    symbol: "SILVER",
+    name: "Silver Spot / Comex",
+    category: "COMMODITIES",
+    exchangeBadge: "COMEX",
     maxLeverage: 50,
     initialMarginPct: 2,
     is24x7: true,
