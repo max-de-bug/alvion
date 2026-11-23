@@ -27,6 +27,11 @@ const VaultBackstopTab = dynamic(
   { ssr: false }
 );
 
+const CreditsTab = dynamic(
+  () => import("@/components/trading/CreditsTab").then((m) => m.CreditsTab),
+  { ssr: false }
+);
+
 const ArchitectureDocsTab = dynamic(
   () => import("@/components/trading/ArchitectureDocsTab").then((m) => m.ArchitectureDocsTab),
   { ssr: false }
@@ -74,6 +79,7 @@ export default function Home() {
     loadingQuote,
     solvency,
     domainInfo,
+    credits,
 
     // Wallet
     address,
@@ -256,7 +262,18 @@ export default function Home() {
           </div>
         )}
 
-        {/* Tab 4: Architecture & Robinhood Chain Docs */}
+        {/* Tab 4: Alvion Credits Rewards Program */}
+        {activeTab === "credits" && (
+          <div className="p-3 max-w-7xl mx-auto w-full">
+            <CreditsTab
+              credits={credits}
+              onNavigateTrade={() => setActiveTab("trade")}
+              onNavigateVault={() => setActiveTab("vault")}
+            />
+          </div>
+        )}
+
+        {/* Tab 5: Architecture & Robinhood Chain Docs */}
         {activeTab === "docs" && (
           <div className="p-3 max-w-7xl mx-auto w-full">
             <ArchitectureDocsTab />

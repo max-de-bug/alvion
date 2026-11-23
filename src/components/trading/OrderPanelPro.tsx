@@ -124,8 +124,8 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
     sizeMode === "USDC"
       ? marginUsdc * leverage
       : currentMarket.markPx > 0
-      ? Number(((marginUsdc * leverage) / currentMarket.markPx).toFixed(5))
-      : 0;
+        ? Number(((marginUsdc * leverage) / currentMarket.markPx).toFixed(5))
+        : 0;
 
   const handleSizeInputChange = (val: string) => {
     const num = parseFloat(val);
@@ -170,7 +170,7 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
   const isProTypeSelected = proOrderType !== "market" && proOrderType !== "limit";
 
   return (
-    <div className="flex flex-col shrink-0 rounded-2xl border border-[#1e272c] bg-[#10171a] overflow-hidden max-md:w-full select-none text-white shadow-xl">
+    <div className="flex flex-col shrink-0 rounded-none border border-[#1e272c] bg-[#10171a] overflow-hidden max-md:w-full select-none text-white shadow-xl">
       <div className="p-3.5 flex flex-col gap-3.5">
         {/* 1. TOP PILL BAR: [ Isolated ] [ 5x ] [ Unified ] */}
         <div className="grid grid-cols-3 gap-2 relative">
@@ -183,7 +183,7 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
               setShowCollateralModal(false);
               setShowProMenu(false);
             }}
-            className="h-[40px] rounded-[10px] bg-[#1a2327] hover:bg-[#212c32] border border-[#232e34] text-[13.5px] font-medium text-[#e2e8ea] flex items-center justify-center transition-colors cursor-pointer"
+            className="h-[40px] rounded-none bg-[#1a2327] hover:bg-[#212c32] border border-[#232e34] text-[13.5px] font-medium text-[#e2e8ea] flex items-center justify-center transition-colors cursor-pointer"
           >
             <span>{marginMode === "isolated" ? "Isolated" : "Cross"}</span>
           </button>
@@ -197,7 +197,7 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
               setShowCollateralModal(false);
               setShowProMenu(false);
             }}
-            className="h-[40px] rounded-[10px] bg-[#1a2327] hover:bg-[#212c32] border border-[#232e34] text-[13.5px] font-medium text-[#e2e8ea] flex items-center justify-center transition-colors cursor-pointer"
+            className="h-[40px] rounded-none bg-[#1a2327] hover:bg-[#212c32] border border-[#232e34] text-[13.5px] font-medium text-[#e2e8ea] flex items-center justify-center transition-colors cursor-pointer"
           >
             <span className="font-mono">{leverage}x</span>
           </button>
@@ -211,14 +211,14 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
               setShowLeverageModal(false);
               setShowProMenu(false);
             }}
-            className="h-[40px] rounded-[10px] bg-[#1a2327] hover:bg-[#212c32] border border-[#232e34] text-[13.5px] font-medium text-[#e2e8ea] flex items-center justify-center transition-colors cursor-pointer"
+            className="h-[40px] rounded-none bg-[#1a2327] hover:bg-[#212c32] border border-[#232e34] text-[13.5px] font-medium text-[#e2e8ea] flex items-center justify-center transition-colors cursor-pointer"
           >
             <span>{collateralMode === "unified" ? "Unified" : "Single"}</span>
           </button>
 
           {/* MODAL 1: Margin Mode Popover */}
           {showMarginModal && (
-            <div className="absolute top-[44px] left-0 right-0 z-50 bg-[#161d21] border border-[var(--border-strong)] rounded-xl p-3 shadow-2xl flex flex-col gap-2 backdrop-blur-md">
+            <div className="absolute top-[44px] left-0 right-0 z-50 bg-[#161d21] border border-[var(--border-strong)] rounded-none p-3 shadow-2xl flex flex-col gap-2 backdrop-blur-md">
               <div className="text-xs font-semibold text-[var(--t1)]">Margin Mode</div>
               <div className="flex flex-col gap-1.5">
                 <button
@@ -227,11 +227,10 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
                     setMarginMode("isolated");
                     setShowMarginModal(false);
                   }}
-                  className={`p-2 rounded-lg text-left text-xs transition-colors cursor-pointer flex items-center justify-between ${
-                    marginMode === "isolated"
+                  className={`p-2 rounded-none text-left text-xs transition-colors cursor-pointer flex items-center justify-between ${marginMode === "isolated"
                       ? "bg-[#1c272c] border border-[var(--fixed-green)]/40 text-white"
                       : "hover:bg-[var(--hover)] text-[var(--t2)]"
-                  }`}
+                    }`}
                 >
                   <div>
                     <div className="font-semibold text-white">Isolated Margin</div>
@@ -245,11 +244,10 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
                     setMarginMode("cross");
                     setShowMarginModal(false);
                   }}
-                  className={`p-2 rounded-lg text-left text-xs transition-colors cursor-pointer flex items-center justify-between ${
-                    marginMode === "cross"
+                  className={`p-2 rounded-none text-left text-xs transition-colors cursor-pointer flex items-center justify-between ${marginMode === "cross"
                       ? "bg-[#1c272c] border border-[var(--fixed-green)]/40 text-white"
                       : "hover:bg-[var(--hover)] text-[var(--t2)]"
-                  }`}
+                    }`}
                 >
                   <div>
                     <div className="font-semibold text-white">Cross Margin</div>
@@ -263,7 +261,7 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
 
           {/* MODAL 2: Leverage Slider & Presets Popover */}
           {showLeverageModal && (
-            <div className="absolute top-[44px] left-0 right-0 z-50 bg-[#161d21] border border-[var(--border-strong)] rounded-xl p-3 shadow-2xl flex flex-col gap-3 backdrop-blur-md">
+            <div className="absolute top-[44px] left-0 right-0 z-50 bg-[#161d21] border border-[var(--border-strong)] rounded-none p-3 shadow-2xl flex flex-col gap-3 backdrop-blur-md">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-[var(--t1)]">Adjust Leverage</span>
                 <span className="font-mono text-sm font-bold text-[var(--fixed-green)]">{leverage}x</span>
@@ -285,11 +283,10 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
                       setLeverage(preset);
                       setShowLeverageModal(false);
                     }}
-                    className={`py-1.5 rounded-lg text-xs font-mono font-medium transition-colors cursor-pointer ${
-                      leverage === preset
+                    className={`py-1.5 rounded-none text-xs font-mono font-medium transition-colors cursor-pointer ${leverage === preset
                         ? "bg-[var(--fixed-green)] text-slate-950 font-bold"
                         : "bg-[var(--surface-3)] text-[var(--t2)] hover:text-white"
-                    }`}
+                      }`}
                   >
                     {preset}x
                   </button>
@@ -300,7 +297,7 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
 
           {/* MODAL 3: Collateral Mode Popover */}
           {showCollateralModal && (
-            <div className="absolute top-[44px] left-0 right-0 z-50 bg-[#161d21] border border-[var(--border-strong)] rounded-xl p-3 shadow-2xl flex flex-col gap-2 backdrop-blur-md">
+            <div className="absolute top-[44px] left-0 right-0 z-50 bg-[#161d21] border border-[var(--border-strong)] rounded-none p-3 shadow-2xl flex flex-col gap-2 backdrop-blur-md">
               <div className="text-xs font-semibold text-[var(--t1)]">Collateral Account</div>
               <div className="flex flex-col gap-1.5">
                 <button
@@ -309,11 +306,10 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
                     setCollateralMode("unified");
                     setShowCollateralModal(false);
                   }}
-                  className={`p-2 rounded-lg text-left text-xs transition-colors cursor-pointer flex items-center justify-between ${
-                    collateralMode === "unified"
+                  className={`p-2 rounded-none text-left text-xs transition-colors cursor-pointer flex items-center justify-between ${collateralMode === "unified"
                       ? "bg-[#1c272c] border border-[var(--fixed-green)]/40 text-white"
                       : "hover:bg-[var(--hover)] text-[var(--t2)]"
-                  }`}
+                    }`}
                 >
                   <div>
                     <div className="font-semibold text-white">Unified Multi-Asset</div>
@@ -327,11 +323,10 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
                     setCollateralMode("isolated");
                     setShowCollateralModal(false);
                   }}
-                  className={`p-2 rounded-lg text-left text-xs transition-colors cursor-pointer flex items-center justify-between ${
-                    collateralMode === "isolated"
+                  className={`p-2 rounded-none text-left text-xs transition-colors cursor-pointer flex items-center justify-between ${collateralMode === "isolated"
                       ? "bg-[#1c272c] border border-[var(--fixed-green)]/40 text-white"
                       : "hover:bg-[var(--hover)] text-[var(--t2)]"
-                  }`}
+                    }`}
                 >
                   <div>
                     <div className="font-semibold text-white">Single-Asset USDCx</div>
@@ -354,11 +349,10 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
               setProOrderType("market");
               setShowProMenu(false);
             }}
-            className={`relative pb-2.5 font-medium transition-colors mr-7 cursor-pointer ${
-              orderType === "market" && !isProTypeSelected
+            className={`relative pb-2.5 font-medium transition-colors mr-7 cursor-pointer ${orderType === "market" && !isProTypeSelected
                 ? "text-white font-semibold"
                 : "text-[#7a8990] hover:text-white"
-            }`}
+              }`}
           >
             Market
             {orderType === "market" && !isProTypeSelected && (
@@ -374,11 +368,10 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
               setProOrderType("limit");
               setShowProMenu(false);
             }}
-            className={`relative pb-2.5 font-medium transition-colors mr-7 cursor-pointer ${
-              orderType === "limit" && !isProTypeSelected
+            className={`relative pb-2.5 font-medium transition-colors mr-7 cursor-pointer ${orderType === "limit" && !isProTypeSelected
                 ? "text-white font-semibold"
                 : "text-[#7a8990] hover:text-white"
-            }`}
+              }`}
           >
             Limit
             {orderType === "limit" && !isProTypeSelected && (
@@ -391,11 +384,10 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
             <button
               type="button"
               onClick={() => setShowProMenu((prev) => !prev)}
-              className={`relative pb-2.5 font-medium transition-colors flex items-center gap-1 cursor-pointer ${
-                isProTypeSelected
+              className={`relative pb-2.5 font-medium transition-colors flex items-center gap-1 cursor-pointer ${isProTypeSelected
                   ? "text-white font-semibold"
                   : "text-[#7a8990] hover:text-white"
-              }`}
+                }`}
             >
               <span>{getProLabel()}</span>
               <ChevronDown className="w-3.5 h-3.5 text-[#7a8990]" />
@@ -406,7 +398,7 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
 
             {/* Pro Menu Dropdown */}
             {showProMenu && (
-              <div className="absolute top-[32px] left-0 z-50 bg-[#161d21] border border-[var(--border-strong)] rounded-xl py-1 w-36 shadow-2xl flex flex-col backdrop-blur-md">
+              <div className="absolute top-[32px] left-0 z-50 bg-[#161d21] border border-[var(--border-strong)] rounded-none py-1 w-36 shadow-2xl flex flex-col backdrop-blur-md">
                 <button
                   type="button"
                   onClick={() => {
@@ -455,26 +447,24 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
         </div>
 
         {/* 3. LONG / SHORT TOGGLE: [ Buy / Long | Sell / Short ] */}
-        <div className="relative grid grid-cols-2 p-[3px] rounded-[11px] bg-[#141b1f] border border-[#1d262b]">
+        <div className="relative grid grid-cols-2 p-[3px] rounded-none bg-[#141b1f] border border-[#1d262b]">
           <button
             type="button"
             onClick={() => setIsLong(true)}
-            className={`h-[36px] rounded-[8px] text-[13.5px] font-semibold transition-all cursor-pointer flex items-center justify-center ${
-              isLong
+            className={`h-[36px] rounded-none text-[13.5px] font-semibold transition-all cursor-pointer flex items-center justify-center ${isLong
                 ? "bg-[#5ec2a8] text-[#0b1a16] shadow-sm font-bold"
                 : "text-[#d6dee2] hover:text-white"
-            }`}
+              }`}
           >
             Buy / Long
           </button>
           <button
             type="button"
             onClick={() => setIsLong(false)}
-            className={`h-[36px] rounded-[8px] text-[13.5px] font-semibold transition-all cursor-pointer flex items-center justify-center ${
-              !isLong
+            className={`h-[36px] rounded-none text-[13.5px] font-semibold transition-all cursor-pointer flex items-center justify-center ${!isLong
                 ? "bg-[#eb4d5c] text-white shadow-sm font-bold"
                 : "text-[#d6dee2] hover:text-white"
-            }`}
+              }`}
           >
             Sell / Short
           </button>
@@ -506,7 +496,7 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
 
         {/* 5. SIZE INPUT WITH DROPDOWN: [ Size ... USDC ∨ ] */}
         <div className="relative">
-          <div className="flex items-center justify-between px-3.5 h-[46px] rounded-[10px] bg-[#141b1f] border border-[#202a2f] focus-within:border-[#5ec2a8]/60 transition-colors">
+          <div className="flex items-center justify-between px-3.5 h-[46px] rounded-none bg-[#141b1f] border border-[#202a2f] focus-within:border-[#5ec2a8]/60 transition-colors">
             <input
               id={marginInputId}
               type="text"
@@ -519,7 +509,7 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
             <button
               type="button"
               onClick={() => setShowSizeUnitMenu((prev) => !prev)}
-              className="flex items-center gap-1 px-1.5 py-1 rounded text-[13px] font-medium text-white hover:bg-white/5 transition-colors ml-2 shrink-0 cursor-pointer"
+              className="flex items-center gap-1 px-1.5 py-1 rounded-none text-[13px] font-medium text-white hover:bg-white/5 transition-colors ml-2 shrink-0 cursor-pointer"
             >
               <span>{sizeMode === "USDC" ? "USDC" : baseSymbol}</span>
               <ChevronDown className="w-3.5 h-3.5 text-[#8b99a1]" />
@@ -528,16 +518,15 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
 
           {/* Size unit dropdown */}
           {showSizeUnitMenu && (
-            <div className="absolute right-0 top-[48px] z-50 bg-[#161d21] border border-[var(--border-strong)] rounded-xl py-1 w-28 shadow-2xl flex flex-col backdrop-blur-md">
+            <div className="absolute right-0 top-[48px] z-50 bg-[#161d21] border border-[var(--border-strong)] rounded-none py-1 w-28 shadow-2xl flex flex-col backdrop-blur-md">
               <button
                 type="button"
                 onClick={() => {
                   setSizeMode("USDC");
                   setShowSizeUnitMenu(false);
                 }}
-                className={`px-3 py-1.5 text-left text-xs transition-colors cursor-pointer ${
-                  sizeMode === "USDC" ? "text-[var(--fixed-green)] font-bold" : "text-[var(--t2)] hover:text-white"
-                }`}
+                className={`px-3 py-1.5 text-left text-xs transition-colors cursor-pointer ${sizeMode === "USDC" ? "text-[var(--fixed-green)] font-bold" : "text-[var(--t2)] hover:text-white"
+                  }`}
               >
                 USDC
               </button>
@@ -547,9 +536,8 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
                   setSizeMode("ASSET");
                   setShowSizeUnitMenu(false);
                 }}
-                className={`px-3 py-1.5 text-left text-xs transition-colors cursor-pointer ${
-                  sizeMode === "ASSET" ? "text-[var(--fixed-green)] font-bold" : "text-[var(--t2)] hover:text-white"
-                }`}
+                className={`px-3 py-1.5 text-left text-xs transition-colors cursor-pointer ${sizeMode === "ASSET" ? "text-[var(--fixed-green)] font-bold" : "text-[var(--t2)] hover:text-white"
+                  }`}
               >
                 {baseSymbol}
               </button>
@@ -610,7 +598,7 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
           </div>
 
           {/* Standalone percentage box: [ 0 % ] */}
-          <div className="w-[56px] h-[36px] rounded-[8px] bg-[#161e22] border border-[#202b31] flex items-center justify-center font-mono text-[13.5px] font-semibold text-white shrink-0">
+          <div className="w-[56px] h-[36px] rounded-none bg-[#161e22] border border-[#202b31] flex items-center justify-center font-mono text-[13.5px] font-semibold text-white shrink-0">
             {currentPercent} %
           </div>
         </div>
@@ -619,7 +607,7 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
         {(orderType === "limit" || proOrderType === "stop_limit") && (
           <div className="flex flex-col gap-1 pt-1">
             <span className="text-[10px] tracking-[.06em] font-semibold text-[var(--t3)]">Limit Price</span>
-            <div className="flex items-center gap-1.5 px-3 h-[44px] rounded-[10px] bg-[#141b1f] border border-[#202a2f] font-mono text-[13px] focus-within:border-[#5ec2a8]/60 transition-colors">
+            <div className="flex items-center gap-1.5 px-3 h-[44px] rounded-none bg-[#141b1f] border border-[#202a2f] font-mono text-[13px] focus-within:border-[#5ec2a8]/60 transition-colors">
               <input
                 id={limitPriceInputId}
                 placeholder={currentMarket.markPx ? currentMarket.markPx.toFixed(1) : "0"}
@@ -643,7 +631,7 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
         {isProTypeSelected && (
           <div className="flex flex-col gap-1">
             <span className="text-[10px] tracking-[.06em] font-semibold text-[var(--t3)]">Trigger Price</span>
-            <div className="flex items-center gap-1.5 px-3 h-[40px] rounded-[10px] bg-[var(--surface-3)] border border-[var(--border)] font-mono text-[13px] focus-within:border-[#4ECCA3]/60 transition-colors">
+            <div className="flex items-center gap-1.5 px-3 h-[40px] rounded-none bg-[var(--surface-3)] border border-[var(--border)] font-mono text-[13px] focus-within:border-[#4ECCA3]/60 transition-colors">
               <input
                 placeholder={currentMarket.markPx ? currentMarket.markPx.toFixed(1) : "0"}
                 value={triggerPrice}
@@ -666,21 +654,19 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
         <button
           type="button"
           onClick={() => setReduceOnly((prev) => !prev)}
-          className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-[var(--surface-3)] hover:bg-[var(--hover)] transition-all cursor-pointer"
+          className="w-full flex items-center justify-between px-3 py-2 rounded-none bg-[var(--surface-3)] hover:bg-[var(--hover)] transition-all cursor-pointer"
         >
           <span className="flex items-center gap-1.5 text-[12px] text-white">
             <span>Reduce only</span>
             <Info className="w-3.5 h-3.5 text-[var(--t3)]" />
           </span>
           <span
-            className={`relative w-[34px] h-[20px] rounded-none transition-colors ${
-              reduceOnly ? "bg-[var(--fixed-green)]" : "bg-[var(--border-strong)]"
-            }`}
+            className={`relative w-[34px] h-[20px] rounded-none transition-colors ${reduceOnly ? "bg-[var(--fixed-green)]" : "bg-[var(--border-strong)]"
+              }`}
           >
             <span
-              className={`absolute top-[2px] size-[16px] rounded-none bg-white transition-transform ${
-                reduceOnly ? "left-[16px]" : "left-[2px]"
-              }`}
+              className={`absolute top-[2px] size-[16px] rounded-none bg-white transition-transform ${reduceOnly ? "left-[16px]" : "left-[2px]"
+                }`}
             />
           </span>
         </button>
@@ -690,27 +676,25 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
           <button
             type="button"
             onClick={() => setTpEnabled((prev) => !prev)}
-            className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-[var(--surface-3)] hover:bg-[var(--hover)] transition-all cursor-pointer"
+            className="w-full flex items-center justify-between px-3 py-2 rounded-none bg-[var(--surface-3)] hover:bg-[var(--hover)] transition-all cursor-pointer"
           >
             <span className="flex items-center gap-1.5 text-[12px] text-white">
               <span>Take Profit / Stop Loss</span>
               <Info className="w-3.5 h-3.5 text-[var(--t3)]" />
             </span>
             <span
-              className={`relative w-[34px] h-[20px] rounded-none transition-colors ${
-                tpEnabled ? "bg-[var(--fixed-green)]" : "bg-[var(--border-strong)]"
-              }`}
+              className={`relative w-[34px] h-[20px] rounded-none transition-colors ${tpEnabled ? "bg-[var(--fixed-green)]" : "bg-[var(--border-strong)]"
+                }`}
             >
               <span
-                className={`absolute top-[2px] size-[16px] rounded-none bg-white transition-transform ${
-                  tpEnabled ? "left-[16px]" : "left-[2px]"
-                }`}
+                className={`absolute top-[2px] size-[16px] rounded-none bg-white transition-transform ${tpEnabled ? "left-[16px]" : "left-[2px]"
+                  }`}
               />
             </span>
           </button>
 
           {tpEnabled && (
-            <div className="p-2.5 rounded-xl bg-[var(--surface-3)]/60 border border-[var(--border)] flex flex-col gap-2 text-xs">
+            <div className="p-2.5 rounded-none bg-[var(--surface-3)]/60 border border-[var(--border)] flex flex-col gap-2 text-xs">
               <span className="text-[10px] text-[var(--t3)]">Triggers on mark price, executed automatically</span>
               <div className="grid grid-cols-2 gap-2">
                 <div className="flex flex-col gap-1">
@@ -719,7 +703,7 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
                     placeholder="62,000"
                     value={tpPrice}
                     onChange={(e) => setTpPrice(e.target.value)}
-                    className="h-8 px-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] font-mono text-xs text-white outline-none"
+                    className="h-8 px-2 rounded-none bg-[var(--surface)] border border-[var(--border)] font-mono text-xs text-white outline-none"
                   />
                 </div>
                 <div className="flex flex-col gap-1">
@@ -728,7 +712,7 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
                     placeholder="10%"
                     value={tpGain}
                     onChange={(e) => setTpGain(e.target.value)}
-                    className="h-8 px-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] font-mono text-xs text-white outline-none"
+                    className="h-8 px-2 rounded-none bg-[var(--surface)] border border-[var(--border)] font-mono text-xs text-white outline-none"
                   />
                 </div>
               </div>
@@ -739,7 +723,7 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
                     placeholder="58,500"
                     value={slPrice}
                     onChange={(e) => setSlPrice(e.target.value)}
-                    className="h-8 px-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] font-mono text-xs text-white outline-none"
+                    className="h-8 px-2 rounded-none bg-[var(--surface)] border border-[var(--border)] font-mono text-xs text-white outline-none"
                   />
                 </div>
                 <div className="flex flex-col gap-1">
@@ -748,7 +732,7 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
                     placeholder="5%"
                     value={slLoss}
                     onChange={(e) => setSlLoss(e.target.value)}
-                    className="h-8 px-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] font-mono text-xs text-white outline-none"
+                    className="h-8 px-2 rounded-none bg-[var(--surface)] border border-[var(--border)] font-mono text-xs text-white outline-none"
                   />
                 </div>
               </div>
@@ -760,11 +744,10 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
         <button
           type="button"
           onClick={onExecuteTrade}
-          className={`w-full flex items-center justify-center gap-1.5 py-3 rounded-none text-[13.5px] font-bold uppercase tracking-[0.05em] cursor-pointer transition-all shadow-lg active:scale-[0.98] ${
-            isLong
+          className={`w-full flex items-center justify-center gap-1.5 py-3 rounded-none text-[13.5px] font-bold uppercase tracking-[0.05em] cursor-pointer transition-all shadow-lg active:scale-[0.98] ${isLong
               ? "bg-[#5ec2a8] hover:bg-[#52ad96] text-[#0b1a16] shadow-[#5ec2a8]/20"
               : "bg-[#eb4d5c] hover:bg-[#d43f4d] text-white shadow-[#eb4d5c]/20"
-          }`}
+            }`}
         >
           {loadingQuote ? (
             <span>Calculating...</span>
@@ -776,7 +759,7 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
         </button>
 
         {/* 11. EXECUTION SUMMARY CARD */}
-        <div className="flex flex-col gap-1.5 px-3 py-2.5 rounded-[12px] bg-[var(--surface-3)] border border-[var(--border)] text-[11.5px]">
+        <div className="flex flex-col gap-1.5 px-3 py-2.5 rounded-none bg-[var(--surface-3)] border border-[var(--border)] text-[11.5px]">
           <div className="flex items-center justify-between">
             <span className="text-[var(--t3)]">Liq. price</span>
             <span className="font-mono tabular-nums font-semibold text-[var(--t1)]">
@@ -829,7 +812,7 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
               <button
                 type="button"
                 onClick={() => setShowSlippageMenu((prev) => !prev)}
-                className="font-mono font-semibold text-[var(--t1)] underline decoration-dotted underline-offset-2 hover:bg-[var(--hover)] px-1 rounded cursor-pointer"
+                className="font-mono font-semibold text-[var(--t1)] underline decoration-dotted underline-offset-2 hover:bg-[var(--hover)] px-1 rounded-none cursor-pointer"
               >
                 Max {selectedSlippage}%
               </button>
@@ -846,11 +829,10 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
                     setSelectedSlippage(preset);
                     setShowSlippageMenu(false);
                   }}
-                  className={`py-1 rounded-none border text-[10.5px] font-mono font-semibold transition-colors cursor-pointer ${
-                    selectedSlippage === preset
+                  className={`py-1 rounded-none border text-[10.5px] font-mono font-semibold transition-colors cursor-pointer ${selectedSlippage === preset
                       ? "bg-[var(--surface)] border-[var(--fixed-green)] text-white"
                       : "bg-[var(--surface)] border-[var(--border)] text-[var(--t2)] hover:text-white"
-                  }`}
+                    }`}
                 >
                   {preset}%
                 </button>

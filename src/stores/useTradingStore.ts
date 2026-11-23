@@ -159,7 +159,7 @@ export type TradingMode = "consumer" | "pro";
 export type MarginMode = "isolated" | "cross";
 export type CollateralMode = "unified" | "isolated";
 export type BottomTab = "positions" | "openOrders" | "trades";
-export type ActiveTab = "trade" | "orderbook" | "vault" | "docs";
+export type ActiveTab = "trade" | "orderbook" | "vault" | "credits" | "docs";
 export type Timeframe = "1s" | "1m" | "3m" | "5m" | "15m" | "30m" | "1h" | "4h" | "1D" | "1W";
 
 interface TradingState {
@@ -197,6 +197,10 @@ interface TradingState {
   vaultLiquidity: number;
   vaultNetSkew: number;
   vaultApr: number;
+
+  // Platform Credits Program
+  credits: number;
+  setCredits: (credits: number) => void;
 
   // Actions
   setSelectedMarketName: (market: string) => void;
@@ -283,6 +287,8 @@ export const useTradingStore = create<TradingState>((set) => ({
   vaultNetSkew: 420_000,
   vaultApr: 24.8,
 
+  credits: 250,
+
   // Setters
   setSelectedMarketName: (market) => set({ selectedMarketName: market }),
   setIsLong: (isLong) => set({ isLong }),
@@ -334,5 +340,7 @@ export const useTradingStore = create<TradingState>((set) => ({
   setVaultLiquidity: (vaultLiquidity) => set({ vaultLiquidity }),
   setVaultNetSkew: (vaultNetSkew) => set({ vaultNetSkew }),
   setVaultApr: (vaultApr) => set({ vaultApr }),
+
+  setCredits: (credits) => set({ credits }),
 }));
 

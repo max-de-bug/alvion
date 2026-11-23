@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
-import { Award, Zap, CheckCircle2, TrendingUp } from "lucide-react";
+import React from "react";
 import { MarketContext } from "@/lib/hyperliquid";
 import { SignedOrder, MatchedTrade } from "@/lib/orderTypes";
 import { Position } from "@/stores/useTradingStore";
@@ -29,68 +28,45 @@ export const PositionsPanel = React.memo<PositionsPanelProps>(function Positions
   onClosePosition,
   onCancelOrder,
 }) {
-  const [activeTabExtended, setActiveTabExtended] = useState<"positions" | "openOrders" | "trades" | "points">("positions");
-
-  const handleTabClick = (tab: "positions" | "openOrders" | "trades" | "points") => {
-    setActiveTabExtended(tab);
-    if (tab !== "points") {
-      setBottomTab(tab);
-    }
-  };
-
   return (
-    <div className="bg-[#0C1215] border border-[#1E272B] rounded-xl p-4 flex flex-col shadow-xl select-none text-slate-200">
+    <div className="bg-[#0C1215] border border-[#1E272B] rounded-none p-4 flex flex-col shadow-xl select-none text-slate-200">
       <div className="flex items-center justify-between border-b border-[#1E272B] pb-2 mb-3">
         <div className="flex items-center gap-1">
           <button
-            onClick={() => handleTabClick("positions")}
-            className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors relative ${activeTabExtended === "positions"
+            onClick={() => setBottomTab("positions")}
+            className={`text-xs font-semibold px-3 py-1.5 rounded-none transition-colors relative ${bottomTab === "positions"
                 ? "bg-[#162125] text-white"
                 : "text-slate-400 hover:text-slate-200"
               }`}
           >
             Positions ({positions.length})
-            {activeTabExtended === "positions" && (
+            {bottomTab === "positions" && (
               <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-[#4ECCA3] rounded-none" />
             )}
           </button>
 
           <button
-            onClick={() => handleTabClick("openOrders")}
-            className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors relative ${activeTabExtended === "openOrders"
+            onClick={() => setBottomTab("openOrders")}
+            className={`text-xs font-semibold px-3 py-1.5 rounded-none transition-colors relative ${bottomTab === "openOrders"
                 ? "bg-[#162125] text-white"
                 : "text-slate-400 hover:text-slate-200"
               }`}
           >
             Open Orders ({openOrders.length})
-            {activeTabExtended === "openOrders" && (
+            {bottomTab === "openOrders" && (
               <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-[#4ECCA3] rounded-none" />
             )}
           </button>
 
           <button
-            onClick={() => handleTabClick("trades")}
-            className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors relative ${activeTabExtended === "trades"
+            onClick={() => setBottomTab("trades")}
+            className={`text-xs font-semibold px-3 py-1.5 rounded-none transition-colors relative ${bottomTab === "trades"
                 ? "bg-[#162125] text-white"
                 : "text-slate-400 hover:text-slate-200"
               }`}
           >
             Trade Fills ({recentTrades.length})
-            {activeTabExtended === "trades" && (
-              <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-[#4ECCA3] rounded-none" />
-            )}
-          </button>
-
-          {/* Alvion Points Tab */}
-          <button
-            onClick={() => handleTabClick("points")}
-            className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors relative ${activeTabExtended === "points"
-                ? "bg-[#162125] text-[#4ECCA3]"
-                : "text-slate-400 hover:text-slate-200"
-              }`}
-          >
-            <span>Points</span>
-            {activeTabExtended === "points" && (
+            {bottomTab === "trades" && (
               <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-[#4ECCA3] rounded-none" />
             )}
           </button>
@@ -98,7 +74,7 @@ export const PositionsPanel = React.memo<PositionsPanelProps>(function Positions
       </div>
 
       {/* View 1: Active Positions */}
-      {activeTabExtended === "positions" && (
+      {bottomTab === "positions" && (
         <div>
           {positions.length === 0 ? (
             <div className="py-10 text-center flex flex-col items-center justify-center text-slate-500 text-xs">
@@ -170,7 +146,7 @@ export const PositionsPanel = React.memo<PositionsPanelProps>(function Positions
                         <td className="py-3 text-right font-sans">
                           <button
                             onClick={() => onClosePosition(pos.id)}
-                            className="px-3 py-1 rounded-lg bg-[#182125] hover:bg-rose-500/20 hover:text-rose-300 text-slate-300 text-xs border border-[#232F35] transition-colors cursor-pointer font-medium"
+                            className="px-3 py-1 rounded-none bg-[#182125] hover:bg-rose-500/20 hover:text-rose-300 text-slate-300 text-xs border border-[#232F35] transition-colors cursor-pointer font-medium"
                           >
                             Close Market
                           </button>
@@ -186,7 +162,7 @@ export const PositionsPanel = React.memo<PositionsPanelProps>(function Positions
       )}
 
       {/* View 2: Open Limit Orders */}
-      {activeTabExtended === "openOrders" && (
+      {bottomTab === "openOrders" && (
         <div>
           {openOrders.length === 0 ? (
             <div className="py-8 text-center text-slate-500 text-xs">
@@ -246,7 +222,7 @@ export const PositionsPanel = React.memo<PositionsPanelProps>(function Positions
       )}
 
       {/* View 3: Trade Fills */}
-      {activeTabExtended === "trades" && (
+      {bottomTab === "trades" && (
         <div>
           {recentTrades.length === 0 ? (
             <div className="py-8 text-center text-slate-500 text-xs">
@@ -293,47 +269,6 @@ export const PositionsPanel = React.memo<PositionsPanelProps>(function Positions
               </table>
             </div>
           )}
-        </div>
-      )}
-
-      {/* View 4: Titan Points Dashboard (matching TitanX Testnet Reward Program) */}
-      {activeTabExtended === "points" && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 py-2">
-          <div className="bg-[#121A1E] border border-[#212D33] rounded-xl p-3 flex flex-col gap-1">
-            <div className="flex items-center justify-between text-[#8C9DA6] text-[11px]">
-              <span>Total Points</span>
-              <Award className="w-3.5 h-3.5 text-[#4ECCA3]" />
-            </div>
-            <div className="text-xl font-bold font-mono text-[#4ECCA3]">250 pts</div>
-            <span className="text-[10px] text-slate-400">Weekly rank: Top 5%</span>
-          </div>
-
-          <div className="bg-[#121A1E] border border-[#212D33] rounded-xl p-3 flex flex-col gap-1">
-            <div className="flex items-center justify-between text-[#8C9DA6] text-[11px]">
-              <span>First Trade Bonus</span>
-              <CheckCircle2 className="w-3.5 h-3.5 text-[#4ECCA3]" />
-            </div>
-            <div className="text-xl font-bold font-mono text-white">+250 pts</div>
-            <span className="text-[10px] text-[#4ECCA3]">Completed</span>
-          </div>
-
-          <div className="bg-[#121A1E] border border-[#212D33] rounded-xl p-3 flex flex-col gap-1">
-            <div className="flex items-center justify-between text-[#8C9DA6] text-[11px]">
-              <span>Volume Multiplier</span>
-              <Zap className="w-3.5 h-3.5 text-amber-400" />
-            </div>
-            <div className="text-xl font-bold font-mono text-white">1.25x</div>
-            <span className="text-[10px] text-slate-400">Bronze Vanguard Tier</span>
-          </div>
-
-          <div className="bg-[#121A1E] border border-[#212D33] rounded-xl p-3 flex flex-col gap-1">
-            <div className="flex items-center justify-between text-[#8C9DA6] text-[11px]">
-              <span>Referral Network</span>
-              <TrendingUp className="w-3.5 h-3.5 text-cyan-400" />
-            </div>
-            <div className="text-xl font-bold font-mono text-white">+15% Pts</div>
-            <span className="text-[10px] text-slate-400">Invite friends via waitlist</span>
-          </div>
         </div>
       )}
     </div>

@@ -68,17 +68,17 @@ export const OrderPanelConsumer = React.memo<OrderPanelConsumerProps>(function O
   };
 
   return (
-    <div className="flex flex-col shrink-0 rounded-[18px] border border-[var(--border)] bg-[var(--surface)] p-4 gap-4 text-[var(--t1)] select-none">
+    <div className="flex flex-col shrink-0 rounded-none border border-[var(--border)] bg-[var(--surface)] p-4 gap-4 text-[var(--t1)] select-none">
       {/* Friendly Header Badge */}
-      <div className="flex items-center justify-between bg-[var(--surface-3)] border border-[var(--border)] rounded-xl px-3 py-2">
+      <div className="flex items-center justify-between bg-[var(--surface-3)] border border-[var(--border)] rounded-none px-3 py-2">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-[#4ECCA3]/10 border border-[#4ECCA3]/20 flex items-center justify-center text-[#4ECCA3] font-bold text-sm">
+          <div className="w-8 h-8 rounded-none bg-[#4ECCA3]/10 border border-[#4ECCA3]/20 flex items-center justify-center text-[#4ECCA3] font-bold text-sm">
             {currentMarket.name.slice(0, 2)}
           </div>
           <div>
             <div className="text-xs font-semibold text-white flex items-center gap-1.5">
               <span>{currentMarket.name}</span>
-              <span className="text-[10px] font-normal text-[#4ECCA3] bg-[#4ECCA3]/10 px-1.5 py-0.5 rounded">
+              <span className="text-[10px] font-normal text-[#4ECCA3] bg-[#4ECCA3]/10 px-1.5 py-0.5 rounded-none">
                 Live
               </span>
             </div>
@@ -113,7 +113,7 @@ export const OrderPanelConsumer = React.memo<OrderPanelConsumerProps>(function O
           <button
             type="button"
             onClick={() => setIsLong(true)}
-            className={`p-3 rounded-xl border text-left transition-all flex flex-col gap-1 relative cursor-pointer ${
+            className={`p-3 rounded-none border text-left transition-all flex flex-col gap-1 relative cursor-pointer ${
               isLong
                 ? "bg-[#10241E] border-[#4ECCA3] shadow-md shadow-[#4ECCA3]/10"
                 : "bg-[var(--surface-3)] border-[var(--border)] hover:border-[var(--border-strong)] text-[var(--t2)]"
@@ -135,7 +135,7 @@ export const OrderPanelConsumer = React.memo<OrderPanelConsumerProps>(function O
           <button
             type="button"
             onClick={() => setIsLong(false)}
-            className={`p-3 rounded-xl border text-left transition-all flex flex-col gap-1 relative cursor-pointer ${
+            className={`p-3 rounded-none border text-left transition-all flex flex-col gap-1 relative cursor-pointer ${
               !isLong
                 ? "bg-[#251319] border-[var(--red)] shadow-md shadow-[var(--red)]/10"
                 : "bg-[var(--surface-3)] border-[var(--border)] hover:border-[var(--border-strong)] text-[var(--t2)]"
@@ -173,7 +173,7 @@ export const OrderPanelConsumer = React.memo<OrderPanelConsumerProps>(function O
               key={preset.val}
               type="button"
               onClick={() => setLeverage(preset.val)}
-              className={`py-2 px-1 rounded-xl border text-center transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
+              className={`py-2 px-1 rounded-none border text-center transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
                 leverage === preset.val
                   ? "bg-[#182622] border-[#4ECCA3] text-[#4ECCA3] shadow-sm"
                   : "bg-[var(--surface-3)] border-[var(--border)] hover:border-[var(--border-strong)] text-[var(--t2)]"
@@ -199,7 +199,7 @@ export const OrderPanelConsumer = React.memo<OrderPanelConsumerProps>(function O
         </div>
 
         {/* Input box */}
-        <div className="bg-[var(--surface-3)] border border-[var(--border)] focus-within:border-[#4ECCA3]/60 rounded-xl px-3.5 py-2.5 flex items-center justify-between transition-colors">
+        <div className="bg-[var(--surface-3)] border border-[var(--border)] focus-within:border-[#4ECCA3]/60 rounded-none px-3.5 py-2.5 flex items-center justify-between transition-colors">
           <div className="flex items-center gap-1 text-sm font-mono text-[var(--t3)]">
             <span>$</span>
             <input
@@ -210,7 +210,7 @@ export const OrderPanelConsumer = React.memo<OrderPanelConsumerProps>(function O
               className="bg-transparent text-white font-mono text-base font-semibold outline-none w-32"
             />
           </div>
-          <span className="text-xs font-bold text-white bg-[var(--surface)] px-2 py-1 rounded-lg">
+          <span className="text-xs font-bold text-white bg-[var(--surface)] px-2 py-1 rounded-none">
             USDCx
           </span>
         </div>
@@ -222,7 +222,7 @@ export const OrderPanelConsumer = React.memo<OrderPanelConsumerProps>(function O
               key={amt}
               type="button"
               onClick={() => handleQuickAdd(amt)}
-              className={`py-1.5 text-xs font-mono rounded-lg border transition-all cursor-pointer ${
+              className={`py-1.5 text-xs font-mono rounded-none border transition-all cursor-pointer ${
                 marginUsdc === amt
                   ? "bg-[#182622] border-[#4ECCA3] text-[#4ECCA3] font-bold"
                   : "bg-[var(--surface-3)] border-[var(--border)] hover:border-[var(--border-strong)] text-[var(--t2)]"
@@ -235,7 +235,7 @@ export const OrderPanelConsumer = React.memo<OrderPanelConsumerProps>(function O
       </div>
 
       {/* PROJECTED RETURN CARD */}
-      <div className="bg-[var(--surface-3)] border border-[var(--border)] rounded-xl p-3 flex flex-col gap-2 text-xs">
+      <div className="bg-[var(--surface-3)] border border-[var(--border)] rounded-none p-3 flex flex-col gap-2 text-xs">
         <div className="flex items-center justify-between text-[11px] text-[var(--t3)]">
           <span>If {currentMarket.name} moves 5%</span>
           <span className="font-mono font-bold text-[#4ECCA3]">+{estimatedReturnPct}% Return</span>

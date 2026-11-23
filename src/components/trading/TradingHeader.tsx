@@ -8,11 +8,11 @@ import {
   Settings,
 } from "lucide-react";
 import { AlvionBirdLogo } from "@/components/brand/AlvionBirdLogo";
-import { useTradingStore } from "@/stores/useTradingStore";
+import { useTradingStore, type ActiveTab } from "@/stores/useTradingStore";
 
 interface TradingHeaderProps {
-  activeTab: "trade" | "orderbook" | "vault" | "docs";
-  setActiveTab: (tab: "trade" | "orderbook" | "vault" | "docs") => void;
+  activeTab: ActiveTab;
+  setActiveTab: (tab: ActiveTab) => void;
   walletBalance: number;
   faucetWallet: (amount: number) => void;
   isConnected: boolean;
@@ -32,7 +32,7 @@ export const TradingHeader = React.memo<TradingHeaderProps>(function TradingHead
   connectWallet,
   disconnect,
 }) {
-  const { tradingMode, setTradingMode } = useTradingStore();
+  const { tradingMode, setTradingMode, credits } = useTradingStore();
   const [showWarning, setShowWarning] = useState(true);
 
   return (
@@ -67,7 +67,7 @@ export const TradingHeader = React.memo<TradingHeaderProps>(function TradingHead
           <Link
             href="/"
             aria-label="Alvion home"
-            className="brand-lockup flex items-center gap-2.5 shrink-0 rounded-[10px] cursor-pointer font-semibold tracking-[-0.01em] text-[var(--t1)] group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--fixed-green)]"
+            className="brand-lockup flex items-center gap-2.5 shrink-0 rounded-none cursor-pointer font-semibold tracking-[-0.01em] text-[var(--t1)] group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--fixed-green)]"
           >
             <AlvionBirdLogo
               size={28}
@@ -110,6 +110,22 @@ export const TradingHeader = React.memo<TradingHeaderProps>(function TradingHead
               <span>Vault</span>
             </button>
 
+            <button
+              onClick={() => setActiveTab("credits")}
+              aria-label="Credits"
+              aria-current={activeTab === "credits" ? "page" : undefined}
+              className={`inline-flex items-center gap-1.5 px-[14px] py-[6px] rounded-none text-[13px] tracking-[-0.005em] transition-colors cursor-pointer ${
+                activeTab === "credits"
+                  ? "bg-[var(--surface)] text-[var(--t1)] font-semibold shadow-[0_1px_3px_rgba(0,0,0,.25)]"
+                  : "text-[var(--t2)] hover:text-[var(--t1)] font-normal"
+              }`}
+            >
+              <span>Credits</span>
+              <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-none bg-[#4ECCA3]/10 text-[#4ECCA3] border border-[#4ECCA3]/25">
+                {credits}
+              </span>
+            </button>
+
             <Link
               href="/waitlist"
               className="inline-flex items-center px-[14px] py-[6px] rounded-none text-[13px] tracking-[-0.005em] transition-colors cursor-pointer text-[var(--t2)] hover:text-[var(--t1)] font-normal"
@@ -121,6 +137,20 @@ export const TradingHeader = React.memo<TradingHeaderProps>(function TradingHead
 
         {/* Right: Controls & Wallet */}
         <div className="flex items-center gap-[10px] min-w-0">
+          {/* Mobile Credits Chip */}
+          <button
+            type="button"
+            onClick={() => setActiveTab("credits")}
+            aria-label="View Credits"
+            className={`md:hidden flex items-center gap-1 px-2.5 py-1 rounded-none border text-xs font-mono font-semibold transition-colors cursor-pointer ${
+              activeTab === "credits"
+                ? "bg-[#162922] border-[#4ECCA3] text-[#4ECCA3]"
+                : "bg-[var(--surface-3)] border-[var(--border)] text-[var(--t2)] hover:text-white"
+            }`}
+          >
+            <span>{credits} CR</span>
+          </button>
+
           {/* Dual Experience Mode Switcher (Consumer / Pro) */}
           <div className="flex items-center bg-[var(--surface-3)] p-[3px] rounded-none border border-[var(--border)] text-xs">
             <button

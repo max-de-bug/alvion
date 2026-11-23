@@ -75,6 +75,8 @@ export function useTradingDashboard() {
     vaultLiquidity,
     vaultNetSkew,
     vaultApr,
+    credits,
+    setCredits,
   } = useTradingStore();
 
   // 1. Fetch live markets from Hyperliquid backend API via TanStack Query
@@ -446,6 +448,8 @@ export function useTradingDashboard() {
     vaultLiquidity,
     vaultNetSkew,
     vaultApr,
+    credits,
+    setCredits,
 
     // Market and Engine data
     markets,

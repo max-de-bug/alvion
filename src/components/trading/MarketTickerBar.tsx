@@ -53,7 +53,7 @@ export const MarketTickerBar = React.memo<MarketTickerBarProps>(function MarketT
 
   return (
     <div className="container-in container-in-1 relative z-20 shrink-0 mb-3">
-      <div className="h-[60px] rounded-[18px] border border-[var(--border)] bg-[var(--surface)] shadow-lg">
+      <div className="h-[60px] rounded-none border border-[var(--border)] bg-[var(--surface)] shadow-lg">
         <div className="strip-scroll flex h-full items-center gap-4 px-3 overflow-x-auto [scrollbar-width:none]">
           {/* Market Selector Pill */}
           <div className="shrink-0 relative">
@@ -80,7 +80,7 @@ export const MarketTickerBar = React.memo<MarketTickerBarProps>(function MarketT
             </button>
 
             {showMarketMenu && (
-              <div className="absolute top-12 left-0 z-50 w-64 bg-[var(--surface)] border border-[var(--border-strong)] rounded-2xl p-2 shadow-2xl text-xs flex flex-col gap-1">
+              <div className="absolute top-12 left-0 z-50 w-64 bg-[var(--surface)] border border-[var(--border-strong)] rounded-none p-2 shadow-2xl text-xs flex flex-col gap-1">
                 {[
                   { sym: "BTC", name: "Bitcoin", lev: "50x" },
                   { sym: "ETH", name: "Ethereum", lev: "50x" },
@@ -96,7 +96,7 @@ export const MarketTickerBar = React.memo<MarketTickerBarProps>(function MarketT
                       setSelectedMarketName(item.sym);
                       setShowMarketMenu(false);
                     }}
-                    className={`flex items-center justify-between px-3 py-2 rounded-xl text-left transition-colors cursor-pointer ${
+                    className={`flex items-center justify-between px-3 py-2 rounded-none text-left transition-colors cursor-pointer ${
                       selectedMarketName === item.sym
                         ? "bg-[var(--surface-3)] text-[#4ECCA3] font-semibold"
                         : "text-[var(--t1)] hover:bg-[var(--hover)]"

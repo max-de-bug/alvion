@@ -46,7 +46,7 @@ export const OrderBookView = React.memo<OrderBookViewProps>(function OrderBookVi
 
   return (
     <div
-      className="flex flex-col shrink-0 rounded-[18px] border border-[var(--border)] bg-[var(--surface)] overflow-hidden max-md:w-full select-none shadow-lg"
+      className="flex flex-col shrink-0 rounded-none border border-[var(--border)] bg-[var(--surface)] overflow-hidden max-md:w-full select-none shadow-lg"
       style={{ width: "230px" }}
     >
       <div className="trade-ob-in flex flex-col flex-1 min-h-0">
@@ -57,22 +57,20 @@ export const OrderBookView = React.memo<OrderBookViewProps>(function OrderBookVi
               <button
                 type="button"
                 onClick={() => setActiveTab("book")}
-                className={`px-2.5 py-1 rounded-none text-[10.5px] font-semibold tracking-[.06em] transition-colors cursor-pointer ${
-                  activeTab === "book"
+                className={`px-2.5 py-1 rounded-none text-[10.5px] font-semibold tracking-[.06em] transition-colors cursor-pointer ${activeTab === "book"
                     ? "bg-[var(--surface-3)] text-[var(--t1)]"
                     : "text-[var(--t2)] hover:text-[var(--t1)]"
-                }`}
+                  }`}
               >
                 Book
               </button>
               <button
                 type="button"
                 onClick={() => setActiveTab("trades")}
-                className={`px-2.5 py-1 rounded-none text-[10.5px] font-semibold tracking-[.06em] transition-colors cursor-pointer ${
-                  activeTab === "trades"
+                className={`px-2.5 py-1 rounded-none text-[10.5px] font-semibold tracking-[.06em] transition-colors cursor-pointer ${activeTab === "trades"
                     ? "bg-[var(--surface-3)] text-[var(--t1)]"
                     : "text-[var(--t2)] hover:text-[var(--t1)]"
-                }`}
+                  }`}
               >
                 Trades
               </button>

@@ -9,7 +9,7 @@ export const TradingFooter = React.memo(function TradingFooter() {
   return (
     <footer
       role="contentinfo"
-      className="flex items-center justify-between gap-4 mx-3 mb-3 px-5 py-3 rounded-[18px] border border-[var(--border)] bg-[var(--surface)] text-[var(--t1)] select-none"
+      className="flex items-center justify-between gap-4 mx-3 mb-3 px-5 py-3 rounded-none border border-[var(--border)] bg-[var(--surface)] text-[var(--t1)] select-none"
     >
       {/* Left: Brand & Latency */}
       <div className="flex items-center gap-3">

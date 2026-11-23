@@ -12,5 +12,6 @@ export { OrderPanelPro } from "./OrderPanelPro";
 export { OrderPanelConsumer } from "./OrderPanelConsumer";
 export { FullOrderBookTab } from "./FullOrderBookTab";
 export { VaultBackstopTab } from "./VaultBackstopTab";
+export { CreditsTab } from "./CreditsTab";
 export { ArchitectureDocsTab } from "./ArchitectureDocsTab";
 export { TradingFooter } from "./TradingFooter";
