@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import {
   X,
@@ -34,34 +34,50 @@ export const TradingHeader = React.memo<TradingHeaderProps>(function TradingHead
 }) {
   const { tradingMode, setTradingMode, credits } = useTradingStore();
   const [showWarning, setShowWarning] = useState(true);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const [headerHeight, setHeaderHeight] = useState<number>(showWarning ? 88 : 56);
+
+  useEffect(() => {
+    if (!headerRef.current) return;
+    const updateHeight = () => {
+      if (headerRef.current) {
+        setHeaderHeight(headerRef.current.getBoundingClientRect().height);
+      }
+    };
+    updateHeight();
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(headerRef.current);
+    return () => observer.disconnect();
+  }, [showWarning]);
 
   return (
-    <div className="sticky top-0 z-40 flex flex-col">
-      {/* 1. Dismissible Testnet Banner */}
-      {showWarning && (
-        <div
-          role="status"
-          className="relative z-20 flex items-center justify-center gap-2 border-b border-[var(--border)] bg-[var(--warn-soft)] px-10 py-[6px]"
-        >
-          <span className="text-[12px] font-semibold tracking-[0.02em] text-[var(--warn)]">
-            Testnet environment: funds and data are not real
-          </span>
-          <button
-            type="button"
-            aria-label="Dismiss"
-            onClick={() => setShowWarning(false)}
-            className="absolute right-2 grid size-[24px] cursor-pointer place-items-center rounded-none text-[var(--warn)] transition-colors hover:bg-[var(--hover)] focus-visible:outline-none"
+    <>
+      <div ref={headerRef} className="fixed top-0 left-0 right-0 z-40 flex flex-col w-full">
+        {/* 1. Dismissible Testnet Banner */}
+        {showWarning && (
+          <div
+            role="status"
+            className="relative z-20 flex items-center justify-center gap-2 border-b border-[var(--border)] bg-[var(--warn-soft)] px-10 py-[6px]"
           >
-            <X className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      )}
+            <span className="text-[12px] font-semibold tracking-[0.02em] text-[var(--warn)]">
+              Testnet environment: funds and data are not real
+            </span>
+            <button
+              type="button"
+              aria-label="Dismiss"
+              onClick={() => setShowWarning(false)}
+              className="absolute right-2 grid size-[24px] cursor-pointer place-items-center rounded-none text-[var(--warn)] transition-colors hover:bg-[var(--hover)] focus-visible:outline-none"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
 
-      {/* 2. Main Header */}
-      <header
-        role="banner"
-        className="flex items-center justify-between gap-[14px] px-[12px] sm:px-[20px] h-[var(--header-h)] border-b border-[var(--border)] bg-[rgba(10,10,12,0.85)] [backdrop-filter:blur(14px)_saturate(1.8)] [-webkit-backdrop-filter:blur(14px)_saturate(1.8)]"
-      >
+        {/* 2. Main Header */}
+        <header
+          role="banner"
+          className="flex items-center justify-between gap-[14px] px-[12px] sm:px-[20px] h-[var(--header-h)] border-b border-[var(--border)] bg-[rgba(10,10,12,0.85)] [backdrop-filter:blur(14px)_saturate(1.8)] [-webkit-backdrop-filter:blur(14px)_saturate(1.8)]"
+        >
         {/* Left: Alvion Brand Lockup & Nav Tabs */}
         <div className="flex items-center gap-[16px] min-w-0">
           <Link
@@ -229,5 +245,8 @@ export const TradingHeader = React.memo<TradingHeaderProps>(function TradingHead
         </div>
       </header>
     </div>
+    {/* Spacer to preserve normal document flow beneath fixed navbar */}
+    <div style={{ height: headerHeight }} aria-hidden="true" className="shrink-0 pointer-events-none" />
+  </>
   );
 });

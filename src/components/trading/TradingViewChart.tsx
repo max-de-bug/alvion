@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useId } from "react";
 import { ChevronRight, Loader2 } from "lucide-react";
 import type { Timeframe } from "@/stores/useTradingStore";
 
@@ -84,8 +84,9 @@ export const TradingViewChart = React.memo<TradingViewChartProps>(function Tradi
   setShowDrawingTools,
   className = "",
 }) {
+  const chartId = useId().replace(/:/g, "_");
   const containerRef = useRef<HTMLDivElement>(null);
-  const widgetContainerIdRef = useRef(`tv_chart_${Math.random().toString(36).substring(2, 9)}`);
+  const widgetContainerIdRef = useRef<string>(`tv_chart_${chartId}`);
   const [isLoading, setIsLoading] = useState(true);
 
   const tvSymbol = getTradingViewSymbol(marketName);
@@ -99,8 +100,8 @@ export const TradingViewChart = React.memo<TradingViewChartProps>(function Tradi
     setIsLoading(true);
     container.innerHTML = "";
 
-    // Generate unique container id for this render instance
-    const currentContainerId = `tv_chart_${Math.random().toString(36).substring(2, 9)}`;
+    // Unique container id for this render instance
+    const currentContainerId = `tv_chart_${chartId}`;
     widgetContainerIdRef.current = currentContainerId;
 
     const widgetDiv = document.createElement("div");
