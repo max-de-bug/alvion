@@ -129,8 +129,8 @@ export const MarketSelectorModal = React.memo<MarketSelectorModalProps>(function
         name: sym,
         category: "CRYPTO",
         exchangeBadge: "Robinhood Chain",
-        maxLeverage: m.maxLeverage || 50,
-        initialMarginPct: 5,
+        maxLeverage: m.maxLeverage || 1000,
+        initialMarginPct: 0.1,
         is24x7: true,
       };
       list.push({ ...m, name: sym, meta });
@@ -531,7 +531,7 @@ export const MarketSelectorModal = React.memo<MarketSelectorModalProps>(function
                         {m.name}-USDCX
                       </span>
                       <span className="text-[9.5px] font-mono px-1 py-0.2 rounded-none bg-[#1C262B] border border-[#26343C] text-[#8C9DA6]">
-                        {m.meta.maxLeverage || 20}x
+                        {m.meta.maxLeverage || 1000}x
                       </span>
                     </div>
                     <div className="flex items-center gap-1.5 text-[10.5px] text-[#728087] truncate">

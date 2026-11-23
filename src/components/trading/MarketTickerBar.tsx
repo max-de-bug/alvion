@@ -110,8 +110,8 @@ export const MarketTickerBar = React.memo<MarketTickerBarProps>(function MarketT
               <span className="font-semibold tracking-[-0.01em] text-[var(--t1)] text-[14.5px]">
                 {selectedMarketName}-USDCX
               </span>
-              <span className="lev-tag" aria-label={`Up to ${marketMeta.maxLeverage || 20}x leverage`}>
-                {marketMeta.maxLeverage || 20}x
+              <span className="lev-tag" aria-label={`Up to ${marketMeta.maxLeverage || 1000}x leverage`}>
+                {marketMeta.maxLeverage || 1000}x
               </span>
               <ChevronDown
                 className={`w-4 h-4 text-[var(--t3)] transition-transform duration-200 ${

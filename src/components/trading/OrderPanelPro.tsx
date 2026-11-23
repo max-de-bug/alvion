@@ -40,7 +40,7 @@ interface OrderPanelProProps {
   onExecuteTrade: () => void;
 }
 
-const LEVERAGE_PRESETS = [2, 5, 10, 20, 25, 50, 100];
+const LEVERAGE_PRESETS = [5, 25, 50, 100, 250, 500, 1000];
 const SLIPPAGE_PRESETS = [0.1, 0.5, 1, 3];
 
 export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelPro({
@@ -278,18 +278,33 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
             <div className="absolute top-[44px] left-0 right-0 z-50 bg-[#161d21] border border-[var(--border-strong)] rounded-none p-3 shadow-2xl flex flex-col gap-3 backdrop-blur-md">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-[var(--t1)]">Adjust Leverage</span>
-                <span className="font-mono text-sm font-bold text-[var(--fixed-green)]">{leverage}x</span>
+                <div className="flex items-center gap-1.5">
+                  <input
+                    type="number"
+                    min="1"
+                    max={currentMarket.maxLeverage || 1000}
+                    value={leverage}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value, 10);
+                      if (!isNaN(val)) {
+                        setLeverage(Math.min(currentMarket.maxLeverage || 1000, Math.max(1, val)));
+                      }
+                    }}
+                    className="w-16 h-6 px-1.5 bg-[#0e1417] border border-[#232e34] rounded-none font-mono text-xs font-bold text-[var(--fixed-green)] text-right outline-none focus:border-[var(--fixed-green)]"
+                  />
+                  <span className="font-mono text-xs font-bold text-[var(--fixed-green)]">x</span>
+                </div>
               </div>
               <input
                 type="range"
                 min="1"
-                max={currentMarket.maxLeverage || 50}
+                max={currentMarket.maxLeverage || 1000}
                 value={leverage}
                 onChange={(e) => setLeverage(Number(e.target.value))}
                 className="w-full accent-[var(--fixed-green)] cursor-pointer"
               />
-              <div className="grid grid-cols-4 gap-1.5">
-                {LEVERAGE_PRESETS.filter((p) => p <= (currentMarket.maxLeverage || 50)).map((preset) => (
+              <div className="grid grid-cols-4 sm:grid-cols-7 gap-1">
+                {LEVERAGE_PRESETS.filter((p) => p <= (currentMarket.maxLeverage || 1000)).map((preset) => (
                   <button
                     key={preset}
                     type="button"
@@ -297,7 +312,7 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
                       setLeverage(preset);
                       setShowLeverageModal(false);
                     }}
-                    className={`py-1.5 rounded-none text-xs font-mono font-medium transition-colors cursor-pointer ${leverage === preset
+                    className={`py-1 rounded-none text-[11px] font-mono font-medium transition-colors cursor-pointer ${leverage === preset
                         ? "bg-[var(--fixed-green)] text-slate-950 font-bold"
                         : "bg-[var(--surface-3)] text-[var(--t2)] hover:text-white"
                       }`}
@@ -306,6 +321,12 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
                   </button>
                 ))}
               </div>
+              {leverage >= 250 && (
+                <div className="text-[10px] text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-1 rounded-none flex items-center justify-between">
+                  <span>Ultra-High Leverage: Fast liquidation buffer</span>
+                  <span className="font-mono font-bold">{leverage}x</span>
+                </div>
+              )}
             </div>
           )}
 
@@ -811,7 +832,9 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
 
           <div className="flex items-center justify-between">
             <span className="text-[var(--t3)]">Maint. margin</span>
-            <span className="font-mono tabular-nums font-semibold text-[var(--t1)]">2.5%</span>
+            <span className="font-mono tabular-nums font-semibold text-[var(--t1)]">
+              {(Math.min(0.008, 0.4 / Math.max(1, leverage)) * 100).toFixed(2)}%
+            </span>
           </div>
 
           <div className="flex items-center justify-between">

@@ -54,7 +54,7 @@ export const CANONICAL_ROBINHOOD_STOCK_TOKENS: RobinhoodStockToken[] = [
     },
     status: "ASSET_STATUS_ACTIVE",
     defaultPrice: 228.45,
-    maxLeverage: 10,
+    maxLeverage: 1000,
     category: "EQUITY",
   },
   {
@@ -78,7 +78,7 @@ export const CANONICAL_ROBINHOOD_STOCK_TOKENS: RobinhoodStockToken[] = [
     },
     status: "ASSET_STATUS_ACTIVE",
     defaultPrice: 388.92,
-    maxLeverage: 10,
+    maxLeverage: 1000,
     category: "EQUITY",
   },
   {
@@ -102,7 +102,7 @@ export const CANONICAL_ROBINHOOD_STOCK_TOKENS: RobinhoodStockToken[] = [
     },
     status: "ASSET_STATUS_ACTIVE",
     defaultPrice: 164.20,
-    maxLeverage: 10,
+    maxLeverage: 1000,
     category: "EQUITY",
   },
   {
@@ -126,7 +126,7 @@ export const CANONICAL_ROBINHOOD_STOCK_TOKENS: RobinhoodStockToken[] = [
     },
     status: "ASSET_STATUS_ACTIVE",
     defaultPrice: 754.37,
-    maxLeverage: 20,
+    maxLeverage: 1000,
     category: "EQUITY",
   },
   {
@@ -150,7 +150,7 @@ export const CANONICAL_ROBINHOOD_STOCK_TOKENS: RobinhoodStockToken[] = [
     },
     status: "ASSET_STATUS_ACTIVE",
     defaultPrice: 512.40,
-    maxLeverage: 20,
+    maxLeverage: 1000,
     category: "EQUITY",
   },
   {
@@ -174,7 +174,7 @@ export const CANONICAL_ROBINHOOD_STOCK_TOKENS: RobinhoodStockToken[] = [
     },
     status: "ASSET_STATUS_ACTIVE",
     defaultPrice: 9.85,
-    maxLeverage: 10,
+    maxLeverage: 1000,
     category: "EQUITY",
   },
   {
@@ -198,7 +198,7 @@ export const CANONICAL_ROBINHOOD_STOCK_TOKENS: RobinhoodStockToken[] = [
     },
     status: "ASSET_STATUS_ACTIVE",
     defaultPrice: 428.15,
-    maxLeverage: 10,
+    maxLeverage: 1000,
     category: "EQUITY",
   },
   {
@@ -222,7 +222,7 @@ export const CANONICAL_ROBINHOOD_STOCK_TOKENS: RobinhoodStockToken[] = [
     },
     status: "ASSET_STATUS_ACTIVE",
     defaultPrice: 214.30,
-    maxLeverage: 10,
+    maxLeverage: 1000,
     category: "EQUITY",
   },
   {
@@ -246,7 +246,7 @@ export const CANONICAL_ROBINHOOD_STOCK_TOKENS: RobinhoodStockToken[] = [
     },
     status: "ASSET_STATUS_ACTIVE",
     defaultPrice: 184.50,
-    maxLeverage: 10,
+    maxLeverage: 1000,
     category: "EQUITY",
   },
   {
@@ -270,7 +270,7 @@ export const CANONICAL_ROBINHOOD_STOCK_TOKENS: RobinhoodStockToken[] = [
     },
     status: "ASSET_STATUS_ACTIVE",
     defaultPrice: 642.80,
-    maxLeverage: 10,
+    maxLeverage: 1000,
     category: "EQUITY",
   },
   {
@@ -294,7 +294,7 @@ export const CANONICAL_ROBINHOOD_STOCK_TOKENS: RobinhoodStockToken[] = [
     },
     status: "ASSET_STATUS_ACTIVE",
     defaultPrice: 228.60,
-    maxLeverage: 10,
+    maxLeverage: 1000,
     category: "EQUITY",
   },
   {
@@ -318,7 +318,7 @@ export const CANONICAL_ROBINHOOD_STOCK_TOKENS: RobinhoodStockToken[] = [
     },
     status: "ASSET_STATUS_ACTIVE",
     defaultPrice: 320.10,
-    maxLeverage: 10,
+    maxLeverage: 1000,
     category: "EQUITY",
   },
   {
@@ -342,7 +342,7 @@ export const CANONICAL_ROBINHOOD_STOCK_TOKENS: RobinhoodStockToken[] = [
     },
     status: "ASSET_STATUS_ACTIVE",
     defaultPrice: 37.85,
-    maxLeverage: 10,
+    maxLeverage: 1000,
     category: "EQUITY",
   },
   {
@@ -366,7 +366,7 @@ export const CANONICAL_ROBINHOOD_STOCK_TOKENS: RobinhoodStockToken[] = [
     },
     status: "ASSET_STATUS_ACTIVE",
     defaultPrice: 65.40,
-    maxLeverage: 10,
+    maxLeverage: 1000,
     category: "EQUITY",
   },
   {
@@ -390,7 +390,7 @@ export const CANONICAL_ROBINHOOD_STOCK_TOKENS: RobinhoodStockToken[] = [
     },
     status: "ASSET_STATUS_ACTIVE",
     defaultPrice: 142.10,
-    maxLeverage: 10,
+    maxLeverage: 1000,
     category: "EQUITY",
   },
   {
@@ -414,7 +414,7 @@ export const CANONICAL_ROBINHOOD_STOCK_TOKENS: RobinhoodStockToken[] = [
     },
     status: "ASSET_STATUS_ACTIVE",
     defaultPrice: 875.20,
-    maxLeverage: 10,
+    maxLeverage: 1000,
     category: "EQUITY",
   },
 ];
@@ -468,7 +468,7 @@ export async function fetchRobinhoodStockTokens(): Promise<RobinhoodStockToken[]
             },
             status: (a.status as "ASSET_STATUS_ACTIVE") || "ASSET_STATUS_ACTIVE",
             defaultPrice: fallback?.defaultPrice || 100,
-            maxLeverage: fallback?.maxLeverage || 10,
+            maxLeverage: fallback?.maxLeverage || 1000,
             category: "EQUITY",
           };
         });

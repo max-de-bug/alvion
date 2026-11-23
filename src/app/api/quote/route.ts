@@ -25,9 +25,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (leverage < 1 || leverage > 100) {
+    if (leverage < 1 || leverage > 1000) {
       return NextResponse.json(
-        { success: false, error: "Leverage must be between 1x and 100x" },
+        { success: false, error: "Leverage must be between 1x and 1000x" },
         { status: 400 }
       );
     }

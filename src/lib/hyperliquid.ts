@@ -55,26 +55,26 @@ const ROBINHOOD_USDC_ADDRESS = "0x538d689255850901eC5A206A2a9d80d283A44919";
 
 export async function fetchNyseEquities(): Promise<MarketContext[]> {
   const equityDefs = [
-    { name: "SPY", maxLeverage: 20, fallbackPx: 754.37, szDecimals: 2 },
-    { name: "NVDA", maxLeverage: 10, fallbackPx: 162.85, szDecimals: 2 },
-    { name: "TSLA", maxLeverage: 10, fallbackPx: 390.22, szDecimals: 2 },
-    { name: "AAPL", maxLeverage: 10, fallbackPx: 356.27, szDecimals: 2 },
-    { name: "QQQ", maxLeverage: 20, fallbackPx: 512.40, szDecimals: 2 },
-    { name: "MSFT", maxLeverage: 10, fallbackPx: 428.15, szDecimals: 2 },
-    { name: "AMZN", maxLeverage: 10, fallbackPx: 214.30, szDecimals: 2 },
-    { name: "GOOGL", maxLeverage: 10, fallbackPx: 184.50, szDecimals: 2 },
-    { name: "META", maxLeverage: 10, fallbackPx: 642.80, szDecimals: 2 },
-    { name: "COIN", maxLeverage: 10, fallbackPx: 228.60, szDecimals: 2 },
-    { name: "MSTR", maxLeverage: 10, fallbackPx: 320.10, szDecimals: 2 },
-    { name: "APLD", maxLeverage: 10, fallbackPx: 28.45, szDecimals: 2 },
-    { name: "HOOD", maxLeverage: 10, fallbackPx: 37.85, szDecimals: 2 },
-    { name: "PLTR", maxLeverage: 10, fallbackPx: 65.40, szDecimals: 2 },
-    { name: "AMD", maxLeverage: 10, fallbackPx: 142.10, szDecimals: 2 },
-    { name: "NFLX", maxLeverage: 10, fallbackPx: 875.20, szDecimals: 2 },
-    { name: "NATGAS", maxLeverage: 50, fallbackPx: 2.842, szDecimals: 3 },
-    { name: "CRUDE", maxLeverage: 50, fallbackPx: 71.24, szDecimals: 2 },
-    { name: "GOLD", maxLeverage: 50, fallbackPx: 2742.60, szDecimals: 2 },
-    { name: "SILVER", maxLeverage: 50, fallbackPx: 31.85, szDecimals: 3 },
+    { name: "SPY", maxLeverage: 1000, fallbackPx: 754.37, szDecimals: 2 },
+    { name: "NVDA", maxLeverage: 1000, fallbackPx: 162.85, szDecimals: 2 },
+    { name: "TSLA", maxLeverage: 1000, fallbackPx: 390.22, szDecimals: 2 },
+    { name: "AAPL", maxLeverage: 1000, fallbackPx: 356.27, szDecimals: 2 },
+    { name: "QQQ", maxLeverage: 1000, fallbackPx: 512.40, szDecimals: 2 },
+    { name: "MSFT", maxLeverage: 1000, fallbackPx: 428.15, szDecimals: 2 },
+    { name: "AMZN", maxLeverage: 1000, fallbackPx: 214.30, szDecimals: 2 },
+    { name: "GOOGL", maxLeverage: 1000, fallbackPx: 184.50, szDecimals: 2 },
+    { name: "META", maxLeverage: 1000, fallbackPx: 642.80, szDecimals: 2 },
+    { name: "COIN", maxLeverage: 1000, fallbackPx: 228.60, szDecimals: 2 },
+    { name: "MSTR", maxLeverage: 1000, fallbackPx: 320.10, szDecimals: 2 },
+    { name: "APLD", maxLeverage: 1000, fallbackPx: 28.45, szDecimals: 2 },
+    { name: "HOOD", maxLeverage: 1000, fallbackPx: 37.85, szDecimals: 2 },
+    { name: "PLTR", maxLeverage: 1000, fallbackPx: 65.40, szDecimals: 2 },
+    { name: "AMD", maxLeverage: 1000, fallbackPx: 142.10, szDecimals: 2 },
+    { name: "NFLX", maxLeverage: 1000, fallbackPx: 875.20, szDecimals: 2 },
+    { name: "NATGAS", maxLeverage: 1000, fallbackPx: 2.842, szDecimals: 3 },
+    { name: "CRUDE", maxLeverage: 1000, fallbackPx: 71.24, szDecimals: 2 },
+    { name: "GOLD", maxLeverage: 1000, fallbackPx: 2742.60, szDecimals: 2 },
+    { name: "SILVER", maxLeverage: 1000, fallbackPx: 31.85, szDecimals: 3 },
   ];
 
   const results: MarketContext[] = [];
@@ -174,7 +174,7 @@ export async function fetchHyperliquidMarkets(): Promise<MarketContext[]> {
         markets.push({
           name: u.name,
           szDecimals: u.szDecimals,
-          maxLeverage: Math.min(100, Math.max(u.maxLeverage || 50, 100)),
+          maxLeverage: 1000,
           oraclePx,
           markPx,
           midPx,
@@ -204,7 +204,7 @@ export async function fetchHyperliquidMarkets(): Promise<MarketContext[]> {
       {
         name: "SPY",
         szDecimals: 2,
-        maxLeverage: 20,
+        maxLeverage: 1000,
         oraclePx: 754.37,
         markPx: 754.37,
         midPx: 754.37,
@@ -219,7 +219,7 @@ export async function fetchHyperliquidMarkets(): Promise<MarketContext[]> {
       {
         name: "NVDA",
         szDecimals: 2,
-        maxLeverage: 10,
+        maxLeverage: 1000,
         oraclePx: 162.85,
         markPx: 162.85,
         midPx: 162.85,
@@ -234,7 +234,7 @@ export async function fetchHyperliquidMarkets(): Promise<MarketContext[]> {
       {
         name: "TSLA",
         szDecimals: 2,
-        maxLeverage: 10,
+        maxLeverage: 1000,
         oraclePx: 390.22,
         markPx: 390.22,
         midPx: 390.22,
@@ -249,7 +249,7 @@ export async function fetchHyperliquidMarkets(): Promise<MarketContext[]> {
       {
         name: "AAPL",
         szDecimals: 2,
-        maxLeverage: 10,
+        maxLeverage: 1000,
         oraclePx: 356.27,
         markPx: 356.27,
         midPx: 356.27,
@@ -264,7 +264,7 @@ export async function fetchHyperliquidMarkets(): Promise<MarketContext[]> {
       {
         name: "SOL",
         szDecimals: 2,
-        maxLeverage: 50,
+        maxLeverage: 1000,
         oraclePx: 142.5,
         markPx: 142.45,
         midPx: 142.48,
@@ -279,7 +279,7 @@ export async function fetchHyperliquidMarkets(): Promise<MarketContext[]> {
       {
         name: "BTC",
         szDecimals: 4,
-        maxLeverage: 100,
+        maxLeverage: 1000,
         oraclePx: 64550.0,
         markPx: 64530.0,
         midPx: 64520.0,
@@ -294,7 +294,7 @@ export async function fetchHyperliquidMarkets(): Promise<MarketContext[]> {
       {
         name: "ETH",
         szDecimals: 3,
-        maxLeverage: 100,
+        maxLeverage: 1000,
         oraclePx: 2680.0,
         markPx: 2678.5,
         midPx: 2679.0,
@@ -355,15 +355,18 @@ export function calculateQuote(
 
   const priceImpactPct = (totalSpreadBps / 100);
 
-  // Maintenance margin: 0.8% (allows up to 100x leverage)
-  const maintenanceMarginRate = 0.008;
+  // Maintenance margin rate dynamically scales with leverage (supports up to 1000x leverage).
+  // For standard leverage (<=50x), maintenance margin is ~0.8%.
+  // For ultra-high leverage (up to 1000x), maintenance margin scales to 40% of initial margin
+  // ensuring maxLossRatio remains positive (e.g. at 1000x: initial margin = 0.1%, maintenance = 0.04%, maxLossRatio = 0.06%).
+  const maintenanceMarginRate = Math.min(0.008, 0.4 / leverage);
 
   // Liquidation Price calculation (standard formula):
   // Long liq: entryPrice * (1 - (1/leverage) + maintenanceMarginRate)
   // Short liq: entryPrice * (1 + (1/leverage) - maintenanceMarginRate)
-  const maxLossRatio = (1 / leverage) - maintenanceMarginRate;
+  const maxLossRatio = Math.max(0.0001, (1 / leverage) - maintenanceMarginRate);
   const liquidationPrice = isLong
-    ? executionPrice * Math.max(0.01, (1 - maxLossRatio))
+    ? executionPrice * Math.max(0.001, (1 - maxLossRatio))
     : executionPrice * (1 + maxLossRatio);
 
   // Trading fee: 6 bps of notional

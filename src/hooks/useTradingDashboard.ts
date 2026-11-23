@@ -34,7 +34,7 @@ const DEFAULT_MARKET: MarketContext = {
   dayVolumeUsd: 184500000,
   openInterest: 42800000,
   szDecimals: 4,
-  maxLeverage: 50,
+  maxLeverage: 1000,
   impactBidPx: 67445.0,
   impactAskPx: 67452.0,
 };
@@ -115,8 +115,8 @@ export function useTradingDashboard() {
     name: selectedMarketName,
     category: "CRYPTO",
     exchangeBadge: "Robinhood L2",
-    maxLeverage: currentMarket.maxLeverage || 50,
-    initialMarginPct: 5,
+    maxLeverage: currentMarket.maxLeverage || 1000,
+    initialMarginPct: 0.1,
     is24x7: true,
   };
   const isEquity = marketMeta.category === "EQUITY";

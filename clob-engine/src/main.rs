@@ -160,6 +160,19 @@ async fn handle_submit_order(
     let mut eng = engine.lock().unwrap();
 
     let order_id = format!("ORD-{}", Uuid::new_v4().simple());
+    if payload.leverage == 0 || payload.leverage > 1000 {
+        return (
+            StatusCode::BAD_REQUEST,
+            Json(SubmitOrderResponse {
+                success: false,
+                order_id: "".to_string(),
+                status: "REJECTED_INVALID_LEVERAGE".to_string(),
+                trades_count: 0,
+                trades: Vec::new(),
+                position: None,
+            }),
+        );
+    }
     let side = if payload.is_long { Side::Buy } else { Side::Sell };
     let order_type = match payload.order_type.to_uppercase().as_str() {
         "MARKET" => OrderType::Market,

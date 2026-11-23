@@ -19,10 +19,12 @@ interface OrderPanelConsumerProps {
 }
 
 const CONSUMER_LEVERAGE_PRESETS = [
-  { val: 2, label: "2x", tag: "Low Risk", tip: "Safe & stable" },
-  { val: 5, label: "5x", tag: "Popular", tip: "Balanced exposure" },
-  { val: 10, label: "10x", tag: "High", tip: "Fast swings" },
-  { val: 25, label: "25x", tag: "Max", tip: "Maximum boost" },
+  { val: 5, label: "5x", tag: "Safe", tip: "Balanced exposure" },
+  { val: 25, label: "25x", tag: "Popular", tip: "Dynamic swings" },
+  { val: 100, label: "100x", tag: "High", tip: "Fast momentum" },
+  { val: 250, label: "250x", tag: "Pro", tip: "High responsiveness" },
+  { val: 500, label: "500x", tag: "Ultra", tip: "Extreme boost" },
+  { val: 1000, label: "1000x", tag: "Max", tip: "1000x Maximum Power" },
 ];
 
 const QUICK_AMOUNTS = [25, 50, 100, 250, 500];
@@ -167,7 +169,7 @@ export const OrderPanelConsumer = React.memo<OrderPanelConsumerProps>(function O
           </span>
         </div>
 
-        <div className="grid grid-cols-4 gap-1.5">
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
           {CONSUMER_LEVERAGE_PRESETS.map((preset) => (
             <button
               key={preset.val}
@@ -183,6 +185,18 @@ export const OrderPanelConsumer = React.memo<OrderPanelConsumerProps>(function O
               <span className="text-[9px] text-[var(--t3)] tracking-tight">{preset.tag}</span>
             </button>
           ))}
+        </div>
+
+        {/* Smooth Leverage Slider 1x - 1000x */}
+        <div className="flex items-center gap-2 pt-0.5">
+          <input
+            type="range"
+            min="1"
+            max={currentMarket.maxLeverage || 1000}
+            value={leverage}
+            onChange={(e) => setLeverage(Number(e.target.value))}
+            className="w-full accent-[#4ECCA3] cursor-pointer h-1.5 bg-[var(--surface-3)] rounded-none"
+          />
         </div>
       </div>
 

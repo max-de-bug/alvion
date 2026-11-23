@@ -182,7 +182,10 @@ impl DomainRiskManager {
         Ok((realizable_pnl, payout_usdc))
     }
 
-    /// Check if position is liquidatable (Maintenance margin = 0.8% = 80 bps)
+    /// Check if position is liquidatable with dynamic maintenance margin supporting up to 1000x leverage.
+    /// For standard leverage (<=50x), maintenance margin is 80 bps (0.8%).
+    /// For ultra-high leverage (up to 1000x), maintenance margin scales to 40% of initial margin
+    /// (e.g. at 1000x: initial margin = 10 bps / 0.1%, maintenance = 4 bps / 0.04%).
     pub fn can_liquidate(&self, position_id: &str, current_price: u64) -> Result<bool, DomainError> {
         let pos = self.positions.get(position_id).ok_or_else(|| DomainError::position_not_found(position_id))?;
         if !pos.is_open {
@@ -191,7 +194,14 @@ impl DomainRiskManager {
 
         let pnl = Self::calc_pnl(pos.side, pos.entry_price, pos.size_usd, current_price);
         let remaining_margin = pos.margin_usdc as i64 + pnl;
-        let maintenance_threshold = (pos.size_usd * 80) / 10000;
+
+        // Dynamic maintenance margin in bps: 40% of initial margin (4000 / leverage), capped at 80 bps (0.8%)
+        let maintenance_bps = if pos.leverage > 0 {
+            (4000 / pos.leverage as u64).min(80).max(1)
+        } else {
+            80
+        };
+        let maintenance_threshold = (pos.size_usd * maintenance_bps) / 10000;
 
         Ok(remaining_margin <= maintenance_threshold as i64)
     }
@@ -309,10 +319,10 @@ impl DomainRiskManager {
     fn calc_pnl(side: Side, entry_price: u64, size_usd: u64, current_price: u64) -> i64 {
         if side == Side::Buy {
             let price_diff = current_price as i64 - entry_price as i64;
-            (price_diff * size_usd as i64) / entry_price as i64
+            ((price_diff as i128 * size_usd as i128) / entry_price as i128) as i64
         } else {
             let price_diff = entry_price as i64 - current_price as i64;
-            (price_diff * size_usd as i64) / entry_price as i64
+            ((price_diff as i128 * size_usd as i128) / entry_price as i128) as i64
         }
     }
 }
@@ -403,6 +413,37 @@ mod tests {
         assert_eq!(manager.positions.len(), 1, "Only 1 active position should remain");
         assert!(!manager.positions.contains_key(&pos1.id));
         assert!(manager.positions.contains_key(&pos2.id));
+    }
+
+    #[test]
+    fn test_1000x_leverage_liquidation_math() {
+        let mut manager = DomainRiskManager::new(10_000_000 * USD_SCALE);
+        // 100 USDC margin with 1000x leverage on BTC = 100,000 USD size
+        // Entry price: $60,000
+        let entry_px = 60_000 * PRICE_SCALE;
+        let pos = manager.open_position(
+            "0xWhaleTrader".to_string(),
+            "BTC".to_string(),
+            Side::Buy,
+            100 * USD_SCALE,
+            1000,
+            100_000 * USD_SCALE,
+            entry_px,
+        ).expect("should open 1000x position");
+
+        // 1. At opening price ($60,000), position must NOT be liquidated
+        let can_liq_at_open = manager.can_liquidate(&pos.id, entry_px).expect("can_liquidate check");
+        assert!(!can_liq_at_open, "1000x position must be healthy immediately after open");
+
+        // 2. Small adverse price drop of 0.02% (price: $59,988)
+        let minor_dip_px = 59_988 * PRICE_SCALE;
+        let can_liq_minor = manager.can_liquidate(&pos.id, minor_dip_px).expect("can_liquidate check");
+        assert!(!can_liq_minor, "1000x position should withstand minor 0.02% noise");
+
+        // 3. Adverse price drop of 0.08% (price: $59,952), exceeds 0.06% liquidation buffer
+        let liq_drop_px = 59_952 * PRICE_SCALE;
+        let can_liq_trigger = manager.can_liquidate(&pos.id, liq_drop_px).expect("can_liquidate check");
+        assert!(can_liq_trigger, "1000x position must trigger liquidation beyond maintenance margin");
     }
 }
 
