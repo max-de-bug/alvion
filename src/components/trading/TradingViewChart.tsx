@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState, useId } from "react";
-import { ChevronRight, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import type { Timeframe } from "@/stores/useTradingStore";
 
 declare global {
@@ -13,8 +13,6 @@ declare global {
 interface TradingViewChartProps {
   marketName: string;
   timeframe: Timeframe;
-  showDrawingTools?: boolean;
-  setShowDrawingTools?: (val: boolean | ((prev: boolean) => boolean)) => void;
   className?: string;
 }
 
@@ -80,8 +78,6 @@ function getTradingViewInterval(tf: Timeframe): string {
 export const TradingViewChart = React.memo<TradingViewChartProps>(function TradingViewChart({
   marketName,
   timeframe,
-  showDrawingTools = false,
-  setShowDrawingTools,
   className = "",
 }) {
   const chartId = useId().replace(/:/g, "_");
@@ -127,7 +123,7 @@ export const TradingViewChart = React.memo<TradingViewChartProps>(function Tradi
           toolbar_bg: "#10171a",
           enable_publishing: false,
           hide_top_toolbar: false,
-          hide_side_toolbar: !showDrawingTools,
+          hide_side_toolbar: false, // Built-in native drawing toolbar always active without reload
           withdateranges: true,
           hide_legend: false,
           save_image: false,
@@ -167,7 +163,7 @@ export const TradingViewChart = React.memo<TradingViewChartProps>(function Tradi
 
       setTimeout(() => {
         if (isMounted) setIsLoading(false);
-      }, 900);
+      }, 500);
     };
 
     if (window.TradingView) {
@@ -189,11 +185,15 @@ export const TradingViewChart = React.memo<TradingViewChartProps>(function Tradi
 
     return () => {
       isMounted = false;
+      const existingScript = document.getElementById("tradingview-tvjs");
+      if (existingScript) {
+        existingScript.removeEventListener("load", initWidget);
+      }
       if (container) {
         container.innerHTML = "";
       }
     };
-  }, [tvSymbol, tvInterval, showDrawingTools]);
+  }, [tvSymbol, tvInterval]);
 
   return (
     <div className={`relative w-full h-full min-h-[460px] overflow-hidden bg-[#10171a] ${className}`}>
@@ -214,22 +214,6 @@ export const TradingViewChart = React.memo<TradingViewChartProps>(function Tradi
         className="w-full h-full"
         style={{ width: "100%", height: "100%" }}
       />
-
-      {/* QFEX-Style Teal Floating Toggle Tab on the bottom-left edge */}
-      {setShowDrawingTools ? (
-        <button
-          type="button"
-          onClick={() => setShowDrawingTools((prev) => !prev)}
-          className="absolute bottom-6 left-0 z-20 flex items-center justify-center w-4 h-7 rounded-none bg-[#4ECCA3] text-[#0a1815] hover:bg-[#3fb892] shadow-lg transition-all cursor-pointer group"
-          title={showDrawingTools ? "Hide drawing tools" : "Show drawing tools"}
-        >
-          <ChevronRight
-            className={`w-3.5 h-3.5 transition-transform duration-200 ${
-              showDrawingTools ? "rotate-180" : ""
-            }`}
-          />
-        </button>
-      ) : null}
     </div>
   );
 });
