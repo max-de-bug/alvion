@@ -57,7 +57,7 @@ export const OrderBookView = React.memo<OrderBookViewProps>(function OrderBookVi
               <button
                 type="button"
                 onClick={() => setActiveTab("book")}
-                className={`px-2.5 py-1 rounded-full text-[10.5px] font-semibold tracking-[.06em] transition-colors cursor-pointer ${
+                className={`px-2.5 py-1 rounded-none text-[10.5px] font-semibold tracking-[.06em] transition-colors cursor-pointer ${
                   activeTab === "book"
                     ? "bg-[var(--surface-3)] text-[var(--t1)]"
                     : "text-[var(--t2)] hover:text-[var(--t1)]"
@@ -68,7 +68,7 @@ export const OrderBookView = React.memo<OrderBookViewProps>(function OrderBookVi
               <button
                 type="button"
                 onClick={() => setActiveTab("trades")}
-                className={`px-2.5 py-1 rounded-full text-[10.5px] font-semibold tracking-[.06em] transition-colors cursor-pointer ${
+                className={`px-2.5 py-1 rounded-none text-[10.5px] font-semibold tracking-[.06em] transition-colors cursor-pointer ${
                   activeTab === "trades"
                     ? "bg-[var(--surface-3)] text-[var(--t1)]"
                     : "text-[var(--t2)] hover:text-[var(--t1)]"
@@ -81,7 +81,7 @@ export const OrderBookView = React.memo<OrderBookViewProps>(function OrderBookVi
                 type="button"
                 aria-label="Hide order book"
                 title="Hide order book"
-                className="ml-auto grid place-items-center w-6 h-6 rounded-full text-[var(--t3)] hover:text-[var(--t1)] hover:bg-[var(--surface-3)] transition-colors cursor-pointer"
+                className="ml-auto grid place-items-center w-6 h-6 rounded-none text-[var(--t3)] hover:text-[var(--t1)] hover:bg-[var(--surface-3)] transition-colors cursor-pointer"
               >
                 <ChevronsRight className="w-3.5 h-3.5" />
               </button>
@@ -92,14 +92,14 @@ export const OrderBookView = React.memo<OrderBookViewProps>(function OrderBookVi
                 <button
                   type="button"
                   title="Aggregate book"
-                  className="grid place-items-center size-6 rounded-full font-mono font-bold text-[11px] transition-colors cursor-pointer bg-[var(--surface-3)] text-[var(--t3)] hover:text-[var(--t1)]"
+                  className="grid place-items-center size-6 rounded-none font-mono font-bold text-[11px] transition-colors cursor-pointer bg-[var(--surface-3)] text-[var(--t3)] hover:text-[var(--t1)]"
                 >
                   Σ
                 </button>
                 <button
                   type="button"
                   onClick={() => setPrecision((p) => (p === "1" ? "5" : p === "5" ? "10" : "1"))}
-                  className="flex items-center gap-1 px-[9px] py-1 rounded-full bg-[var(--surface-3)] font-mono text-[10.5px] text-[var(--t2)] hover:bg-[var(--hover)] hover:text-[var(--t1)] transition-colors cursor-pointer"
+                  className="flex items-center gap-1 px-[9px] py-1 rounded-none bg-[var(--surface-3)] font-mono text-[10.5px] text-[var(--t2)] hover:bg-[var(--hover)] hover:text-[var(--t1)] transition-colors cursor-pointer"
                 >
                   <span>{precision}</span>
                   <ChevronDown className="w-3.5 h-3.5 text-[var(--t3)]" />
@@ -109,7 +109,7 @@ export const OrderBookView = React.memo<OrderBookViewProps>(function OrderBookVi
               <button
                 type="button"
                 title="Display unit"
-                className="flex items-center gap-1 px-[9px] py-1 rounded-full bg-[var(--surface-3)] font-mono text-[10.5px] text-[var(--t2)] hover:bg-[var(--hover)] hover:text-[var(--t1)] transition-colors cursor-pointer"
+                className="flex items-center gap-1 px-[9px] py-1 rounded-none bg-[var(--surface-3)] font-mono text-[10.5px] text-[var(--t2)] hover:bg-[var(--hover)] hover:text-[var(--t1)] transition-colors cursor-pointer"
               >
                 <span>BTC</span>
                 <ArrowUpDown className="w-3.5 h-3.5 text-[var(--t3)]" />

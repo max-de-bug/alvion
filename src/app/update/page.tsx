@@ -56,7 +56,7 @@ export default function UpdatePage() {
         <div className="flex items-center gap-3">
           <button
             onClick={handleShare}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-[rgba(223,228,218,0.2)] bg-[rgba(15,29,21,0.6)] backdrop-blur-md text-xs font-mono text-[#DFE4DA] hover:border-[#52B788] transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-none border border-[rgba(223,228,218,0.2)] bg-[rgba(15,29,21,0.6)] backdrop-blur-md text-xs font-mono text-[#DFE4DA] hover:border-[#52B788] transition-colors cursor-pointer"
           >
             {copied ? <Check className="h-3 w-3 text-[#52B788]" /> : <Share2 className="h-3 w-3" />}
             <span>{copied ? "Link copied" : "Share"}</span>
@@ -65,7 +65,7 @@ export default function UpdatePage() {
           <button
             onClick={handleDownload}
             disabled={downloading}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#23412E] text-[#DFE4DA] border border-[rgba(223,228,218,0.3)] hover:bg-[#2d523b] text-xs font-mono font-medium transition-all shadow-md cursor-pointer"
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-none bg-[#23412E] text-[#DFE4DA] border border-[rgba(223,228,218,0.3)] hover:bg-[#2d523b] text-xs font-mono font-medium transition-all shadow-md cursor-pointer"
           >
             <Download className="h-3.5 w-3.5" />
             <span>Download PNG</span>

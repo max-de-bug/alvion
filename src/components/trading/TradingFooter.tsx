@@ -24,13 +24,12 @@ export const TradingFooter = React.memo(function TradingFooter() {
 
         {/* API Latency */}
         <div
-          title="API round-trip latency"
-          aria-label="API round-trip latency"
+          aria-label="API latency"
           className="flex items-center gap-1.5 text-[11.5px] font-mono text-[var(--t3)]"
         >
           <span
             aria-hidden="true"
-            className="inline-block size-1.5 rounded-full bg-[var(--fixed-green)] animate-pulse"
+            className="inline-block size-1.5 rounded-none bg-[var(--fixed-green)]"
           />
           <span className="tabular-nums">54 ms</span>
         </div>
@@ -40,7 +39,7 @@ export const TradingFooter = React.memo(function TradingFooter() {
         {/* Chain & Settlement Engine */}
         <div className="hidden md:flex items-center gap-1.5 text-[11px] text-[var(--t3)] font-mono">
           <ShieldCheck className="w-3.5 h-3.5 text-[var(--fixed-green)]" />
-          <span>Robinhood Chain &bull; High-Performance L2</span>
+          <span>Robinhood Chain</span>
         </div>
       </div>
 
@@ -49,7 +48,7 @@ export const TradingFooter = React.memo(function TradingFooter() {
         <Link
           href="/waitlist"
           title="Waitlist"
-          className="grid size-[28px] place-items-center rounded-full text-[var(--t3)] hover:text-[var(--t1)] hover:bg-[var(--hover)] transition-colors cursor-pointer"
+          className="grid size-[28px] place-items-center rounded-none text-[var(--t3)] hover:text-[var(--t1)] hover:bg-[var(--hover)] transition-colors cursor-pointer"
         >
           <Globe className="w-3.5 h-3.5" />
         </Link>
@@ -59,7 +58,7 @@ export const TradingFooter = React.memo(function TradingFooter() {
           target="_blank"
           rel="noopener noreferrer"
           title="Documentation & GitHub"
-          className="grid size-[28px] place-items-center rounded-full text-[var(--t3)] hover:text-[var(--t1)] hover:bg-[var(--hover)] transition-colors cursor-pointer"
+          className="grid size-[28px] place-items-center rounded-none text-[var(--t3)] hover:text-[var(--t1)] hover:bg-[var(--hover)] transition-colors cursor-pointer"
         >
           <ExternalLink className="w-3.5 h-3.5" />
         </a>
@@ -67,7 +66,7 @@ export const TradingFooter = React.memo(function TradingFooter() {
         <a
           href="mailto:support@alvion.exchange"
           title="Contact & Feedback"
-          className="grid size-[28px] place-items-center rounded-full text-[var(--t3)] hover:text-[var(--t1)] hover:bg-[var(--hover)] transition-colors cursor-pointer"
+          className="grid size-[28px] place-items-center rounded-none text-[var(--t3)] hover:text-[var(--t1)] hover:bg-[var(--hover)] transition-colors cursor-pointer"
         >
           <MessageSquareText className="w-3.5 h-3.5" />
         </a>

@@ -57,7 +57,7 @@ Robinhood Chain L2 Settlement | Zero Spread | Zero Borrow Fee
             <td align="center" style="padding-bottom: 24px;">
               <table role="presentation" border="0" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td style="background-color: #23412E; border: 1px solid rgba(223, 228, 218, 0.35); border-radius: 9999px; padding: 8px 18px;">
+                  <td style="background-color: #23412E; border: 1px solid rgba(223, 228, 218, 0.35); border-radius: 0px; padding: 8px 18px;">
                     <span style="font-family: 'SF Mono', Menlo, monospace; font-size: 11px; font-weight: 600; color: #DFE4DA; letter-spacing: 0.05em; text-transform: uppercase;">
                       Alvion &middot; Allocation Upgrade
                     </span>
@@ -89,7 +89,7 @@ Robinhood Chain L2 Settlement | Zero Spread | Zero Borrow Fee
                     </table>
                     
                     <div style="padding-top: 20px;">
-                      <span style="display: inline-block; background-color: rgba(82, 183, 136, 0.2); border: 1px solid #52B788; border-radius: 9999px; padding: 4px 14px; font-family: 'SF Mono', Menlo, monospace; font-size: 11px; font-weight: 700; color: #52B788; letter-spacing: 0.05em; text-transform: uppercase;">
+                      <span style="display: inline-block; background-color: rgba(82, 183, 136, 0.2); border: 1px solid #52B788; border-radius: 0px; padding: 4px 14px; font-family: 'SF Mono', Menlo, monospace; font-size: 11px; font-weight: 700; color: #52B788; letter-spacing: 0.05em; text-transform: uppercase;">
                         +${data.xpEarned} Credits &middot; Rank Jumped
                       </span>
                       <h1 style="margin: 12px 0 0 0; font-family: 'Newsreader', Georgia, serif; font-size: 30px; font-weight: 400; color: #F4F7F2;">

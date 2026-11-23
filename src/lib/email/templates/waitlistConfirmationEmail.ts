@@ -86,7 +86,7 @@ Robinhood Chain L2 Settlement | Zero Spread | Zero Borrow Fee
             <td align="center" style="padding-bottom: 24px;">
               <table role="presentation" border="0" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td style="background-color: #23412E; border: 1px solid rgba(223, 228, 218, 0.35); border-radius: 9999px; padding: 8px 18px;">
+                  <td style="background-color: #23412E; border: 1px solid rgba(223, 228, 218, 0.35); border-radius: 0px; padding: 8px 18px;">
                     <table role="presentation" border="0" cellpadding="0" cellspacing="0">
                       <tr>
                         <td valign="middle" style="padding-right: 8px;">
@@ -163,7 +163,7 @@ Robinhood Chain L2 Settlement | Zero Spread | Zero Borrow Fee
                                 </div>
                               </td>
                               <td align="right" valign="top">
-                                <span style="background-color: #23412E; border: 1px solid rgba(223, 228, 218, 0.3); border-radius: 9999px; padding: 4px 12px; font-family: 'SF Mono', Menlo, Consolas, monospace; font-size: 11px; font-weight: 700; color: #E5C07B; letter-spacing: 0.05em;">
+                                <span style="background-color: #23412E; border: 1px solid rgba(223, 228, 218, 0.3); border-radius: 0px; padding: 4px 12px; font-family: 'SF Mono', Menlo, Consolas, monospace; font-size: 11px; font-weight: 700; color: #E5C07B; letter-spacing: 0.05em;">
                                   ${data.tier} TIER
                                 </span>
                               </td>
@@ -219,7 +219,7 @@ Robinhood Chain L2 Settlement | Zero Spread | Zero Borrow Fee
                           <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="padding: 8px 0; border-bottom: 1px solid rgba(223, 228, 218, 0.08);">
                             <tr>
                               <td width="28%" valign="top">
-                                <span style="background-color: rgba(205, 127, 50, 0.18); border: 1px solid rgba(205, 127, 50, 0.5); border-radius: 9999px; padding: 2px 8px; font-family: 'SF Mono', monospace; font-size: 10px; font-weight: 700; color: #CD7F32; text-transform: uppercase;">
+                                <span style="background-color: rgba(205, 127, 50, 0.18); border: 1px solid rgba(205, 127, 50, 0.5); border-radius: 0px; padding: 2px 8px; font-family: 'SF Mono', monospace; font-size: 10px; font-weight: 700; color: #CD7F32; text-transform: uppercase;">
                                   Bronze &middot; Scout
                                 </span>
                                 <div style="font-family: 'SF Mono', monospace; font-size: 9px; color: rgba(223, 228, 218, 0.45); margin-top: 3px;">0 Invites &middot; 200 Credits</div>
@@ -234,7 +234,7 @@ Robinhood Chain L2 Settlement | Zero Spread | Zero Borrow Fee
                           <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="padding: 8px 0; border-bottom: 1px solid rgba(223, 228, 218, 0.08);">
                             <tr>
                               <td width="28%" valign="top">
-                                <span style="background-color: rgba(192, 192, 192, 0.18); border: 1px solid rgba(192, 192, 192, 0.5); border-radius: 9999px; padding: 2px 8px; font-family: 'SF Mono', monospace; font-size: 10px; font-weight: 700; color: #E2E8F0; text-transform: uppercase;">
+                                <span style="background-color: rgba(192, 192, 192, 0.18); border: 1px solid rgba(192, 192, 192, 0.5); border-radius: 0px; padding: 2px 8px; font-family: 'SF Mono', monospace; font-size: 10px; font-weight: 700; color: #E2E8F0; text-transform: uppercase;">
                                   Metal &middot; Vanguard
                                 </span>
                                 <div style="font-family: 'SF Mono', monospace; font-size: 9px; color: rgba(223, 228, 218, 0.45); margin-top: 3px;">1 Invite &middot; 800 Credits</div>
@@ -249,7 +249,7 @@ Robinhood Chain L2 Settlement | Zero Spread | Zero Borrow Fee
                           <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="padding: 8px 0; border-bottom: 1px solid rgba(223, 228, 218, 0.08);">
                             <tr>
                               <td width="28%" valign="top">
-                                <span style="background-color: rgba(229, 192, 123, 0.2); border: 1px solid #E5C07B; border-radius: 9999px; padding: 2px 8px; font-family: 'SF Mono', monospace; font-size: 10px; font-weight: 700; color: #E5C07B; text-transform: uppercase;">
+                                <span style="background-color: rgba(229, 192, 123, 0.2); border: 1px solid #E5C07B; border-radius: 0px; padding: 2px 8px; font-family: 'SF Mono', monospace; font-size: 10px; font-weight: 700; color: #E5C07B; text-transform: uppercase;">
                                   Gold &middot; Sovereign
                                 </span>
                                 <div style="font-family: 'SF Mono', monospace; font-size: 9px; color: rgba(223, 228, 218, 0.45); margin-top: 3px;">2 Invites &middot; 1,800 Credits</div>
@@ -264,7 +264,7 @@ Robinhood Chain L2 Settlement | Zero Spread | Zero Borrow Fee
                           <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="padding: 8px 0; border-bottom: 1px solid rgba(223, 228, 218, 0.08);">
                             <tr>
                               <td width="28%" valign="top">
-                                <span style="background-color: rgba(112, 214, 255, 0.18); border: 1px solid #70D6FF; border-radius: 9999px; padding: 2px 8px; font-family: 'SF Mono', monospace; font-size: 10px; font-weight: 700; color: #70D6FF; text-transform: uppercase;">
+                                <span style="background-color: rgba(112, 214, 255, 0.18); border: 1px solid #70D6FF; border-radius: 0px; padding: 2px 8px; font-family: 'SF Mono', monospace; font-size: 10px; font-weight: 700; color: #70D6FF; text-transform: uppercase;">
                                   Platinum &middot; Syndicate
                                 </span>
                                 <div style="font-family: 'SF Mono', monospace; font-size: 9px; color: rgba(223, 228, 218, 0.45); margin-top: 3px;">5 Invites &middot; 3,000 Credits</div>
@@ -279,7 +279,7 @@ Robinhood Chain L2 Settlement | Zero Spread | Zero Borrow Fee
                           <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="padding: 8px 0;">
                             <tr>
                               <td width="28%" valign="top">
-                                <span style="background-color: rgba(82, 183, 136, 0.22); border: 1px solid #52B788; border-radius: 9999px; padding: 2px 8px; font-family: 'SF Mono', monospace; font-size: 10px; font-weight: 700; color: #52B788; text-transform: uppercase;">
+                                <span style="background-color: rgba(82, 183, 136, 0.22); border: 1px solid #52B788; border-radius: 0px; padding: 2px 8px; font-family: 'SF Mono', monospace; font-size: 10px; font-weight: 700; color: #52B788; text-transform: uppercase;">
                                   Diamond &middot; Council
                                 </span>
                                 <div style="font-family: 'SF Mono', monospace; font-size: 9px; color: rgba(223, 228, 218, 0.45); margin-top: 3px;">10+ Invites &middot; 5,000 Credits</div>

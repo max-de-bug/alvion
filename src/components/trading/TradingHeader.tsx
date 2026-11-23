@@ -4,13 +4,8 @@ import React, { useState } from "react";
 import Link from "next/link";
 import {
   X,
-  CandlestickChart,
   Wallet,
-  Trophy,
-  Zap,
-  SlidersHorizontal,
   Settings,
-  ChevronDown,
 } from "lucide-react";
 import { AlvionBirdLogo } from "@/components/brand/AlvionBirdLogo";
 import { useTradingStore } from "@/stores/useTradingStore";
@@ -55,7 +50,7 @@ export const TradingHeader = React.memo<TradingHeaderProps>(function TradingHead
             type="button"
             aria-label="Dismiss"
             onClick={() => setShowWarning(false)}
-            className="absolute right-2 grid size-[24px] cursor-pointer place-items-center rounded-full text-[var(--warn)] transition-colors hover:bg-[var(--hover)] focus-visible:outline-none"
+            className="absolute right-2 grid size-[24px] cursor-pointer place-items-center rounded-none text-[var(--warn)] transition-colors hover:bg-[var(--hover)] focus-visible:outline-none"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -87,48 +82,38 @@ export const TradingHeader = React.memo<TradingHeaderProps>(function TradingHead
           {/* Navigation Pill Container */}
           <nav
             aria-label="Primary"
-            className="hidden md:flex items-center gap-[2px] p-[3px] rounded-full bg-[var(--surface-3)]"
+            className="hidden md:flex items-center gap-[2px] p-[3px] rounded-none bg-[var(--surface-3)]"
           >
             <button
               onClick={() => setActiveTab("trade")}
               aria-label="Trade"
               aria-current={activeTab === "trade" ? "page" : undefined}
-              className={`group inline-flex items-center gap-[6px] px-[13px] py-[6px] rounded-full text-[13px] tracking-[-0.005em] transition-all duration-200 cursor-pointer ${
+              className={`inline-flex items-center px-[14px] py-[6px] rounded-none text-[13px] tracking-[-0.005em] transition-colors cursor-pointer ${
                 activeTab === "trade"
                   ? "bg-[var(--surface)] text-[var(--t1)] font-semibold shadow-[0_1px_3px_rgba(0,0,0,.25)]"
-                  : "text-[var(--t2)] hover:text-[var(--t1)] hover:font-medium font-normal"
+                  : "text-[var(--t2)] hover:text-[var(--t1)] font-normal"
               }`}
             >
-              <CandlestickChart className="w-3.5 h-3.5 transition-transform duration-200 group-hover:scale-110 text-[#4ECCA3]" />
               <span>Trade</span>
             </button>
 
             <button
               onClick={() => setActiveTab("vault")}
-              aria-label="Portfolio"
-              className={`group inline-flex items-center gap-[6px] px-[13px] py-[6px] rounded-full text-[13px] tracking-[-0.005em] transition-all duration-200 cursor-pointer ${
+              aria-label="Vault"
+              aria-current={activeTab === "vault" ? "page" : undefined}
+              className={`inline-flex items-center px-[14px] py-[6px] rounded-none text-[13px] tracking-[-0.005em] transition-colors cursor-pointer ${
                 activeTab === "vault"
                   ? "bg-[var(--surface)] text-[var(--t1)] font-semibold shadow-[0_1px_3px_rgba(0,0,0,.25)]"
-                  : "text-[var(--t2)] hover:text-[var(--t1)] hover:font-medium font-normal"
+                  : "text-[var(--t2)] hover:text-[var(--t1)] font-normal"
               }`}
             >
-              <Wallet className="w-3.5 h-3.5 transition-transform duration-200 group-hover:scale-110 text-cyan-400" />
               <span>Vault</span>
             </button>
 
             <Link
               href="/waitlist"
-              className="group inline-flex items-center gap-[6px] px-[13px] py-[6px] rounded-full text-[13px] tracking-[-0.005em] transition-all duration-200 cursor-pointer text-[var(--t2)] hover:text-[var(--t1)] hover:font-medium font-normal"
+              className="inline-flex items-center px-[14px] py-[6px] rounded-none text-[13px] tracking-[-0.005em] transition-colors cursor-pointer text-[var(--t2)] hover:text-[var(--t1)] font-normal"
             >
-              <Trophy className="w-3.5 h-3.5 transition-transform duration-200 group-hover:scale-110 text-amber-400" />
-              <span>Rewards</span>
-            </Link>
-
-            <Link
-              href="/waitlist"
-              className="group inline-flex items-center gap-[6px] px-[13px] py-[6px] rounded-full text-[13px] tracking-[-0.005em] transition-all duration-200 cursor-pointer text-[var(--t2)] hover:text-[var(--t1)] hover:font-medium font-normal"
-            >
-              <Zap className="w-3.5 h-3.5 transition-transform duration-200 group-hover:scale-110 text-[#4ECCA3]" />
               <span>Waitlist</span>
             </Link>
           </nav>
@@ -137,35 +122,31 @@ export const TradingHeader = React.memo<TradingHeaderProps>(function TradingHead
         {/* Right: Controls & Wallet */}
         <div className="flex items-center gap-[10px] min-w-0">
           {/* Dual Experience Mode Switcher (Consumer / Pro) */}
-          <div className="flex items-center bg-[var(--surface-3)] p-[3px] rounded-full border border-[var(--border)] text-xs">
+          <div className="flex items-center bg-[var(--surface-3)] p-[3px] rounded-none border border-[var(--border)] text-xs">
             <button
               onClick={() => setTradingMode("consumer")}
-              className={`px-3 py-1 rounded-full font-medium transition-all flex items-center gap-1.5 ${
+              className={`px-3 py-1 rounded-none font-medium transition-colors ${
                 tradingMode === "consumer"
-                  ? "bg-[var(--surface)] text-[#4ECCA3] font-semibold shadow-sm"
+                  ? "bg-[var(--surface)] text-[#4ECCA3] font-semibold shadow-xs"
                   : "text-[var(--t3)] hover:text-[var(--t1)]"
               }`}
-              title="Consumer Mode: 3-step simple trading"
             >
-              <Zap className="w-3 h-3 text-[#4ECCA3]" />
               <span className="text-[12px]">Consumer</span>
             </button>
             <button
               onClick={() => setTradingMode("pro")}
-              className={`px-3 py-1 rounded-full font-medium transition-all flex items-center gap-1.5 ${
+              className={`px-3 py-1 rounded-none font-medium transition-colors ${
                 tradingMode === "pro"
-                  ? "bg-[var(--surface)] text-white font-semibold shadow-sm"
+                  ? "bg-[var(--surface)] text-white font-semibold shadow-xs"
                   : "text-[var(--t3)] hover:text-[var(--t1)]"
               }`}
-              title="Pro Mode: Deep CLOB order book, leverage isolation & full optionality"
             >
-              <SlidersHorizontal className="w-3 h-3 text-cyan-400" />
               <span className="text-[12px]">Pro</span>
             </button>
           </div>
 
           {/* Faucet Balance Pill */}
-          <div className="hidden sm:flex items-center gap-2 pl-3 pr-1.5 py-1 rounded-full bg-[var(--surface-3)] border border-[var(--border)]">
+          <div className="hidden sm:flex items-center gap-2 pl-3 pr-1.5 py-1 rounded-none bg-[var(--surface-3)] border border-[var(--border)]">
             <div className="text-right">
               <span className="text-xs font-mono font-semibold text-[var(--t1)]">
                 ${walletBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -175,7 +156,7 @@ export const TradingHeader = React.memo<TradingHeaderProps>(function TradingHead
             <button
               onClick={() => faucetWallet(10000)}
               title="Claim 10,000 test USDCx"
-              className="text-[10.5px] font-semibold text-[#4ECCA3] hover:text-[#3db890] px-2 py-0.5 rounded-full border border-[#4ECCA3]/30 bg-[#162922] transition-colors"
+              className="text-[10.5px] font-semibold text-[#4ECCA3] hover:text-[#3db890] px-2 py-0.5 rounded-none border border-[#4ECCA3]/30 bg-[#162922] transition-colors"
             >
               +Faucet
             </button>
@@ -185,14 +166,14 @@ export const TradingHeader = React.memo<TradingHeaderProps>(function TradingHead
           <button
             type="button"
             aria-label="Settings"
-            className="grid place-items-center size-[var(--header-ctl-h)] rounded-full bg-[var(--surface-3)] text-[var(--t2)] hover:text-[var(--t1)] hover:bg-[var(--hover)] transition-colors cursor-pointer border border-[var(--border)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--fixed-green)]"
+            className="grid place-items-center size-[var(--header-ctl-h)] rounded-none bg-[var(--surface-3)] text-[var(--t2)] hover:text-[var(--t1)] hover:bg-[var(--hover)] transition-colors cursor-pointer border border-[var(--border)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--fixed-green)]"
           >
             <Settings className="w-4 h-4" />
           </button>
 
           {/* Connect / Wallet Button */}
           {isConnected && address ? (
-            <div className="flex items-center gap-2 bg-[var(--surface-3)] border border-[var(--border)] px-3 py-1.5 rounded-full text-xs font-mono">
+            <div className="flex items-center gap-2 bg-[var(--surface-3)] border border-[var(--border)] px-3 py-1.5 rounded-none text-xs font-mono">
               <span className="text-[var(--t1)] font-medium">
                 {address.slice(0, 6)}...{address.slice(-4)}
               </span>
@@ -208,7 +189,7 @@ export const TradingHeader = React.memo<TradingHeaderProps>(function TradingHead
           ) : (
             <button
               onClick={connectWallet}
-              className="btn-chrome flex items-center gap-1.5 h-[var(--header-ctl-h)] px-[16px] rounded-full text-[11.5px] font-semibold uppercase tracking-[0.05em] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--fixed-green)] cursor-pointer shrink-0"
+              className="btn-chrome flex items-center gap-1.5 h-[var(--header-ctl-h)] px-[16px] rounded-none text-[11.5px] font-semibold uppercase tracking-[0.05em] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--fixed-green)] cursor-pointer shrink-0"
               aria-label="Connect Wallet"
             >
               <Wallet className="w-3.5 h-3.5 text-[#4ECCA3]" />

@@ -58,7 +58,7 @@ export const TradingChart = React.memo<TradingChartProps>(function TradingChart(
           >
             <span>Chart</span>
             {activeTab === "chart" && (
-              <span className="absolute -bottom-[9px] left-0 right-0 h-[2.5px] bg-[#4ECCA3] rounded-full" />
+              <span className="absolute -bottom-[9px] left-0 right-0 h-[2.5px] bg-[#4ECCA3] rounded-none" />
             )}
           </button>
 
@@ -73,7 +73,7 @@ export const TradingChart = React.memo<TradingChartProps>(function TradingChart(
           >
             <span>Historical Data</span>
             {activeTab === "history" && (
-              <span className="absolute -bottom-[9px] left-0 right-0 h-[2.5px] bg-[#4ECCA3] rounded-full" />
+              <span className="absolute -bottom-[9px] left-0 right-0 h-[2.5px] bg-[#4ECCA3] rounded-none" />
             )}
           </button>
 
@@ -88,7 +88,7 @@ export const TradingChart = React.memo<TradingChartProps>(function TradingChart(
           >
             <span>Details</span>
             {activeTab === "details" && (
-              <span className="absolute -bottom-[9px] left-0 right-0 h-[2.5px] bg-[#4ECCA3] rounded-full" />
+              <span className="absolute -bottom-[9px] left-0 right-0 h-[2.5px] bg-[#4ECCA3] rounded-none" />
             )}
           </button>
         </div>

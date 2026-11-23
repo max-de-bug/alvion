@@ -394,24 +394,20 @@ export const InteractiveParticleCanvas: React.FC = () => {
 
       {/* Top Floating Badge */}
       <div className="absolute top-6 right-6 select-none pointer-events-none z-30">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[rgba(223,228,218,0.25)] bg-[rgba(15,29,21,0.7)] backdrop-blur-md text-[11px] font-mono text-[#DFE4DA]">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#DFE4DA] animate-pulse" />
-          <span>Interactive particle field</span>
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-none border border-[rgba(223,228,218,0.25)] bg-[rgba(15,29,21,0.7)] backdrop-blur-md text-[11px] font-mono text-[#DFE4DA]">
+          <span className="h-1.5 w-1.5 rounded-none bg-[#DFE4DA]" />
+          <span>Particle field</span>
         </div>
       </div>
 
       {/* Bottom Telemetry Bar */}
       <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between select-none pointer-events-none z-30 text-[11px] font-mono text-[rgba(223,228,218,0.75)]">
-        <div className="px-3 py-1.5 rounded-full border border-[rgba(223,228,218,0.2)] bg-[rgba(15,29,21,0.65)] backdrop-blur-md">
+        <div className="px-3 py-1.5 rounded-none border border-[rgba(223,228,218,0.2)] bg-[rgba(15,29,21,0.65)] backdrop-blur-md">
           {coords ? (
-            <span>Cursor: {coords.x}px · {coords.y}px</span>
+            <span>{coords.x}px · {coords.y}px</span>
           ) : (
-            <span>Hover cursor to interact</span>
+            <span>Interactive field</span>
           )}
-        </div>
-
-        <div className="hidden sm:block px-3 py-1.5 rounded-full border border-[rgba(223,228,218,0.2)] bg-[rgba(15,29,21,0.65)] backdrop-blur-md">
-          <span>Elastic Spring Damping • Constellation Mesh</span>
         </div>
       </div>
     </div>

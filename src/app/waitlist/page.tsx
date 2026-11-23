@@ -415,13 +415,12 @@ export default function WaitlistPage() {
             <nav className="flex items-center gap-2 sm:gap-3">
               <Link
                 href="/"
-                className="inline-flex items-center gap-1.5 text-xs sm:text-[13px] text-[#26241D] hover:text-[#23412E] border border-[rgba(38,36,29,0.18)] hover:border-[#23412E] hover:bg-[rgba(35,65,46,0.05)] rounded-full px-3.5 sm:px-4 py-1.5 transition-all bg-[#DFE4DA]/80 backdrop-blur-sm"
+                className="inline-flex items-center text-xs sm:text-[13px] text-[#26241D] hover:text-[#23412E] border border-[rgba(38,36,29,0.18)] hover:border-[#23412E] hover:bg-[rgba(35,65,46,0.05)] rounded-none px-3.5 sm:px-4 py-1.5 transition-colors bg-[#DFE4DA]/80 backdrop-blur-xs"
               >
                 <span>Launch App</span>
-                <ArrowUpRight className="h-3 w-3 opacity-60" />
               </Link>
-              <div className="hidden sm:inline-flex items-center gap-1.5 text-xs text-[#26241D] border border-[rgba(38,36,29,0.18)] rounded-full px-3.5 py-1.5 opacity-80 bg-[#DFE4DA]/80 backdrop-blur-sm">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#23412E]" />
+              <div className="hidden sm:inline-flex items-center gap-1.5 text-xs text-[#26241D] border border-[rgba(38,36,29,0.18)] rounded-none px-3.5 py-1.5 opacity-80 bg-[#DFE4DA]/80 backdrop-blur-xs">
+                <span className="h-1.5 w-1.5 rounded-none bg-[#23412E]" />
                 <span>Robinhood Chain L2</span>
               </div>
             </nav>
@@ -527,19 +526,10 @@ export default function WaitlistPage() {
                     </button>
                   </div>
 
-                  {/* Subtitle Note */}
-                  <p
-                    style={{ color: "rgba(38, 36, 29, 0.46)" }}
-                    className="text-xs pt-1"
-                  >
-                    Occasional updates from Alvion on Robinhood Chain. Unsubscribe any time.
-                  </p>
-
                   {/* Pre-join Tier Privileges Preview */}
                   <div className="pt-5 border-t border-[rgba(38,36,29,0.12)] space-y-2.5">
-                    <div className="flex items-center justify-between text-xs font-mono text-[rgba(38,36,29,0.65)]">
+                    <div className="text-xs font-mono text-[rgba(38,36,29,0.65)]">
                       <span>Protocol tiers & privileges</span>
-                      <span>Invite traders to advance</span>
                     </div>
 
                     {/* Tier selector tabs */}
@@ -575,7 +565,7 @@ export default function WaitlistPage() {
                                 borderColor: current.badgeBorder,
                                 color: current.badgeText,
                               }}
-                              className="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full border"
+                              className="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-none border"
                             >
                               {current.name} &middot; {current.role}
                             </span>
@@ -589,7 +579,7 @@ export default function WaitlistPage() {
                           <ul className="space-y-1.5 text-xs text-[rgba(38,36,29,0.8)]">
                             {current.perks.map((perk, i) => (
                               <li key={i} className="flex items-start gap-2">
-                                <span className="h-1.5 w-1.5 rounded-full bg-[#23412E] mt-1.5 shrink-0" />
+                                <span className="h-1.5 w-1.5 rounded-none bg-[#23412E] mt-1.5 shrink-0" />
                                 <span>{perk}</span>
                               </li>
                             ))}
@@ -606,7 +596,7 @@ export default function WaitlistPage() {
                     {/* Header */}
                     <div className="flex items-center justify-between border-b border-[rgba(38,36,29,0.12)] pb-3">
                       <div className="flex items-center gap-2.5">
-                        <div className="h-7 w-7 rounded-full bg-[#23412E] text-[#DFE4DA] flex items-center justify-center">
+                        <div className="h-7 w-7 rounded-none bg-[#23412E] text-[#DFE4DA] flex items-center justify-center">
                           <Check className="h-4 w-4" />
                         </div>
                         <div>
@@ -634,7 +624,7 @@ export default function WaitlistPage() {
                               borderColor: userTier.badgeBorder,
                               color: userTier.badgeText,
                             }}
-                            className="text-[11px] font-mono font-bold px-2.5 py-1 rounded-full border"
+                            className="text-[11px] font-mono font-bold px-2.5 py-1 rounded-none border"
                           >
                             {userTier.name} &middot; {userTier.role}
                           </span>
@@ -704,10 +694,10 @@ export default function WaitlistPage() {
                               {invitesLeft} {invitesLeft === 1 ? "invite" : "invites"} left
                             </span>
                           </div>
-                          <div className="h-2 w-full rounded-full bg-[rgba(38,36,29,0.1)] overflow-hidden">
+                          <div className="h-2 w-full rounded-none bg-[rgba(38,36,29,0.1)] overflow-hidden">
                             <div
                               style={{ width: `${progressPercent}%` }}
-                              className="h-full bg-[#23412E] rounded-full transition-all duration-500"
+                              className="h-full bg-[#23412E] rounded-none transition-all duration-500"
                             />
                           </div>
                         </div>
@@ -754,7 +744,7 @@ export default function WaitlistPage() {
                                   borderColor: current.badgeBorder,
                                   color: current.badgeText,
                                 }}
-                                className="text-[11px] font-mono font-bold px-2 py-0.5 rounded-full border"
+                                className="text-[11px] font-mono font-bold px-2 py-0.5 rounded-none border"
                               >
                                 {current.name} &middot; {current.role}
                               </span>
@@ -767,7 +757,7 @@ export default function WaitlistPage() {
                             <ul className="space-y-1 text-xs text-[rgba(38,36,29,0.85)]">
                               {current.perks.map((p, i) => (
                                 <li key={i} className="flex items-start gap-2">
-                                  <span className="h-1.5 w-1.5 rounded-full bg-[#23412E] mt-1.5 shrink-0" />
+                                  <span className="h-1.5 w-1.5 rounded-none bg-[#23412E] mt-1.5 shrink-0" />
                                   <span>{p}</span>
                                 </li>
                               ))}
@@ -789,7 +779,7 @@ export default function WaitlistPage() {
                           </span>
                           <button
                             onClick={copyInvite}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#23412E] text-[#DFE4DA] font-medium hover:opacity-90 transition-opacity shrink-0 cursor-pointer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-[#23412E] text-[#DFE4DA] font-medium hover:opacity-90 transition-opacity shrink-0 cursor-pointer"
                           >
                             {copiedLink ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
                             <span>{copiedLink ? "Copied" : "Copy link"}</span>
@@ -854,7 +844,7 @@ export default function WaitlistPage() {
             }}
             className="select-none px-4"
           >
-            <div className="pointer-events-auto inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[rgba(223,228,218,0.22)] bg-[rgba(10,22,16,0.85)] backdrop-blur-xl text-xs font-mono text-[#DFE4DA] shadow-xl shadow-black/40">
+            <div className="pointer-events-auto inline-flex items-center gap-2 px-4 py-2 rounded-none border border-[rgba(223,228,218,0.22)] bg-[rgba(10,22,16,0.85)] backdrop-blur-xl text-xs font-mono text-[#DFE4DA] shadow-xl shadow-black/40">
               <AlvionBirdLogo size={16} variant="light" />
               <span>Alvion · Peaceful Financial Freedom</span>
             </div>
@@ -877,7 +867,7 @@ export default function WaitlistPage() {
             }}
             className="select-none text-xs font-mono text-[#DFE4DA]/80 px-4"
           >
-            <div className="pointer-events-auto inline-flex items-center gap-3 px-4 py-2 rounded-full border border-[rgba(223,228,218,0.18)] bg-[rgba(10,22,16,0.8)] backdrop-blur-xl shadow-lg shadow-black/30">
+            <div className="pointer-events-auto inline-flex items-center gap-3 px-4 py-2 rounded-none border border-[rgba(223,228,218,0.18)] bg-[rgba(10,22,16,0.8)] backdrop-blur-xl shadow-lg shadow-black/30">
               <span>Robinhood Chain L2 Settlement</span>
               <span className="opacity-30">|</span>
               <span className="hidden sm:inline">Zero Spread</span>

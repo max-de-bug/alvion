@@ -32,7 +32,7 @@ export const PeacefulBirdHeroArt: React.FC = () => {
           position: absolute;
           width: 220px;
           height: 220px;
-          border-radius: 9999px;
+          border-radius: 0px;
           border: 1px solid rgba(223, 228, 218, 0.45);
           pointer-events: none;
           animation: radar-pulse 1.4s cubic-bezier(0.1, 0.8, 0.2, 1) forwards;
@@ -71,7 +71,7 @@ export const PeacefulBirdHeroArt: React.FC = () => {
 
         {/* Outer Guide Ring */}
         <div
-          className="absolute rounded-full pointer-events-none"
+          className="absolute rounded-none pointer-events-none"
           style={{
             width: "480px",
             height: "480px",
@@ -81,7 +81,7 @@ export const PeacefulBirdHeroArt: React.FC = () => {
 
         {/* Mid Guide Ring */}
         <div
-          className="absolute rounded-full pointer-events-none"
+          className="absolute rounded-none pointer-events-none"
           style={{
             width: "340px",
             height: "340px",
@@ -91,7 +91,7 @@ export const PeacefulBirdHeroArt: React.FC = () => {
 
         {/* Inner Guide Ring */}
         <div
-          className="absolute rounded-full pointer-events-none"
+          className="absolute rounded-none pointer-events-none"
           style={{
             width: "220px",
             height: "220px",

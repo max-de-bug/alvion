@@ -60,13 +60,13 @@ export const MarketTickerBar = React.memo<MarketTickerBarProps>(function MarketT
             <button
               type="button"
               onClick={() => setShowMarketMenu((prev) => !prev)}
-              className="flex items-center gap-2 px-3 py-2 rounded-full border border-transparent hover:bg-[var(--surface-3)] hover:border-[var(--border)] transition-colors cursor-pointer"
+              className="flex items-center gap-2 px-3 py-2 rounded-none border border-transparent hover:bg-[var(--surface-3)] hover:border-[var(--border)] transition-colors cursor-pointer"
             >
               <div className="flex items-center">
-                <div className="w-[22px] h-[22px] rounded-full bg-amber-500/90 flex items-center justify-center text-[11px] font-bold text-black border border-slate-900 shadow-sm">
+                <div className="w-[22px] h-[22px] rounded-none bg-amber-500/90 flex items-center justify-center text-[11px] font-bold text-black border border-slate-900 shadow-sm">
                   ₿
                 </div>
-                <div className="w-[22px] h-[22px] rounded-full bg-[#4ECCA3] flex items-center justify-center text-[10px] font-bold text-[#0A1612] border border-slate-900 shadow-sm -ml-1.5">
+                <div className="w-[22px] h-[22px] rounded-none bg-[#4ECCA3] flex items-center justify-center text-[10px] font-bold text-[#0A1612] border border-slate-900 shadow-sm -ml-1.5">
                   $
                 </div>
               </div>
@@ -81,9 +81,6 @@ export const MarketTickerBar = React.memo<MarketTickerBarProps>(function MarketT
 
             {showMarketMenu && (
               <div className="absolute top-12 left-0 z-50 w-64 bg-[var(--surface)] border border-[var(--border-strong)] rounded-2xl p-2 shadow-2xl text-xs flex flex-col gap-1">
-                <div className="px-2.5 py-1 text-[10px] font-semibold text-[var(--t3)] uppercase tracking-wider">
-                  Select Perpetual Market
-                </div>
                 {[
                   { sym: "BTC", name: "Bitcoin", lev: "50x" },
                   { sym: "ETH", name: "Ethereum", lev: "50x" },

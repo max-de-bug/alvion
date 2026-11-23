@@ -51,7 +51,7 @@ export const PositionsPanel = React.memo<PositionsPanelProps>(function Positions
           >
             Positions ({positions.length})
             {activeTabExtended === "positions" && (
-              <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-[#4ECCA3] rounded-full" />
+              <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-[#4ECCA3] rounded-none" />
             )}
           </button>
 
@@ -64,7 +64,7 @@ export const PositionsPanel = React.memo<PositionsPanelProps>(function Positions
           >
             Open Orders ({openOrders.length})
             {activeTabExtended === "openOrders" && (
-              <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-[#4ECCA3] rounded-full" />
+              <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-[#4ECCA3] rounded-none" />
             )}
           </button>
 
@@ -77,25 +77,21 @@ export const PositionsPanel = React.memo<PositionsPanelProps>(function Positions
           >
             Trade Fills ({recentTrades.length})
             {activeTabExtended === "trades" && (
-              <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-[#4ECCA3] rounded-full" />
+              <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-[#4ECCA3] rounded-none" />
             )}
           </button>
 
-          {/* TitanX Points Reward Tab */}
+          {/* Alvion Points Tab */}
           <button
             onClick={() => handleTabClick("points")}
-            className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 relative ${activeTabExtended === "points"
+            className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors relative ${activeTabExtended === "points"
                 ? "bg-[#162125] text-[#4ECCA3]"
                 : "text-slate-400 hover:text-slate-200"
               }`}
           >
-            <Award className="w-3.5 h-3.5 text-[#4ECCA3]" />
-            <span>Alvion Points</span>
-            <span className="bg-[#142921] text-[#4ECCA3] text-[10px] font-mono px-1.5 py-0.2 rounded-full border border-[#4ECCA3]/30">
-              250 pts
-            </span>
+            <span>Points</span>
             {activeTabExtended === "points" && (
-              <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-[#4ECCA3] rounded-full" />
+              <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-[#4ECCA3] rounded-none" />
             )}
           </button>
         </div>
@@ -105,11 +101,8 @@ export const PositionsPanel = React.memo<PositionsPanelProps>(function Positions
       {activeTabExtended === "positions" && (
         <div>
           {positions.length === 0 ? (
-            <div className="py-10 text-center flex flex-col items-center justify-center gap-1 text-slate-500 text-xs">
+            <div className="py-10 text-center flex flex-col items-center justify-center text-slate-500 text-xs">
               <span className="text-slate-400 font-medium">No open positions</span>
-              <span className="text-[11px] text-slate-500">
-                Execute a market or limit order above on BTC-USDCx to earn weekly testnet volume points.
-              </span>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -141,7 +134,7 @@ export const PositionsPanel = React.memo<PositionsPanelProps>(function Positions
                     return (
                       <tr key={pos.id} className="hover:bg-[#121A1E] transition-colors">
                         <td className="py-3 font-bold text-white font-sans flex items-center gap-1.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#4ECCA3]" />
+                          <span className="w-1.5 h-1.5 rounded-none bg-[#4ECCA3]" />
                           <span>{pos.market}-USDCx</span>
                         </td>
                         <td className="py-3">

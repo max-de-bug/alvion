@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { TrendingUp, TrendingDown, ShieldCheck, Zap, ArrowRight, Sparkles } from "lucide-react";
+import { TrendingUp, TrendingDown, Zap } from "lucide-react";
 import { MarketContext, QuoteResult } from "@/lib/hyperliquid";
 
 interface OrderPanelConsumerProps {
@@ -100,7 +100,7 @@ export const OrderPanelConsumer = React.memo<OrderPanelConsumerProps>(function O
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between text-xs">
           <span className="font-semibold text-white flex items-center gap-1.5">
-            <span className="w-4 h-4 rounded-full bg-[#4ECCA3]/20 text-[#4ECCA3] text-[10px] flex items-center justify-center font-bold">1</span>
+            <span className="w-4 h-4 rounded-none bg-[#4ECCA3]/20 text-[#4ECCA3] text-[10px] flex items-center justify-center font-bold">1</span>
             Select Direction
           </span>
           <span className="text-[11px] text-[var(--t3)]">
@@ -124,7 +124,7 @@ export const OrderPanelConsumer = React.memo<OrderPanelConsumerProps>(function O
                 <TrendingUp className="w-4 h-4" />
                 Up (Long)
               </span>
-              {isLong && <span className="w-2 h-2 rounded-full bg-[#4ECCA3]" />}
+              {isLong && <span className="w-2 h-2 rounded-none bg-[#4ECCA3]" />}
             </div>
             <span className="text-[10px] text-[var(--t3)] leading-tight">
               Expect price will climb
@@ -146,7 +146,7 @@ export const OrderPanelConsumer = React.memo<OrderPanelConsumerProps>(function O
                 <TrendingDown className="w-4 h-4" />
                 Down (Short)
               </span>
-              {!isLong && <span className="w-2 h-2 rounded-full bg-[var(--red)]" />}
+              {!isLong && <span className="w-2 h-2 rounded-none bg-[var(--red)]" />}
             </div>
             <span className="text-[10px] text-[var(--t3)] leading-tight">
               Expect price will fall
@@ -159,7 +159,7 @@ export const OrderPanelConsumer = React.memo<OrderPanelConsumerProps>(function O
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between text-xs">
           <span className="font-semibold text-white flex items-center gap-1.5">
-            <span className="w-4 h-4 rounded-full bg-[#4ECCA3]/20 text-[#4ECCA3] text-[10px] flex items-center justify-center font-bold">2</span>
+            <span className="w-4 h-4 rounded-none bg-[#4ECCA3]/20 text-[#4ECCA3] text-[10px] flex items-center justify-center font-bold">2</span>
             Select Multiplier
           </span>
           <span className="text-[11px] font-mono text-[#4ECCA3] font-semibold">
@@ -190,7 +190,7 @@ export const OrderPanelConsumer = React.memo<OrderPanelConsumerProps>(function O
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between text-xs">
           <span className="font-semibold text-white flex items-center gap-1.5">
-            <span className="w-4 h-4 rounded-full bg-[#4ECCA3]/20 text-[#4ECCA3] text-[10px] flex items-center justify-center font-bold">3</span>
+            <span className="w-4 h-4 rounded-none bg-[#4ECCA3]/20 text-[#4ECCA3] text-[10px] flex items-center justify-center font-bold">3</span>
             Trade Size (USDCx)
           </span>
           <span className="text-[11px] text-[var(--t3)]">
@@ -237,10 +237,7 @@ export const OrderPanelConsumer = React.memo<OrderPanelConsumerProps>(function O
       {/* PROJECTED RETURN CARD */}
       <div className="bg-[var(--surface-3)] border border-[var(--border)] rounded-xl p-3 flex flex-col gap-2 text-xs">
         <div className="flex items-center justify-between text-[11px] text-[var(--t3)]">
-          <span className="flex items-center gap-1">
-            <Sparkles className="w-3.5 h-3.5 text-[#4ECCA3]" />
-            If {currentMarket.name} moves 5%
-          </span>
+          <span>If {currentMarket.name} moves 5%</span>
           <span className="font-mono font-bold text-[#4ECCA3]">+{estimatedReturnPct}% Return</span>
         </div>
         <div className="flex items-baseline justify-between">
@@ -254,7 +251,7 @@ export const OrderPanelConsumer = React.memo<OrderPanelConsumerProps>(function O
         type="button"
         onClick={onExecuteTrade}
         disabled={loadingQuote || marginUsdc <= 0}
-        className={`w-full py-3.5 rounded-full font-bold text-sm tracking-wide transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer ${
+        className={`w-full py-3.5 rounded-none font-bold text-sm tracking-wide transition-colors shadow-lg flex items-center justify-center cursor-pointer ${
           isLong
             ? "bg-[#4ECCA3] hover:bg-[#3fb892] text-slate-950 shadow-[#4ECCA3]/20"
             : "bg-[var(--red)] hover:bg-[#d42d3e] text-white shadow-[var(--red)]/20"
@@ -263,17 +260,13 @@ export const OrderPanelConsumer = React.memo<OrderPanelConsumerProps>(function O
         {loadingQuote ? (
           <span>Calculating...</span>
         ) : (
-          <>
-            <span>{isLong ? "Open Long" : "Open Short"} (${marginUsdc * leverage})</span>
-            <ArrowRight className="w-4 h-4" />
-          </>
+          <span>{isLong ? "Open Long" : "Open Short"} (${marginUsdc * leverage})</span>
         )}
       </button>
 
       {/* SAFETY NOTICE */}
-      <div className="flex items-center justify-center gap-1.5 text-[11px] text-[var(--t3)] text-center">
-        <ShieldCheck className="w-3.5 h-3.5 text-[#4ECCA3]" />
-        <span>No debt risk &bull; Max loss capped at ${marginUsdc}</span>
+      <div className="flex items-center justify-center text-[11px] text-[var(--t3)] text-center">
+        <span>Max loss: ${marginUsdc}</span>
       </div>
     </div>
   );

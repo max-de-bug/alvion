@@ -5,11 +5,7 @@ import {
   ChevronDown,
   Check,
   Info,
-  Lock,
-  Shield,
-  Zap,
   Sliders,
-  Sparkles,
   Maximize2,
 } from "lucide-react";
 import { MarketContext, QuoteResult } from "@/lib/hyperliquid";
@@ -366,7 +362,7 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
           >
             Market
             {orderType === "market" && !isProTypeSelected && (
-              <span className="absolute -bottom-[1px] left-0 right-0 h-[2.5px] bg-[#5ec2a8] rounded-full" />
+              <span className="absolute -bottom-[1px] left-0 right-0 h-[2.5px] bg-[#5ec2a8] rounded-none" />
             )}
           </button>
 
@@ -386,7 +382,7 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
           >
             Limit
             {orderType === "limit" && !isProTypeSelected && (
-              <span className="absolute -bottom-[1px] left-0 right-0 h-[2.5px] bg-[#5ec2a8] rounded-full" />
+              <span className="absolute -bottom-[1px] left-0 right-0 h-[2.5px] bg-[#5ec2a8] rounded-none" />
             )}
           </button>
 
@@ -404,7 +400,7 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
               <span>{getProLabel()}</span>
               <ChevronDown className="w-3.5 h-3.5 text-[#7a8990]" />
               {isProTypeSelected && (
-                <span className="absolute -bottom-[1px] left-0 right-0 h-[2.5px] bg-[#5ec2a8] rounded-full" />
+                <span className="absolute -bottom-[1px] left-0 right-0 h-[2.5px] bg-[#5ec2a8] rounded-none" />
               )}
             </button>
 
@@ -490,7 +486,7 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
           <div className="flex items-center justify-between">
             <span className="text-[#728087] font-normal">Available to Trade</span>
             <div className="flex items-center gap-2">
-              <span className="inline-flex items-center justify-center min-w-[54px] h-[20px] px-2 rounded-full bg-[#2c373b] font-mono text-[11px] font-semibold text-white/90">
+              <span className="inline-flex items-center justify-center min-w-[54px] h-[20px] px-2 rounded-none bg-[#2c373b] font-mono text-[11px] font-semibold text-white/90">
                 {walletBalance > 0
                   ? walletBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                   : ""}
@@ -580,11 +576,11 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
             }}
           >
             {/* Background track line */}
-            <div className="absolute inset-x-0 h-[2px] rounded-full bg-[#20292e]" />
+            <div className="absolute inset-x-0 h-[2px] rounded-none bg-[#20292e]" />
 
             {/* Filled line up to current percentage */}
             <div
-              className="absolute left-0 h-[2px] rounded-full bg-[#5ec2a8] transition-all duration-150"
+              className="absolute left-0 h-[2px] rounded-none bg-[#5ec2a8] transition-all duration-150"
               style={{ width: `${currentPercent}%` }}
             />
 
@@ -597,7 +593,7 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
                   e.stopPropagation();
                   handleSliderChange(pct);
                 }}
-                className="absolute size-[5px] -translate-x-1/2 rounded-full transition-all hover:scale-125 z-10 cursor-pointer"
+                className="absolute size-[5px] -translate-x-1/2 rounded-none transition-all hover:scale-125 z-10 cursor-pointer"
                 style={{
                   left: `${pct}%`,
                   backgroundColor: pct <= currentPercent ? "#5ec2a8" : "#38464d",
@@ -608,7 +604,7 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
 
             {/* Hollow Teal Ring Thumb */}
             <div
-              className="absolute size-[18px] -translate-x-1/2 rounded-full border-[2.5px] border-[#5ec2a8] bg-[#10171a] shadow-sm transition-all duration-150 pointer-events-none z-20"
+              className="absolute size-[18px] -translate-x-1/2 rounded-none border-[2.5px] border-[#5ec2a8] bg-[#10171a] shadow-sm transition-all duration-150 pointer-events-none z-20"
               style={{ left: `${currentPercent}%` }}
             />
           </div>
@@ -636,7 +632,7 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
               <button
                 type="button"
                 onClick={() => setLimitPrice(currentMarket.markPx.toFixed(1))}
-                className="px-2 py-0.5 rounded-full bg-[var(--surface)] text-[10px] font-bold text-[var(--t2)] hover:text-white transition-colors cursor-pointer"
+                className="px-2 py-0.5 rounded-none bg-[var(--surface)] text-[10px] font-bold text-[var(--t2)] hover:text-white transition-colors cursor-pointer"
               >
                 MID
               </button>
@@ -658,7 +654,7 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
               <button
                 type="button"
                 onClick={() => setTriggerPrice(currentMarket.markPx.toFixed(1))}
-                className="px-2 py-0.5 rounded-full bg-[var(--surface)] text-[10px] font-bold text-[var(--t2)] hover:text-white transition-colors cursor-pointer"
+                className="px-2 py-0.5 rounded-none bg-[var(--surface)] text-[10px] font-bold text-[var(--t2)] hover:text-white transition-colors cursor-pointer"
               >
                 MARK
               </button>
@@ -677,12 +673,12 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
             <Info className="w-3.5 h-3.5 text-[var(--t3)]" />
           </span>
           <span
-            className={`relative w-[34px] h-[20px] rounded-full transition-colors ${
+            className={`relative w-[34px] h-[20px] rounded-none transition-colors ${
               reduceOnly ? "bg-[var(--fixed-green)]" : "bg-[var(--border-strong)]"
             }`}
           >
             <span
-              className={`absolute top-[2px] size-[16px] rounded-full bg-white transition-transform ${
+              className={`absolute top-[2px] size-[16px] rounded-none bg-white transition-transform ${
                 reduceOnly ? "left-[16px]" : "left-[2px]"
               }`}
             />
@@ -701,12 +697,12 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
               <Info className="w-3.5 h-3.5 text-[var(--t3)]" />
             </span>
             <span
-              className={`relative w-[34px] h-[20px] rounded-full transition-colors ${
+              className={`relative w-[34px] h-[20px] rounded-none transition-colors ${
                 tpEnabled ? "bg-[var(--fixed-green)]" : "bg-[var(--border-strong)]"
               }`}
             >
               <span
-                className={`absolute top-[2px] size-[16px] rounded-full bg-white transition-transform ${
+                className={`absolute top-[2px] size-[16px] rounded-none bg-white transition-transform ${
                   tpEnabled ? "left-[16px]" : "left-[2px]"
                 }`}
               />
@@ -764,7 +760,7 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
         <button
           type="button"
           onClick={onExecuteTrade}
-          className={`w-full flex items-center justify-center gap-1.5 py-3 rounded-full text-[13.5px] font-bold uppercase tracking-[0.05em] cursor-pointer transition-all shadow-lg active:scale-[0.98] ${
+          className={`w-full flex items-center justify-center gap-1.5 py-3 rounded-none text-[13.5px] font-bold uppercase tracking-[0.05em] cursor-pointer transition-all shadow-lg active:scale-[0.98] ${
             isLong
               ? "bg-[#5ec2a8] hover:bg-[#52ad96] text-[#0b1a16] shadow-[#5ec2a8]/20"
               : "bg-[#eb4d5c] hover:bg-[#d43f4d] text-white shadow-[#eb4d5c]/20"
@@ -850,7 +846,7 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
                     setSelectedSlippage(preset);
                     setShowSlippageMenu(false);
                   }}
-                  className={`py-1 rounded-full border text-[10.5px] font-mono font-semibold transition-colors cursor-pointer ${
+                  className={`py-1 rounded-none border text-[10.5px] font-mono font-semibold transition-colors cursor-pointer ${
                     selectedSlippage === preset
                       ? "bg-[var(--surface)] border-[var(--fixed-green)] text-white"
                       : "bg-[var(--surface)] border-[var(--border)] text-[var(--t2)] hover:text-white"
