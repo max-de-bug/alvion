@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useId } from "react";
+import React, { useState, useId, useRef, useCallback, useEffect } from "react";
+import NumberFlow from "@number-flow/react";
 import {
   ChevronDown,
   Check,
@@ -126,19 +127,88 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
       ? Math.min(100, Math.max(0, Math.round((marginUsdc / walletBalance) * 100)))
       : 0;
 
-  // Handle slider change from 0% to 100%
-  const handleSliderChange = (pct: number) => {
+  // Real-time unlagged pointer drag state
+  const sliderTrackRef = useRef<HTMLDivElement>(null);
+  const rafRef = useRef<number | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragPercent, setDragPercent] = useState<number | null>(null);
+
+  const activePercent = isDragging && dragPercent !== null ? dragPercent : currentPercent;
+  const effectiveMargin = isDragging && dragPercent !== null
+    ? Math.max(0, Math.round((dragPercent / 100) * walletBalance))
+    : marginUsdc;
+
+  // Handle discrete snap click
+  const handleSliderChange = useCallback((pct: number) => {
     if (walletBalance <= 0) return;
     const computedMargin = Math.max(0, Math.round((pct / 100) * walletBalance));
     setMarginUsdc(computedMargin);
+  }, [walletBalance, setMarginUsdc]);
+
+  // Buttery-smooth pointer drag calculation
+  const updateFromPointer = useCallback((clientX: number) => {
+    if (!sliderTrackRef.current || walletBalance <= 0) return;
+    const rect = sliderTrackRef.current.getBoundingClientRect();
+    if (rect.width <= 0) return;
+    const rawPct = ((clientX - rect.left) / rect.width) * 100;
+    const clampedPct = Math.round(Math.min(100, Math.max(0, rawPct)));
+
+    // Snap to nearest 25% if within 3.5%
+    const snaps = [0, 25, 50, 75, 100];
+    const nearest = snaps.reduce((prev, curr) =>
+      Math.abs(curr - clampedPct) < Math.abs(prev - clampedPct) ? curr : prev
+    );
+    const finalPct = Math.abs(nearest - clampedPct) < 3.5 ? nearest : clampedPct;
+
+    setDragPercent(finalPct);
+
+    // Throttle store update to RAF to prevent network flood on every pixel
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => {
+      const computedMargin = Math.max(0, Math.round((finalPct / 100) * walletBalance));
+      setMarginUsdc(computedMargin);
+    });
+  }, [walletBalance, setMarginUsdc]);
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (walletBalance <= 0) return;
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch { }
+    setIsDragging(true);
+    updateFromPointer(e.clientX);
   };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDragging) return;
+    updateFromPointer(e.clientX);
+  };
+
+  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDragging) return;
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch { }
+    setIsDragging(false);
+    if (dragPercent !== null && walletBalance > 0) {
+      const computedMargin = Math.max(0, Math.round((dragPercent / 100) * walletBalance));
+      setMarginUsdc(computedMargin);
+    }
+    setDragPercent(null);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
 
   // Convert size depending on unit mode (USDC vs Asset like BTC)
   const displaySizeValue =
     sizeMode === "USDC"
-      ? marginUsdc * leverage
+      ? effectiveMargin * leverage
       : currentMarket.markPx > 0
-        ? Number(((marginUsdc * leverage) / currentMarket.markPx).toFixed(5))
+        ? Number(((effectiveMargin * leverage) / currentMarket.markPx).toFixed(5))
         : 0;
 
   const handleSizeInputChange = (val: string) => {
@@ -156,7 +226,7 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
   };
 
   // Order value and fees
-  const calculatedOrderValue = marginUsdc * leverage;
+  const calculatedOrderValue = effectiveMargin * leverage;
   const estimatedFee = calculatedOrderValue * 0.00045; // 0.045% taker fee
   const estLiqPrice =
     currentMarket.markPx > 0 && leverage > 0
@@ -242,8 +312,8 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
                     setShowMarginModal(false);
                   }}
                   className={`p-2 rounded-none text-left text-xs transition-colors cursor-pointer flex items-center justify-between ${marginMode === "isolated"
-                      ? "bg-[#1c272c] border border-[var(--fixed-green)]/40 text-white"
-                      : "hover:bg-[var(--hover)] text-[var(--t2)]"
+                    ? "bg-[#1c272c] border border-[var(--fixed-green)]/40 text-white"
+                    : "hover:bg-[var(--hover)] text-[var(--t2)]"
                     }`}
                 >
                   <div>
@@ -259,8 +329,8 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
                     setShowMarginModal(false);
                   }}
                   className={`p-2 rounded-none text-left text-xs transition-colors cursor-pointer flex items-center justify-between ${marginMode === "cross"
-                      ? "bg-[#1c272c] border border-[var(--fixed-green)]/40 text-white"
-                      : "hover:bg-[var(--hover)] text-[var(--t2)]"
+                    ? "bg-[#1c272c] border border-[var(--fixed-green)]/40 text-white"
+                    : "hover:bg-[var(--hover)] text-[var(--t2)]"
                     }`}
                 >
                   <div>
@@ -313,8 +383,8 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
                       setShowLeverageModal(false);
                     }}
                     className={`py-1 rounded-none text-[11px] font-mono font-medium transition-colors cursor-pointer ${leverage === preset
-                        ? "bg-[var(--fixed-green)] text-slate-950 font-bold"
-                        : "bg-[var(--surface-3)] text-[var(--t2)] hover:text-white"
+                      ? "bg-[var(--fixed-green)] text-slate-950 font-bold"
+                      : "bg-[var(--surface-3)] text-[var(--t2)] hover:text-white"
                       }`}
                   >
                     {preset}x
@@ -348,8 +418,8 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
                     setShowCollateralModal(false);
                   }}
                   className={`p-2 rounded-none text-left text-xs transition-colors cursor-pointer flex items-center justify-between ${collateralMode === "unified"
-                      ? "bg-[#1c272c] border border-[var(--fixed-green)]/40 text-white"
-                      : "hover:bg-[var(--hover)] text-[var(--t2)]"
+                    ? "bg-[#1c272c] border border-[var(--fixed-green)]/40 text-white"
+                    : "hover:bg-[var(--hover)] text-[var(--t2)]"
                     }`}
                 >
                   <div>
@@ -365,8 +435,8 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
                     setShowCollateralModal(false);
                   }}
                   className={`p-2 rounded-none text-left text-xs transition-colors cursor-pointer flex items-center justify-between ${collateralMode === "isolated"
-                      ? "bg-[#1c272c] border border-[var(--fixed-green)]/40 text-white"
-                      : "hover:bg-[var(--hover)] text-[var(--t2)]"
+                    ? "bg-[#1c272c] border border-[var(--fixed-green)]/40 text-white"
+                    : "hover:bg-[var(--hover)] text-[var(--t2)]"
                     }`}
                 >
                   <div>
@@ -391,8 +461,8 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
               setShowProMenu(false);
             }}
             className={`relative pb-2.5 font-medium transition-colors mr-7 cursor-pointer ${orderType === "market" && !isProTypeSelected
-                ? "text-white font-semibold"
-                : "text-[#7a8990] hover:text-white"
+              ? "text-white font-semibold"
+              : "text-[#7a8990] hover:text-white"
               }`}
           >
             Market
@@ -410,8 +480,8 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
               setShowProMenu(false);
             }}
             className={`relative pb-2.5 font-medium transition-colors mr-7 cursor-pointer ${orderType === "limit" && !isProTypeSelected
-                ? "text-white font-semibold"
-                : "text-[#7a8990] hover:text-white"
+              ? "text-white font-semibold"
+              : "text-[#7a8990] hover:text-white"
               }`}
           >
             Limit
@@ -426,8 +496,8 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
               type="button"
               onClick={() => setShowProMenu((prev) => !prev)}
               className={`relative pb-2.5 font-medium transition-colors flex items-center gap-1 cursor-pointer ${isProTypeSelected
-                  ? "text-white font-semibold"
-                  : "text-[#7a8990] hover:text-white"
+                ? "text-white font-semibold"
+                : "text-[#7a8990] hover:text-white"
                 }`}
             >
               <span>{getProLabel()}</span>
@@ -493,8 +563,8 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
             type="button"
             onClick={() => setIsLong(true)}
             className={`h-[36px] rounded-none text-[13.5px] font-semibold transition-all cursor-pointer flex items-center justify-center ${isLong
-                ? "bg-[#5ec2a8] text-[#0b1a16] shadow-sm font-bold"
-                : "text-[#d6dee2] hover:text-white"
+              ? "bg-[#5ec2a8] text-[#0b1a16] shadow-sm font-bold"
+              : "text-[#d6dee2] hover:text-white"
               }`}
           >
             Buy / Long
@@ -503,8 +573,8 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
             type="button"
             onClick={() => setIsLong(false)}
             className={`h-[36px] rounded-none text-[13.5px] font-semibold transition-all cursor-pointer flex items-center justify-center ${!isLong
-                ? "bg-[#eb4d5c] text-white shadow-sm font-bold"
-                : "text-[#d6dee2] hover:text-white"
+              ? "bg-[#eb4d5c] text-white shadow-sm font-bold"
+              : "text-[#d6dee2] hover:text-white"
               }`}
           >
             Sell / Short
@@ -517,10 +587,15 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
           <div className="flex items-center justify-between">
             <span className="text-[#728087] font-normal">Available to Trade</span>
             <div className="flex items-center gap-2">
-              <span className="inline-flex items-center justify-center min-w-[54px] h-[20px] px-2 rounded-none bg-[#2c373b] font-mono text-[11px] font-semibold text-white/90">
-                {walletBalance > 0
-                  ? walletBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                  : ""}
+              <span className="inline-flex items-center justify-center min-w-[54px] h-[20px] px-2 rounded-none bg-[#2c373b] font-mono text-[11px] font-semibold text-white/90 tabular-nums">
+                {walletBalance > 0 ? (
+                  <NumberFlow
+                    value={walletBalance}
+                    format={{ minimumFractionDigits: 2, maximumFractionDigits: 2 }}
+                  />
+                ) : (
+                  "0.00"
+                )}
               </span>
               <span className="font-semibold text-white text-[13px]">USDC</span>
             </div>
@@ -588,29 +663,23 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
 
         {/* 6. SLIDER WITH 5 SNAP DOTS & STANDALONE PERCENTAGE BOX */}
         <div className="flex items-center gap-3 pt-0.5">
-          {/* Snap Slider Track */}
+          {/* Snap Slider Track with Unlagged 60/120fps Pointer Capture Drag */}
           <div
-            className="relative flex-1 h-[24px] flex items-center cursor-pointer select-none group"
-            onClick={(e) => {
-              const rect = e.currentTarget.getBoundingClientRect();
-              const clickX = e.clientX - rect.left;
-              const pct = Math.round(Math.min(100, Math.max(0, (clickX / rect.width) * 100)));
-              // Snap to nearest 25% if close
-              const snaps = [0, 25, 50, 75, 100];
-              const nearest = snaps.reduce((prev, curr) =>
-                Math.abs(curr - pct) < Math.abs(prev - pct) ? curr : prev
-              );
-              const finalPct = Math.abs(nearest - pct) < 6 ? nearest : pct;
-              handleSliderChange(finalPct);
-            }}
+            ref={sliderTrackRef}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerCancel={handlePointerUp}
+            className="relative flex-1 h-[24px] flex items-center cursor-pointer select-none group touch-none"
           >
             {/* Background track line */}
             <div className="absolute inset-x-0 h-[2px] rounded-none bg-[#20292e]" />
 
             {/* Filled line up to current percentage */}
             <div
-              className="absolute left-0 h-[2px] rounded-none bg-[#5ec2a8] transition-all duration-150"
-              style={{ width: `${currentPercent}%` }}
+              className={`absolute left-0 h-[2px] rounded-none bg-[#5ec2a8] ${isDragging ? "transition-none" : "transition-all duration-150"
+                }`}
+              style={{ width: `${activePercent}%` }}
             />
 
             {/* 5 snap dots: 0%, 25%, 50%, 75%, 100% */}
@@ -618,14 +687,14 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
               <button
                 key={pct}
                 type="button"
-                onClick={(e) => {
+                onPointerDown={(e) => {
                   e.stopPropagation();
                   handleSliderChange(pct);
                 }}
                 className="absolute size-[5px] -translate-x-1/2 rounded-none transition-all hover:scale-125 z-10 cursor-pointer"
                 style={{
                   left: `${pct}%`,
-                  backgroundColor: pct <= currentPercent ? "#5ec2a8" : "#38464d",
+                  backgroundColor: pct <= activePercent ? "#5ec2a8" : "#38464d",
                 }}
                 title={`${pct}%`}
               />
@@ -633,14 +702,15 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
 
             {/* Hollow Teal Ring Thumb */}
             <div
-              className="absolute size-[18px] -translate-x-1/2 rounded-none border-[2.5px] border-[#5ec2a8] bg-[#10171a] shadow-sm transition-all duration-150 pointer-events-none z-20"
-              style={{ left: `${currentPercent}%` }}
+              className={`absolute size-[18px] -translate-x-1/2 rounded-none border-[2.5px] border-[#5ec2a8] bg-[#10171a] shadow-sm pointer-events-none z-20 ${isDragging ? "transition-none scale-110" : "transition-all duration-150"
+                }`}
+              style={{ left: `${activePercent}%` }}
             />
           </div>
 
-          {/* Standalone percentage box: [ 0 % ] */}
-          <div className="w-[56px] h-[36px] rounded-none bg-[#161e22] border border-[#202b31] flex items-center justify-center font-mono text-[13.5px] font-semibold text-white shrink-0">
-            {currentPercent} %
+          {/* Standalone percentage box with NumberFlow animated digits */}
+          <div className="w-[56px] h-[36px] rounded-none bg-[#161e22] border border-[#202b31] flex items-center justify-center font-mono text-[13.5px] font-semibold text-white shrink-0 tabular-nums">
+            <NumberFlow value={activePercent} suffix=" %" />
           </div>
         </div>
 
@@ -786,8 +856,8 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
           type="button"
           onClick={onExecuteTrade}
           className={`w-full flex items-center justify-center gap-1.5 py-3 rounded-none text-[13.5px] font-bold uppercase tracking-[0.05em] cursor-pointer transition-all shadow-lg active:scale-[0.98] ${isLong
-              ? "bg-[#5ec2a8] hover:bg-[#52ad96] text-[#0b1a16] shadow-[#5ec2a8]/20"
-              : "bg-[#eb4d5c] hover:bg-[#d43f4d] text-white shadow-[#eb4d5c]/20"
+            ? "bg-[#5ec2a8] hover:bg-[#52ad96] text-[#0b1a16] shadow-[#5ec2a8]/20"
+            : "bg-[#eb4d5c] hover:bg-[#d43f4d] text-white shadow-[#eb4d5c]/20"
             }`}
         >
           {loadingQuote ? (
@@ -811,21 +881,30 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
           <div className="flex items-center justify-between">
             <span className="text-[var(--t3)]">Order Value</span>
             <span className="font-mono tabular-nums font-semibold text-[var(--t1)]">
-              ${calculatedOrderValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              <NumberFlow
+                value={calculatedOrderValue}
+                format={{ style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2 }}
+              />
             </span>
           </div>
 
           <div className="flex items-center justify-between">
             <span className="text-[var(--t3)]">Margin</span>
             <span className="font-mono tabular-nums font-semibold text-[var(--t1)]">
-              ${marginUsdc.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              <NumberFlow
+                value={effectiveMargin}
+                format={{ style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2 }}
+              />
             </span>
           </div>
 
           <div className="flex items-center justify-between">
             <span className="text-[var(--t3)]">Fee (est.)</span>
             <span className="font-mono tabular-nums font-semibold text-[var(--t1)]">
-              ${estimatedFee.toFixed(2)}
+              <NumberFlow
+                value={estimatedFee}
+                format={{ style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2 }}
+              />
             </span>
           </div>
 
@@ -886,8 +965,8 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
                     setShowSlippageMenu(false);
                   }}
                   className={`py-1 rounded-none border text-[10.5px] font-mono font-semibold transition-colors cursor-pointer ${selectedSlippage === preset
-                      ? "bg-[var(--surface)] border-[var(--fixed-green)] text-white"
-                      : "bg-[var(--surface)] border-[var(--border)] text-[var(--t2)] hover:text-white"
+                    ? "bg-[var(--surface)] border-[var(--fixed-green)] text-white"
+                    : "bg-[var(--surface)] border-[var(--border)] text-[var(--t2)] hover:text-white"
                     }`}
                 >
                   {preset}%
