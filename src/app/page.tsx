@@ -83,10 +83,13 @@ export default function Home() {
 
     // Wallet
     address,
+    alias,
     isConnected,
     chainId,
     connectWallet,
     disconnect,
+    exportPrivateKey,
+    resetAccount,
 
     // Metrics
     longOi,
@@ -116,9 +119,12 @@ export default function Home() {
         faucetWallet={faucetWallet}
         isConnected={isConnected}
         address={address}
+        alias={alias}
         chainId={chainId}
         connectWallet={connectWallet}
         disconnect={disconnect}
+        exportPrivateKey={exportPrivateKey}
+        resetAccount={resetAccount}
       />
 
       {/* 2. Notification Toast */}

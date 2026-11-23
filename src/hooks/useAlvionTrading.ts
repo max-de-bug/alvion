@@ -1,83 +1,32 @@
 "use client";
 
-import { useAccount, useConnect, useDisconnect, useSignTypedData } from "wagmi";
-import { injected } from "wagmi/connectors";
-import { ROBINHOOD_CLEARINGHOUSE, ORDER_TYPES } from "@/lib/wagmi";
-import { useState, useCallback } from "react";
-
-export interface EIP712OrderPayload {
-  trader: `0x${string}`;
-  market: string;
-  isLong: boolean;
-  price: bigint;
-  sizeUsd: bigint;
-  marginUsdc: bigint;
-  leverage: bigint;
-  nonce: bigint;
-  expiry: bigint;
-}
+import { useState, useEffect, useCallback } from "react";
+import {
+  getOrCreateEmbeddedWallet,
+  signOrderWithEmbeddedWallet,
+  resetEmbeddedWallet,
+  EmbeddedWalletState,
+  SignOrderParams,
+} from "@/lib/embeddedWallet";
 
 export function useAlvionTrading() {
-  const { address, isConnected, chainId } = useAccount();
-  const { connect } = useConnect();
-  const { disconnect } = useDisconnect();
-  const { signTypedDataAsync } = useSignTypedData();
+  const [wallet, setWallet] = useState<EmbeddedWalletState>(() => getOrCreateEmbeddedWallet());
   const [isSigning, setIsSigning] = useState(false);
 
-  const connectWallet = useCallback(() => {
-    connect({ connector: injected() });
-  }, [connect]);
+  useEffect(() => {
+    // Sync with localStorage on client mount
+    const current = getOrCreateEmbeddedWallet();
+    setWallet(current);
+  }, []);
 
   const signOrder = useCallback(
-    async (params: {
-      market: string;
-      isLong: boolean;
-      price: number;
-      sizeUsd: number;
-      marginUsdc: number;
-      leverage: number;
-    }) => {
-      const traderAddress = (address || "0x71C8364762A803325b335371b292723E59d64663") as `0x${string}`;
-      const now = Math.floor(Date.now() / 1000);
-      const nonce = BigInt(Date.now());
-      const expiry = BigInt(now + 86400);
-
-      const message: EIP712OrderPayload = {
-        trader: traderAddress,
-        market: params.market,
-        isLong: params.isLong,
-        price: BigInt(Math.round(params.price * 1_000_000)),
-        sizeUsd: BigInt(Math.round(params.sizeUsd * 1_000_000)),
-        marginUsdc: BigInt(Math.round(params.marginUsdc * 1_000_000)),
-        leverage: BigInt(params.leverage),
-        nonce,
-        expiry,
-      };
-
-      if (!isConnected || !address) {
-        // Return valid mock EIP-712 signature in demo mode
-        return {
-          message,
-          signature: "0x" + "a1b2c3d4e5f67890".repeat(8) + "1b",
-          isMock: true,
-        };
-      }
-
+    async (params: SignOrderParams) => {
       setIsSigning(true);
       try {
-        const domain = {
-          name: "Alvion Perpetuals",
-          version: "1",
-          chainId: chainId ? Number(chainId) : 4663,
-          verifyingContract: ROBINHOOD_CLEARINGHOUSE,
-        };
-
-        const signature = await signTypedDataAsync({
-          domain,
-          types: ORDER_TYPES,
-          primaryType: "Order",
-          message,
-        });
+        const { signature, message } = await signOrderWithEmbeddedWallet(
+          wallet.privateKey,
+          params
+        );
         setIsSigning(false);
         return {
           message,
@@ -86,19 +35,34 @@ export function useAlvionTrading() {
         };
       } catch (err) {
         setIsSigning(false);
+        console.error("Embedded signing error:", err);
         throw err;
       }
     },
-    [address, isConnected, chainId, signTypedDataAsync]
+    [wallet.privateKey]
   );
 
+  const resetAccount = useCallback(() => {
+    const nextWallet = resetEmbeddedWallet();
+    setWallet(nextWallet);
+    return nextWallet;
+  }, []);
+
+  const exportPrivateKey = useCallback(() => {
+    return wallet.privateKey;
+  }, [wallet.privateKey]);
+
   return {
-    address,
-    isConnected,
-    chainId,
+    address: wallet.address,
+    alias: wallet.alias,
+    isConnected: true, // Polymarket-style: user is always connected to their non-custodial embedded account
+    chainId: 4663,
     isSigning,
-    connectWallet,
-    disconnect,
+    isEmbedded: true,
+    connectWallet: () => {}, // No-op, always connected
+    disconnect: resetAccount,
     signOrder,
+    resetAccount,
+    exportPrivateKey,
   };
 }

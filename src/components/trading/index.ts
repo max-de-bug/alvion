@@ -2,6 +2,7 @@ export { TradingHeader } from "./TradingHeader";
 export { NotificationToast } from "./NotificationToast";
 export { MarketTickerBar } from "./MarketTickerBar";
 export { MarketSelectorModal } from "./MarketSelectorModal";
+export { AccountModal } from "./AccountModal";
 export { RiskFirewallBar } from "./RiskFirewallBar";
 export { TradingChart } from "./TradingChart";
 export { TradingViewChart } from "./TradingViewChart";

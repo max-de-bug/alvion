@@ -1,26 +1,37 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import {
   X,
-  Wallet,
+  Plus,
+  ChevronDown,
   Settings,
 } from "lucide-react";
 import { AlvionBirdLogo } from "@/components/brand/AlvionBirdLogo";
 import { useShallow } from "zustand/react/shallow";
 import { useTradingStore, type ActiveTab } from "@/stores/useTradingStore";
 
+// Vercel Best Practice: bundle-dynamic-imports
+const AccountModal = dynamic(
+  () => import("./AccountModal").then((m) => m.AccountModal),
+  { ssr: false }
+);
+
 interface TradingHeaderProps {
   activeTab: ActiveTab;
   setActiveTab: (tab: ActiveTab) => void;
   walletBalance: number;
   faucetWallet: (amount: number) => void;
-  isConnected: boolean;
+  isConnected?: boolean;
   address?: string;
+  alias?: string;
   chainId?: number;
-  connectWallet: () => void;
-  disconnect: () => void;
+  connectWallet?: () => void;
+  disconnect?: () => void;
+  exportPrivateKey?: () => string;
+  resetAccount?: () => void;
 }
 
 export const TradingHeader = React.memo<TradingHeaderProps>(function TradingHeader({
@@ -30,8 +41,11 @@ export const TradingHeader = React.memo<TradingHeaderProps>(function TradingHead
   faucetWallet,
   isConnected,
   address,
+  alias,
   connectWallet,
   disconnect,
+  exportPrivateKey,
+  resetAccount,
 }) {
   // Vercel Best Practice: rerender-defer-reads & shallow store subscription
   const { tradingMode, setTradingMode, credits } = useTradingStore(
@@ -42,8 +56,11 @@ export const TradingHeader = React.memo<TradingHeaderProps>(function TradingHead
     }))
   );
   const [showWarning, setShowWarning] = useState(true);
+  const [showAccountModal, setShowAccountModal] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
   const [headerHeight, setHeaderHeight] = useState<number>(showWarning ? 88 : 56);
+
+  const displayAlias = alias || (address ? `Trader #${address.slice(2, 6).toUpperCase()}` : "Trader #4663");
 
   useEffect(() => {
     if (!headerRef.current) return;
@@ -199,60 +216,63 @@ export const TradingHeader = React.memo<TradingHeaderProps>(function TradingHead
             </button>
           </div>
 
-          {/* Faucet Balance Pill */}
-          <div className="hidden sm:flex items-center gap-2 pl-3 pr-1.5 py-1 rounded-none bg-[var(--surface-3)] border border-[var(--border)]">
-            <div className="text-right">
-              <span className="text-xs font-mono font-semibold text-[var(--t1)]">
-                ${walletBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </span>
-              <span className="text-[11px] text-[#4ECCA3] font-mono ml-1 font-semibold">USDCx</span>
-            </div>
-            <button
-              onClick={() => faucetWallet(10000)}
-              title="Claim 10,000 test USDCx"
-              className="text-[10.5px] font-semibold text-[#4ECCA3] hover:text-[#3db890] px-2 py-0.5 rounded-none border border-[#4ECCA3]/30 bg-[#162922] transition-colors"
-            >
-              +Faucet
-            </button>
-          </div>
-
-          {/* Settings Icon Button */}
+          {/* 1. Cash Balance Pill (Polymarket Style) */}
           <button
             type="button"
-            aria-label="Settings"
-            className="grid place-items-center size-[var(--header-ctl-h)] rounded-none bg-[var(--surface-3)] text-[var(--t2)] hover:text-[var(--t1)] hover:bg-[var(--hover)] transition-colors cursor-pointer border border-[var(--border)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--fixed-green)]"
+            onClick={() => setShowAccountModal(true)}
+            className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-none bg-[var(--surface-3)] hover:bg-[var(--hover)] border border-[var(--border)] transition-colors cursor-pointer"
+            title="Cash Balance • Click to manage account"
           >
-            <Settings className="w-4 h-4" />
+            <span className="text-[10px] text-[#728087] uppercase font-mono tracking-wider">Cash</span>
+            <span className="text-xs font-mono font-bold text-white">
+              ${walletBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </span>
+            <span className="text-[10.5px] text-[#4ECCA3] font-mono font-semibold">USDC</span>
           </button>
 
-          {/* Connect / Wallet Button */}
-          {isConnected && address ? (
-            <div className="flex items-center gap-2 bg-[var(--surface-3)] border border-[var(--border)] px-3 py-1.5 rounded-none text-xs font-mono">
-              <span className="text-[var(--t1)] font-medium">
-                {address.slice(0, 6)}...{address.slice(-4)}
-              </span>
-              <button
-                onClick={() => disconnect()}
-                title="Disconnect wallet"
-                className="text-[var(--t3)] hover:text-rose-400 text-xs ml-1"
-                aria-label="Disconnect wallet"
-              >
-                ✕
-              </button>
+          {/* 2. Deposit Button (Polymarket Style) */}
+          <button
+            type="button"
+            onClick={() => setShowAccountModal(true)}
+            className="flex items-center gap-1.5 h-[var(--header-ctl-h)] px-3.5 bg-[#4ECCA3] hover:bg-[#43B892] text-black font-semibold text-[11.5px] uppercase tracking-wider rounded-none transition-colors cursor-pointer shrink-0 shadow-sm"
+            title="Instant Deposit (Testnet Reload)"
+          >
+            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+            <span>Deposit</span>
+          </button>
+
+          {/* 3. Embedded Account Pill (Polymarket Style) */}
+          <button
+            type="button"
+            onClick={() => setShowAccountModal(true)}
+            className="flex items-center gap-2 h-[var(--header-ctl-h)] px-2.5 bg-[var(--surface-3)] hover:bg-[var(--hover)] border border-[var(--border)] rounded-none text-xs font-mono text-white transition-colors cursor-pointer shrink-0"
+            title="Embedded Account • 1-Click Trading"
+          >
+            <div className="w-5 h-5 bg-[#1A252B] border border-[#2A3740] rounded-none flex items-center justify-center font-mono font-bold text-[10px] text-[#4ECCA3]">
+              {displayAlias.slice(-2)}
             </div>
-          ) : (
-            <button
-              onClick={connectWallet}
-              className="btn-chrome flex items-center gap-1.5 h-[var(--header-ctl-h)] px-[16px] rounded-none text-[11.5px] font-semibold uppercase tracking-[0.05em] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--fixed-green)] cursor-pointer shrink-0"
-              aria-label="Connect Wallet"
-            >
-              <Wallet className="w-3.5 h-3.5 text-[#4ECCA3]" />
-              <span>Connect</span>
-            </button>
-          )}
+            <span className="hidden md:inline font-medium text-[11.5px]">{displayAlias}</span>
+            <span className="w-1.5 h-1.5 bg-[#4ECCA3] rounded-none animate-pulse" title="1-Click Trading Active" />
+            <ChevronDown className="w-3.5 h-3.5 text-[#728087]" />
+          </button>
         </div>
       </header>
     </div>
+
+    {/* Polymarket-Style Account & Embedded Wallet Modal (Vercel Best Practice: bundle-conditional) */}
+    {showAccountModal ? (
+      <AccountModal
+        isOpen={showAccountModal}
+        onClose={() => setShowAccountModal(false)}
+        address={address || "0x71C8364762A803325b335371b292723E59d64663"}
+        alias={displayAlias}
+        walletBalance={walletBalance}
+        faucetWallet={faucetWallet}
+        exportPrivateKey={exportPrivateKey || (() => "0x0000000000000000000000000000000000000000000000000000000000000000")}
+        resetAccount={resetAccount || (() => {})}
+      />
+    ) : null}
+
     {/* Spacer to preserve normal document flow beneath fixed navbar */}
     <div style={{ height: headerHeight }} aria-hidden="true" className="shrink-0 pointer-events-none" />
   </>

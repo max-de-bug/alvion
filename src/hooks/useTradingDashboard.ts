@@ -92,11 +92,14 @@ export function useTradingDashboard() {
 
   const {
     address,
+    alias,
     isConnected,
     chainId,
     connectWallet,
     disconnect,
     signOrder,
+    exportPrivateKey,
+    resetAccount,
   } = useAlvionTrading();
 
   const currentMarket = useMemo(() => {
@@ -279,26 +282,18 @@ export function useTradingDashboard() {
     const sizeUsd = marginUsdc * leverage;
 
     try {
-      let signature = "0x" + "a1b2c3d4e5f67890".repeat(8) + "1b";
       const trader = (address || "0x71C8364762A803325b335371b292723E59d64663") as string;
 
-      if (isConnected && address) {
-        try {
-          notify("Awaiting Order Signature in wallet...", 3000);
-          const signRes = await signOrder({
-            market: currentMarket.name,
-            isLong,
-            price: execPrice,
-            sizeUsd,
-            marginUsdc,
-            leverage,
-          });
-          signature = signRes.signature;
-        } catch (signErr) {
-          notify("Signature rejected or cancelled", 3000);
-          return;
-        }
-      }
+      // 1-Click Cryptographic EIP-712 Signing via Embedded Non-Custodial Wallet (Polymarket Architecture)
+      const signRes = await signOrder({
+        market: currentMarket.name,
+        isLong,
+        price: execPrice,
+        sizeUsd,
+        marginUsdc,
+        leverage,
+      });
+      const signature = signRes.signature;
 
       // Submit signed order to Option A matching engine
       const res = await fetch("/api/orders", {
@@ -467,12 +462,15 @@ export function useTradingDashboard() {
     domainInfo,
     fundingInfo,
 
-    // Wallet
+    // Wallet & Embedded Account
     address,
+    alias,
     isConnected,
     chainId,
     connectWallet,
     disconnect,
+    exportPrivateKey,
+    resetAccount,
 
     // Computed metrics
     longOi,
