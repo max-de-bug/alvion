@@ -284,7 +284,7 @@ export function useTradingDashboard() {
     try {
       const trader = (address || "0x71C8364762A803325b335371b292723E59d64663") as string;
 
-      // 1-Click Cryptographic EIP-712 Signing via Embedded Non-Custodial Wallet (Polymarket Architecture)
+      // 1-Click Cryptographic EIP-712 Signing via Embedded Non-Custodial Wallet
       const signRes = await signOrder({
         market: currentMarket.name,
         isLong,

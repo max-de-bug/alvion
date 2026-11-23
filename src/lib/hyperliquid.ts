@@ -41,6 +41,15 @@ export interface QuoteResult {
   borrowRatePerHour: number;
   tradingFeeUsdc: number;
   maxPayoutUsdc: number;
+  // Slippage-at-Risk (SaR) Microstructure metrics (Sepper 2026)
+  expectedSlippageBps: number;
+  sar95Bps: number;
+  tailSlippageBps: number;
+  liquidityQuality: "DEEP" | "MODERATE" | "THIN";
+  // Percolator Dynamic Leverage Dampener metrics (Yakovenko Architecture)
+  domainUtilizationPct: number;
+  dynamicMaxLeverage: number;
+  dampenerStatus: "OPTIMAL" | "DAMPENED" | "GUARDED" | "RESTRICTED";
   robinhoodNetwork: {
     chainId: number;
     clearinghouse: string;
@@ -359,15 +368,44 @@ export function calculateQuote(
   // For standard leverage (<=50x), maintenance margin is ~0.8%.
   // For ultra-high leverage (up to 1000x), maintenance margin scales to 40% of initial margin
   // ensuring maxLossRatio remains positive (e.g. at 1000x: initial margin = 0.1%, maintenance = 0.04%, maxLossRatio = 0.06%).
-  const maintenanceMarginRate = Math.min(0.008, 0.4 / leverage);
+  const maintenanceMarginRate = Math.min(0.008, 0.4 / Math.max(1, leverage));
 
   // Liquidation Price calculation (standard formula):
   // Long liq: entryPrice * (1 - (1/leverage) + maintenanceMarginRate)
   // Short liq: entryPrice * (1 + (1/leverage) - maintenanceMarginRate)
-  const maxLossRatio = Math.max(0.0001, (1 / leverage) - maintenanceMarginRate);
+  const maxLossRatio = Math.max(0.0001, (1 / Math.max(1, leverage)) - maintenanceMarginRate);
   const liquidationPrice = isLong
     ? executionPrice * Math.max(0.001, (1 - maxLossRatio))
     : executionPrice * (1 + maxLossRatio);
+
+  // 4. Slippage-at-Risk (SaR) Microstructure Modeling (Sepper 2026)
+  // Real-time market volatility and depth concentration scaling
+  const marketVol = Math.max(0.012, Math.abs(marketCtx.change24h || 1.5) / 100);
+  const depthConcentration = Math.min(2.5, Math.max(1.0, positionSizeUsdc / 15_000));
+  const expectedSlippageBps = Number(totalSpreadBps.toFixed(2));
+  // 95% Quantile Slippage-at-Risk (SaR 95%)
+  const sar95Bps = Number((expectedSlippageBps * (1 + 1.645 * marketVol * Math.sqrt(depthConcentration))).toFixed(2));
+  // Expected Tail Slippage (ESaR 95%)
+  const tailSlippageBps = Number((expectedSlippageBps * (1 + 2.06 * marketVol * Math.sqrt(depthConcentration))).toFixed(2));
+  const liquidityQuality: "DEEP" | "MODERATE" | "THIN" =
+    positionSizeUsdc < 50_000 ? "DEEP" : positionSizeUsdc < 250_000 ? "MODERATE" : "THIN";
+
+  // 5. Percolator Dynamic Leverage Dampener (Yakovenko Specification)
+  // Calculates live domain buffer utilization to protect protocol solvency
+  const domainUtilizationPct = Number(Math.min(100, Math.max(0, Math.abs(skewImpactFactor) * 100 * 1.5)).toFixed(1));
+  let dynamicMaxLeverage = marketCtx.maxLeverage || 1000;
+  let dampenerStatus: "OPTIMAL" | "DAMPENED" | "GUARDED" | "RESTRICTED" = "OPTIMAL";
+
+  if (domainUtilizationPct >= 90) {
+    dynamicMaxLeverage = Math.min(dynamicMaxLeverage, 10);
+    dampenerStatus = "RESTRICTED";
+  } else if (domainUtilizationPct >= 75) {
+    dynamicMaxLeverage = Math.min(dynamicMaxLeverage, 50);
+    dampenerStatus = "GUARDED";
+  } else if (domainUtilizationPct >= 50) {
+    dynamicMaxLeverage = Math.min(dynamicMaxLeverage, 100);
+    dampenerStatus = "DAMPENED";
+  }
 
   // Trading fee: 6 bps of notional
   const tradingFeeUsdc = positionSizeUsdc * 0.0006;
@@ -396,6 +434,13 @@ export function calculateQuote(
     borrowRatePerHour,
     tradingFeeUsdc,
     maxPayoutUsdc,
+    expectedSlippageBps,
+    sar95Bps,
+    tailSlippageBps,
+    liquidityQuality,
+    domainUtilizationPct,
+    dynamicMaxLeverage,
+    dampenerStatus,
     robinhoodNetwork: {
       chainId: 4663,
       clearinghouse: "0x4663111111111111111111111111111111114663",

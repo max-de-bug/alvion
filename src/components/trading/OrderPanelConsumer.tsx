@@ -278,9 +278,12 @@ export const OrderPanelConsumer = React.memo<OrderPanelConsumerProps>(function O
         )}
       </button>
 
-      {/* SAFETY NOTICE */}
-      <div className="flex items-center justify-center text-[11px] text-[var(--t3)] text-center">
+      {/* SAFETY NOTICE & SLIPPAGE-AT-RISK */}
+      <div className="flex items-center justify-between text-[11px] text-[var(--t3)] px-1">
         <span>Max loss: ${marginUsdc}</span>
+        <span title="Forward-looking Slippage-at-Risk (SaR 95% • Sepper 2026)">
+          SaR 95%: <span className="font-mono text-amber-400 font-semibold">{quote?.sar95Bps ? `${(quote.sar95Bps / 100).toFixed(3)}%` : "0.045%"}</span>
+        </span>
       </div>
     </div>
   );

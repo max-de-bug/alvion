@@ -96,7 +96,34 @@ impl DomainRiskManager {
         );
     }
 
-    /// Open position and increment domain Open Interest
+    /// Percolator Dynamic Leverage Dampener (Yakovenko Specification)
+    /// Computes domain buffer utilization: (|Long OI - Short OI|) / (Insurance * 2)
+    /// Returns (utilization_pct, dynamic_max_leverage, dampener_status)
+    pub fn get_domain_utilization(&self, market: &str) -> (f64, u16, &'static str) {
+        if let Some(domain) = self.domains.get(market) {
+            let net_skew = (domain.long_open_interest_usd as i64 - domain.short_open_interest_usd as i64).unsigned_abs();
+            let insurance = domain.isolated_insurance_fund_usdc;
+            if insurance == 0 {
+                return (100.0, 10, "RESTRICTED");
+            }
+            let buffer_capacity = insurance * 2;
+            let utilization = (net_skew as f64 / buffer_capacity as f64) * 100.0;
+
+            if utilization < 50.0 {
+                (utilization, 1000, "OPTIMAL")
+            } else if utilization < 75.0 {
+                (utilization, 100, "DAMPENED")
+            } else if utilization < 90.0 {
+                (utilization, 50, "GUARDED")
+            } else {
+                (utilization, 10, "RESTRICTED")
+            }
+        } else {
+            (0.0, 1000, "OPTIMAL")
+        }
+    }
+
+    /// Open position and increment domain Open Interest with Percolator Risk Ceiling Check
     pub fn open_position(
         &mut self,
         trader: String,
@@ -107,6 +134,11 @@ impl DomainRiskManager {
         size_usd: u64,
         entry_price: u64,
     ) -> Result<Position, DomainError> {
+        let (_, max_allowed, _) = self.get_domain_utilization(&market);
+        if leverage > max_allowed {
+            return Err(DomainError::leverage_exceeds_ceiling(leverage, max_allowed, &market));
+        }
+
         let domain = self.domains.get_mut(&market).ok_or_else(|| DomainError::market_not_found(&market))?;
 
         match side {
@@ -444,6 +476,52 @@ mod tests {
         let liq_drop_px = 59_952 * PRICE_SCALE;
         let can_liq_trigger = manager.can_liquidate(&pos.id, liq_drop_px).expect("can_liquidate check");
         assert!(can_liq_trigger, "1000x position must trigger liquidation beyond maintenance margin");
+    }
+
+    #[test]
+    fn test_percolator_dynamic_leverage_dampener() {
+        let mut manager = DomainRiskManager::new(10_000_000 * USD_SCALE);
+        // Initially BTC has minimal skew, so utilization is low (<50%) -> 1000x allowed
+        let (util, max_lev, status) = manager.get_domain_utilization("BTC");
+        assert!(util < 50.0);
+        assert_eq!(max_lev, 1000);
+        assert_eq!(status, "OPTIMAL");
+
+        // Manually skew the domain: insurance is $5M (capacity $10M).
+        // Set Long OI - Short OI = $6M (60% utilization) -> should dampen to 100x
+        if let Some(domain) = manager.domains.get_mut("BTC") {
+            domain.long_open_interest_usd = 60_000_000 * USD_SCALE;
+            domain.short_open_interest_usd = 54_000_000 * USD_SCALE; // net skew = $6M = 60%
+        }
+        let (util, max_lev, status) = manager.get_domain_utilization("BTC");
+        assert_eq!(util, 60.0);
+        assert_eq!(max_lev, 100);
+        assert_eq!(status, "DAMPENED");
+
+        // Attempting 1000x on dampened domain should now fail
+        let res = manager.open_position(
+            "0xRiskyTrader".to_string(),
+            "BTC".to_string(),
+            Side::Buy,
+            100 * USD_SCALE,
+            1000,
+            100_000 * USD_SCALE,
+            60_000 * PRICE_SCALE,
+        );
+        assert!(res.is_err());
+        assert_eq!(res.unwrap_err().error_code(), "LEVERAGE_EXCEEDS_RISK_CEILING");
+
+        // Opening with allowed 100x should succeed
+        let res_ok = manager.open_position(
+            "0xRiskyTrader".to_string(),
+            "BTC".to_string(),
+            Side::Buy,
+            100 * USD_SCALE,
+            100,
+            10_000 * USD_SCALE,
+            60_000 * PRICE_SCALE,
+        );
+        assert!(res_ok.is_ok());
     }
 }
 

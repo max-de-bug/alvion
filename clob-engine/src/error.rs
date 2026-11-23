@@ -14,6 +14,7 @@ pub enum DomainError {
     ExceededDomainPnlCap { requested: u64, allowed: u64 },
     MaintenanceMarginViolated,
     InsufficientMargin { required: u64, available: u64 },
+    LeverageExceedsRiskCeiling { requested: u16, max_allowed: u16, market: String },
 }
 
 impl DomainError {
@@ -26,6 +27,7 @@ impl DomainError {
             DomainError::ExceededDomainPnlCap { .. } => "EXCEEDED_DOMAIN_PNL_CAP",
             DomainError::MaintenanceMarginViolated => "MAINTENANCE_MARGIN_VIOLATED",
             DomainError::InsufficientMargin { .. } => "INSUFFICIENT_MARGIN",
+            DomainError::LeverageExceedsRiskCeiling { .. } => "LEVERAGE_EXCEEDS_RISK_CEILING",
         }
     }
 
@@ -39,6 +41,14 @@ impl DomainError {
 
     pub fn position_closed(id: impl Into<String>) -> Self {
         Self::PositionClosed(id.into())
+    }
+
+    pub fn leverage_exceeds_ceiling(requested: u16, max_allowed: u16, market: impl Into<String>) -> Self {
+        Self::LeverageExceedsRiskCeiling {
+            requested,
+            max_allowed,
+            market: market.into(),
+        }
     }
 }
 
@@ -69,6 +79,13 @@ impl fmt::Display for DomainError {
                     f,
                     "Insufficient collateral margin: required {}, available {}",
                     required, available
+                )
+            }
+            DomainError::LeverageExceedsRiskCeiling { requested, max_allowed, market } => {
+                write!(
+                    f,
+                    "Requested leverage {}x exceeds dynamic domain ceiling {}x for market '{}'",
+                    requested, max_allowed, market
                 )
             }
         }

@@ -321,6 +321,12 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
                   </button>
                 ))}
               </div>
+              {quote?.dampenerStatus && quote.dampenerStatus !== "OPTIMAL" && (
+                <div className="text-[10px] text-cyan-400 bg-cyan-950/30 border border-cyan-500/30 px-2 py-1 rounded-none flex items-center justify-between">
+                  <span>Percolator Risk Dampener: Cap {quote.dynamicMaxLeverage}x ({quote.dampenerStatus})</span>
+                  <span className="font-mono font-bold">{quote.dynamicMaxLeverage}x</span>
+                </div>
+              )}
               {leverage >= 250 && (
                 <div className="text-[10px] text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-1 rounded-none flex items-center justify-between">
                   <span>Ultra-High Leverage: Fast liquidation buffer</span>
@@ -843,13 +849,26 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
           </div>
 
           <div className="flex items-center justify-between pt-0.5 border-t border-[var(--border)]">
-            <span className="text-[var(--t3)]">Slippage</span>
+            <span
+              className="text-[var(--t3)] flex items-center gap-1"
+              title="Forward-Looking Slippage-at-Risk (SaR 95% • Sepper 2026)"
+            >
+              <span>Slippage (Est. / SaR 95%)</span>
+            </span>
             <div className="flex items-center gap-1">
-              <span className="font-mono text-[var(--t3)]">Est. — /</span>
+              <span className="font-mono text-[var(--t2)] text-[11px]">
+                {quote ? `${(quote.expectedSlippageBps / 100).toFixed(3)}%` : "0.020%"} /
+              </span>
+              <span
+                className="font-mono font-semibold text-amber-400 text-[11px]"
+                title="95% Tail Execution Slippage-at-Risk"
+              >
+                {quote?.sar95Bps ? `${(quote.sar95Bps / 100).toFixed(3)}%` : "0.045%"}
+              </span>
               <button
                 type="button"
                 onClick={() => setShowSlippageMenu((prev) => !prev)}
-                className="font-mono font-semibold text-[var(--t1)] underline decoration-dotted underline-offset-2 hover:bg-[var(--hover)] px-1 rounded-none cursor-pointer"
+                className="font-mono font-semibold text-[var(--t1)] underline decoration-dotted underline-offset-2 hover:bg-[var(--hover)] px-1 rounded-none cursor-pointer ml-1"
               >
                 Max {selectedSlippage}%
               </button>

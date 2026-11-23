@@ -21,7 +21,7 @@ export interface SignOrderParams {
 
 /**
  * Retrieve or automatically generate a non-custodial embedded wallet
- * Stored securely in client storage (Polymarket-style zero-friction onboarding)
+ * Stored securely in client storage (zero-friction non-custodial onboarding)
  */
 export function getOrCreateEmbeddedWallet(): EmbeddedWalletState {
   if (typeof window === "undefined") {

@@ -29,6 +29,9 @@ export interface DomainData {
   short_open_interest_usd: number;
   available_long_liquidity_usd?: number;
   available_short_liquidity_usd?: number;
+  domain_utilization_pct?: number;
+  dynamic_max_leverage?: number;
+  dampener_status?: "OPTIMAL" | "DAMPENED" | "GUARDED" | "RESTRICTED";
   firewall_status?: string;
   pnl_protection?: string;
 }

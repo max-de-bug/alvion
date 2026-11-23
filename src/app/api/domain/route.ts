@@ -176,6 +176,23 @@ export async function GET(req: NextRequest) {
     }
 
     const domainConfig = DEFAULT_DOMAINS[market] || DEFAULT_DOMAINS.SPY;
+    const netSkew = Math.abs(domainConfig.long_oi - domainConfig.short_oi);
+    const capacity = domainConfig.insurance_usdc * 2;
+    const domainUtilizationPct = Number(((netSkew / capacity) * 100).toFixed(1));
+
+    let dynamicMaxLeverage = 1000;
+    let dampenerStatus: "OPTIMAL" | "DAMPENED" | "GUARDED" | "RESTRICTED" = "OPTIMAL";
+
+    if (domainUtilizationPct >= 90) {
+      dynamicMaxLeverage = 10;
+      dampenerStatus = "RESTRICTED";
+    } else if (domainUtilizationPct >= 75) {
+      dynamicMaxLeverage = 50;
+      dampenerStatus = "GUARDED";
+    } else if (domainUtilizationPct >= 50) {
+      dynamicMaxLeverage = 100;
+      dampenerStatus = "DAMPENED";
+    }
 
     return NextResponse.json({
       success: true,
@@ -188,6 +205,9 @@ export async function GET(req: NextRequest) {
         short_open_interest_usd: domainConfig.short_oi,
         available_long_liquidity_usd: domainConfig.avail_long,
         available_short_liquidity_usd: domainConfig.avail_short,
+        domain_utilization_pct: domainUtilizationPct,
+        dynamic_max_leverage: dynamicMaxLeverage,
+        dampener_status: dampenerStatus,
         firewall_status: "ACTIVE_PROTECTED",
         pnl_protection: "JUNIOR_TRANCHE_CAPPED",
       },

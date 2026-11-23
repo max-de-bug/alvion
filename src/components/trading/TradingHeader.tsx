@@ -57,6 +57,7 @@ export const TradingHeader = React.memo<TradingHeaderProps>(function TradingHead
   );
   const [showWarning, setShowWarning] = useState(true);
   const [showAccountModal, setShowAccountModal] = useState(false);
+  const [accountModalTab, setAccountModalTab] = useState<"deposit" | "account">("deposit");
   const [isScrolled, setIsScrolled] = useState(false);
 
   const displayAlias = alias || (address ? `Trader #${address.slice(2, 6).toUpperCase()}` : "Trader #4663");
@@ -203,12 +204,15 @@ export const TradingHeader = React.memo<TradingHeaderProps>(function TradingHead
             </button>
           </div>
 
-          {/* 1. Cash Balance Pill (Polymarket Style) */}
+          {/* 1. Cash Balance Pill */}
           <button
             type="button"
-            onClick={() => setShowAccountModal(true)}
+            onClick={() => {
+              setAccountModalTab("deposit");
+              setShowAccountModal(true);
+            }}
             className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-none bg-[var(--surface-3)] hover:bg-[var(--hover)] border border-[var(--border)] transition-colors cursor-pointer"
-            title="Cash Balance • Click to manage account"
+            title="Cash Balance • Click to deposit"
           >
             <span className="text-[10px] text-[#728087] uppercase font-mono tracking-wider">Cash</span>
             <span className="text-xs font-mono font-bold text-white">
@@ -217,40 +221,47 @@ export const TradingHeader = React.memo<TradingHeaderProps>(function TradingHead
             <span className="text-[10.5px] text-[#4ECCA3] font-mono font-semibold">USDC</span>
           </button>
 
-          {/* 2. Deposit Button (Polymarket Style) */}
+          {/* 2. Instant Deposit Button */}
           <button
             type="button"
-            onClick={() => setShowAccountModal(true)}
+            onClick={() => {
+              setAccountModalTab("deposit");
+              setShowAccountModal(true);
+            }}
             className="flex items-center gap-1.5 h-[var(--header-ctl-h)] px-3.5 bg-[#4ECCA3] hover:bg-[#43B892] text-black font-semibold text-[11.5px] uppercase tracking-wider rounded-none transition-colors cursor-pointer shrink-0 shadow-sm"
-            title="Instant Deposit (Testnet Reload)"
+            title="Deposit USDC (Instant Testnet Settlement)"
           >
             <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
             <span>Deposit</span>
           </button>
 
-          {/* 3. Embedded Account Pill (Polymarket Style) */}
+          {/* 3. Trader Account Pill */}
           <button
             type="button"
-            onClick={() => setShowAccountModal(true)}
+            onClick={() => {
+              setAccountModalTab("account");
+              setShowAccountModal(true);
+            }}
             className="flex items-center gap-2 h-[var(--header-ctl-h)] px-2.5 bg-[var(--surface-3)] hover:bg-[var(--hover)] border border-[var(--border)] rounded-none text-xs font-mono text-white transition-colors cursor-pointer shrink-0"
-            title="Embedded Account • 1-Click Trading"
+            title="Trader Account & Key Management"
           >
             <div className="w-5 h-5 bg-[#1A252B] border border-[#2A3740] rounded-none flex items-center justify-center font-mono font-bold text-[10px] text-[#4ECCA3]">
               {displayAlias.slice(-2)}
             </div>
             <span className="hidden md:inline font-medium text-[11.5px]">{displayAlias}</span>
-            <span className="w-1.5 h-1.5 bg-[#4ECCA3] rounded-none animate-pulse" title="1-Click Trading Active" />
+            <span className="w-1.5 h-1.5 bg-[#4ECCA3] rounded-none" title="Account Active" />
             <ChevronDown className="w-3.5 h-3.5 text-[#728087]" />
           </button>
         </div>
       </header>
     </div>
 
-    {/* Polymarket-Style Account & Embedded Wallet Modal (Vercel Best Practice: bundle-conditional) */}
+    {/* Account & Deposit Modal */}
     {showAccountModal ? (
       <AccountModal
         isOpen={showAccountModal}
         onClose={() => setShowAccountModal(false)}
+        initialTab={accountModalTab}
         address={address || "0x71C8364762A803325b335371b292723E59d64663"}
         alias={displayAlias}
         walletBalance={walletBalance}

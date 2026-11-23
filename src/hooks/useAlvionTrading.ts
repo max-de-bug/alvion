@@ -55,7 +55,7 @@ export function useAlvionTrading() {
   return {
     address: wallet.address,
     alias: wallet.alias,
-    isConnected: true, // Polymarket-style: user is always connected to their non-custodial embedded account
+    isConnected: true, // Non-custodial embedded account: user is always connected
     chainId: 4663,
     isSigning,
     isEmbedded: true,
