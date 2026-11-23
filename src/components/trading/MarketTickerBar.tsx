@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import dynamic from "next/dynamic";
 import { ChevronDown } from "lucide-react";
 import { MarketContext } from "@/lib/hyperliquid";
 import { MarketMetadata } from "@/stores/useTradingStore";
+import { MarketIcon } from "./MarketIcon";
 
 // Vercel Best Practice: bundle-dynamic-imports (lazy load 600-line modal)
 const MarketSelectorModal = dynamic(
@@ -50,6 +51,7 @@ export const MarketTickerBar = React.memo<MarketTickerBarProps>(function MarketT
   markets = [],
 }) {
   const [showMarketMenu, setShowMarketMenu] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   const countdownFormatted = `00:${minutesToFunding.toString().padStart(2, "0")}:18`;
   const markPriceFormatted = currentMarket.markPx > 10
@@ -60,28 +62,6 @@ export const MarketTickerBar = React.memo<MarketTickerBarProps>(function MarketT
     ? currentMarket.oraclePx.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })
     : currentMarket.oraclePx.toFixed(4);
 
-  // Asset icon badge
-  const getAssetIcon = (sym: string) => {
-    switch (sym) {
-      case "BTC":
-        return "₿";
-      case "ETH":
-        return "Ξ";
-      case "SOL":
-        return "◎";
-      case "NATGAS":
-        return "🔥";
-      case "CRUDE":
-        return "🛢";
-      case "GOLD":
-        return "✦";
-      case "SILVER":
-        return "◇";
-      default:
-        return sym.slice(0, 1);
-    }
-  };
-
   return (
     <div className="container-in container-in-1 relative z-20 shrink-0 mb-3">
       <div className="h-[60px] rounded-none border border-[var(--border)] bg-[var(--surface)] shadow-lg">
@@ -89,6 +69,7 @@ export const MarketTickerBar = React.memo<MarketTickerBarProps>(function MarketT
           {/* Market Selector Pill */}
           <div className="shrink-0 relative">
             <button
+              ref={buttonRef}
               type="button"
               onClick={() => setShowMarketMenu((prev) => !prev)}
               aria-haspopup="dialog"
@@ -99,20 +80,15 @@ export const MarketTickerBar = React.memo<MarketTickerBarProps>(function MarketT
                   : "border-transparent hover:bg-[var(--surface-3)] hover:border-[var(--border)]"
               }`}
             >
-              <div className="flex items-center">
-                <div className="w-[22px] h-[22px] rounded-none bg-amber-500/90 flex items-center justify-center text-[11px] font-bold text-black border border-slate-900 shadow-sm">
-                  {getAssetIcon(selectedMarketName)}
-                </div>
-                <div className="w-[22px] h-[22px] rounded-none bg-[#4ECCA3] flex items-center justify-center text-[10px] font-bold text-[#0A1612] border border-slate-900 shadow-sm -ml-1.5">
-                  $
-                </div>
+              <div className="flex items-center gap-2">
+                <MarketIcon symbol={selectedMarketName} size={22} />
+                <span className="font-semibold tracking-[-0.01em] text-[var(--t1)] text-[14.5px] font-mono">
+                  {selectedMarketName}-USD
+                </span>
+                <span className="lev-tag" aria-label={`Up to ${marketMeta.maxLeverage || 1000}x leverage`}>
+                  {marketMeta.maxLeverage || 1000}x
+                </span>
               </div>
-              <span className="font-semibold tracking-[-0.01em] text-[var(--t1)] text-[14.5px]">
-                {selectedMarketName}-USDCX
-              </span>
-              <span className="lev-tag" aria-label={`Up to ${marketMeta.maxLeverage || 1000}x leverage`}>
-                {marketMeta.maxLeverage || 1000}x
-              </span>
               <ChevronDown
                 className={`w-4 h-4 text-[var(--t3)] transition-transform duration-200 ${
                   showMarketMenu ? "rotate-180 text-white" : ""
@@ -128,6 +104,7 @@ export const MarketTickerBar = React.memo<MarketTickerBarProps>(function MarketT
                 selectedMarketName={selectedMarketName}
                 onSelectMarket={setSelectedMarketName}
                 markets={markets}
+                triggerRef={buttonRef}
               />
             ) : null}
           </div>

@@ -182,6 +182,9 @@ export default function Home() {
                       <OrderBookView
                         orderBook={orderBook}
                         markPrice={currentMarket.markPx}
+                        symbol={currentMarket.name}
+                        szDecimals={currentMarket.szDecimals || 2}
+                        recentTrades={recentTrades}
                         onSelectPrice={setLimitPrice}
                       />
                     </>
@@ -264,6 +267,7 @@ export default function Home() {
                 vaultNetSkew={vaultNetSkew}
                 vaultApr={vaultApr}
                 solvency={solvency}
+                onBackToTrade={() => setActiveTab("trade")}
               />
             </Suspense>
           </div>
@@ -289,7 +293,7 @@ export default function Home() {
       </main>
 
       {/* 4. Footer */}
-      <TradingFooter />
+      <TradingFooter onOpenVault={() => setActiveTab("vault")} />
     </div>
   );
 }

@@ -5,7 +5,13 @@ import Link from "next/link";
 import { MessageSquareText, Globe, ExternalLink, ShieldCheck } from "lucide-react";
 import { AlvionBirdLogo } from "@/components/brand/AlvionBirdLogo";
 
-export const TradingFooter = React.memo(function TradingFooter() {
+interface TradingFooterProps {
+  onOpenVault?: () => void;
+}
+
+export const TradingFooter = React.memo<TradingFooterProps>(function TradingFooter({
+  onOpenVault,
+}) {
   return (
     <footer
       role="contentinfo"
@@ -41,6 +47,20 @@ export const TradingFooter = React.memo(function TradingFooter() {
           <ShieldCheck className="w-3.5 h-3.5 text-[var(--fixed-green)]" />
           <span>Robinhood Chain</span>
         </div>
+
+        {onOpenVault && (
+          <>
+            <span className="hidden md:inline text-[var(--border-strong)]">|</span>
+            <button
+              type="button"
+              onClick={onOpenVault}
+              className="text-[11px] font-mono text-[var(--t3)] hover:text-[#4ECCA3] transition-colors cursor-pointer"
+              title="USDC Liquidity Vault & Domain Solvency Reserves"
+            >
+              Vault Reserves
+            </button>
+          </>
+        )}
       </div>
 
       {/* Right: Quick Links */}

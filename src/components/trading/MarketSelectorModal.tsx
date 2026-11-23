@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useRef, useDeferredValue } from "react";
+import React, { useState, useEffect, useMemo, useRef, useDeferredValue, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { Search, X, Star, ArrowUpDown, ChevronUp, ChevronDown } from "lucide-react";
+import { Search, X, Star } from "lucide-react";
 import { MarketContext } from "@/lib/hyperliquid";
 import { MARKETS_METADATA, MarketMetadata } from "@/stores/useTradingStore";
+import { MarketIcon } from "./MarketIcon";
 
-type MarketCategory = "ALL" | "FAVORITES" | "CRYPTO" | "COMMODITIES" | "EQUITY";
-
+type MarketCategory = "ALL" | "FAVORITES" | "COMMODITIES" | "EQUITY" | "CRYPTO";
 type SortField = "name" | "price" | "change" | "volume";
 type SortDirection = "asc" | "desc";
 
@@ -17,9 +17,123 @@ interface MarketSelectorModalProps {
   selectedMarketName: string;
   onSelectMarket: (marketName: string) => void;
   markets: MarketContext[];
+  triggerRef?: React.RefObject<HTMLButtonElement | null>;
 }
 
-const DEFAULT_FAVORITES = ["BTC", "ETH", "NATGAS", "SPY", "NVDA"];
+const DEFAULT_FAVORITES = ["BTC", "ETH", "NATGAS", "NVDA", "TSLA"];
+
+// Vercel Best Practice: server-hoist-static-io / pure utility hoisting
+function formatPrice(val: number, decimals: number = 2): string {
+  if (!val || isNaN(val)) return "0.00";
+  if (val < 10) {
+    return val.toFixed(Math.max(3, decimals));
+  }
+  return val.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+function formatVolume(val: number): string {
+  if (!val || isNaN(val)) return "$0";
+  if (val >= 1_000_000_000) return `$${(val / 1_000_000_000).toFixed(2)}B`;
+  if (val >= 1_000_000) return `$${(val / 1_000_000).toFixed(1)}M`;
+  if (val >= 1_000) return `$${(val / 1_000).toFixed(0)}K`;
+  return `$${val.toFixed(0)}`;
+}
+
+interface MarketRowProps {
+  market: MarketContext & { meta: MarketMetadata };
+  isSelected: boolean;
+  isHighlighted: boolean;
+  isFav: boolean;
+  onSelect: (name: string) => void;
+  onToggleFavorite: (symbol: string, e: React.MouseEvent) => void;
+  onMouseEnter: () => void;
+}
+
+// Vercel Best Practice: rerender-memo & rendering-content-visibility
+// 100% solid opaque row backgrounds (zero transparency)
+const MarketRow = React.memo<MarketRowProps>(function MarketRow({
+  market: m,
+  isSelected,
+  isHighlighted,
+  isFav,
+  onSelect,
+  onToggleFavorite,
+  onMouseEnter,
+}) {
+  const isPositive = m.change24h >= 0;
+
+  return (
+    <div
+      onClick={() => onSelect(m.name)}
+      onMouseEnter={onMouseEnter}
+      style={{ contentVisibility: "auto", containIntrinsicSize: "0 48px" }}
+      className={`grid grid-cols-[30px_1.7fr_1fr_1fr_1fr] px-3.5 py-2 items-center transition-colors cursor-pointer select-none h-[48px] border-b border-[#182028] ${
+        isSelected
+          ? "bg-[#112620] border-l-2 border-l-[#4ECCA3]"
+          : isHighlighted
+          ? "bg-[#18232C] border-l-2 border-l-[#4ECCA3]/60"
+          : "bg-[#0E1318] hover:bg-[#151D25] border-l-2 border-l-transparent"
+      }`}
+    >
+      {/* Star Favorite */}
+      <div className="flex items-center justify-center">
+        <button
+          type="button"
+          onClick={(e) => onToggleFavorite(m.name, e)}
+          className="text-[#4E5E6B] hover:text-amber-400 transition-colors p-1 cursor-pointer"
+          title={isFav ? "Remove favorite" : "Add to favorites"}
+        >
+          <Star
+            className={`w-3.5 h-3.5 ${
+              isFav ? "text-amber-400 fill-amber-400" : ""
+            }`}
+          />
+        </button>
+      </div>
+
+      {/* Market & Icon */}
+      <div className="flex items-center gap-2.5 min-w-0 pr-2">
+        <MarketIcon symbol={m.name} size={24} />
+        <div className="flex flex-col min-w-0">
+          <div className="flex items-center gap-1.5 leading-tight">
+            <span className="font-mono font-semibold text-xs text-white tracking-tight">
+              {m.name}-USD
+            </span>
+            <span className="text-[9px] font-mono px-1 py-0.2 rounded-none bg-[#1A232C] border border-[#263340] text-[#8CA0AE]">
+              {m.meta.maxLeverage || 1000}x
+            </span>
+          </div>
+          <span className="text-[10.5px] text-[#718390] truncate leading-tight mt-0.5">
+            {m.meta.name}
+          </span>
+        </div>
+      </div>
+
+      {/* Price */}
+      <div className="font-mono text-xs text-white text-right tabular-nums font-medium">
+        ${formatPrice(m.markPx, m.szDecimals)}
+      </div>
+
+      {/* 24h Change */}
+      <div
+        className={`font-mono text-xs text-right tabular-nums font-medium ${
+          isPositive ? "text-[#4ECCA3]" : "text-[#EB4D5C]"
+        }`}
+      >
+        {isPositive ? "+" : ""}
+        {m.change24h ? m.change24h.toFixed(2) : "0.00"}%
+      </div>
+
+      {/* 24h Volume */}
+      <div className="font-mono text-xs text-[#8A9BA8] text-right tabular-nums">
+        {formatVolume(m.dayVolumeUsd)}
+      </div>
+    </div>
+  );
+});
 
 export const MarketSelectorModal = React.memo<MarketSelectorModalProps>(function MarketSelectorModal({
   isOpen,
@@ -30,52 +144,49 @@ export const MarketSelectorModal = React.memo<MarketSelectorModalProps>(function
 }) {
   const [mounted, setMounted] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  // Vercel Best Practice: rerender-use-deferred-value keeps input 60fps responsive
   const deferredSearchQuery = useDeferredValue(searchQuery);
   const [selectedCategory, setSelectedCategory] = useState<MarketCategory>("ALL");
   const [sortField, setSortField] = useState<SortField>("volume");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
-  const [favorites, setFavorites] = useState<string[]>(DEFAULT_FAVORITES);
+  const [highlightedIndex, setHighlightedIndex] = useState(0);
 
-  // Fast O(1) favorites lookup set (Vercel Best Practice: js-set-map-lookups)
+  // Vercel Best Practice: rerender-lazy-state-init prevents duplicate render on mount
+  const [favorites, setFavorites] = useState<string[]>(() => {
+    if (typeof window === "undefined") return DEFAULT_FAVORITES;
+    try {
+      const saved = localStorage.getItem("alvion_favorite_markets");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {
+      // fallback
+    }
+    return DEFAULT_FAVORITES;
+  });
+
   const favoritesSet = useMemo(() => new Set(favorites), [favorites]);
-
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
+  const listContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Lock body scroll while modal is open
+  // Lock body scroll while modal is open to ensure rock-solid non-wonky scrolling
   useEffect(() => {
-    if (isOpen) {
-      const originalStyle = window.getComputedStyle(document.body).overflow;
-      document.body.style.overflow = "hidden";
-      return () => {
-        document.body.style.overflow = originalStyle;
-      };
-    }
+    if (!isOpen) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
   }, [isOpen]);
 
-  // Load favorites from localStorage
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const saved = localStorage.getItem("alvion_favorite_markets");
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            setFavorites(parsed);
-          }
-        }
-      } catch {
-        // use fallback
-      }
-    }
-  }, []);
-
-  // Save favorites to localStorage
-  const toggleFavorite = (symbol: string, e: React.MouseEvent) => {
+  // Save favorites to localStorage with stable callback
+  const handleToggleFavorite = useCallback((symbol: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setFavorites((prev) => {
       const updated = prev.includes(symbol)
@@ -90,7 +201,12 @@ export const MarketSelectorModal = React.memo<MarketSelectorModalProps>(function
       }
       return updated;
     });
-  };
+  }, []);
+
+  const handleSelectMarket = useCallback((name: string) => {
+    onSelectMarket(name);
+    onClose();
+  }, [onSelectMarket, onClose]);
 
   // Auto focus search input on open
   useEffect(() => {
@@ -100,20 +216,9 @@ export const MarketSelectorModal = React.memo<MarketSelectorModalProps>(function
       }, 50);
     } else {
       setSearchQuery("");
+      setHighlightedIndex(0);
     }
   }, [isOpen]);
-
-  // Handle escape key
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
 
   // Combine full market info (from live API and fallback metadata)
   const fullMarketList = useMemo(() => {
@@ -163,38 +268,15 @@ export const MarketSelectorModal = React.memo<MarketSelectorModalProps>(function
     return list;
   }, [markets]);
 
-  // Category counts in a single pass (Vercel Best Practice: js-combine-iterations)
-  const categoryCounts = useMemo(() => {
-    let crypto = 0;
-    let commodities = 0;
-    let equity = 0;
-    let favs = 0;
-    for (let i = 0; i < fullMarketList.length; i++) {
-      const m = fullMarketList[i];
-      if (favoritesSet.has(m.name)) favs++;
-      const cat = m.meta.category;
-      if (cat === "CRYPTO") crypto++;
-      else if (cat === "COMMODITIES") commodities++;
-      else if (cat === "EQUITY") equity++;
-    }
-    return {
-      ALL: fullMarketList.length,
-      FAVORITES: favs,
-      CRYPTO: crypto,
-      COMMODITIES: commodities,
-      EQUITY: equity,
-    };
-  }, [fullMarketList, favoritesSet]);
-
-  // Filter and sort markets with useDeferredValue (Vercel Best Practice: rerender-use-deferred-value)
+  // Filter and sort markets with useDeferredValue
+  // When search query is non-empty, search across ALL categories so results are never accidentally hidden
   const filteredMarkets = useMemo(() => {
     const q = deferredSearchQuery.toLowerCase().trim();
     const isFavTab = selectedCategory === "FAVORITES";
-    const hasCategoryFilter = selectedCategory !== "ALL" && !isFavTab;
+    const hasCategoryFilter = selectedCategory !== "ALL" && !isFavTab && !q;
 
-    // Single-pass filter
     const result = fullMarketList.filter((m) => {
-      if (isFavTab && !favoritesSet.has(m.name)) return false;
+      if (!q && isFavTab && !favoritesSet.has(m.name)) return false;
       if (hasCategoryFilter && m.meta.category !== selectedCategory) return false;
       if (q) {
         return (
@@ -224,185 +306,173 @@ export const MarketSelectorModal = React.memo<MarketSelectorModalProps>(function
     return result;
   }, [fullMarketList, selectedCategory, favoritesSet, deferredSearchQuery, sortField, sortDirection]);
 
-  const handleHeaderSort = (field: SortField) => {
-    if (sortField === field) {
-      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
-    } else {
-      setSortField(field);
+  // Reset highlightedIndex when search or category changes
+  useEffect(() => {
+    setHighlightedIndex(0);
+  }, [deferredSearchQuery, selectedCategory]);
+
+  // Handle keyboard navigation (ArrowUp, ArrowDown, Enter, Escape)
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+      } else if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setHighlightedIndex((prev) => Math.min(prev + 1, Math.max(0, filteredMarkets.length - 1)));
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setHighlightedIndex((prev) => Math.max(0, prev - 1));
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        if (filteredMarkets[highlightedIndex]) {
+          handleSelectMarket(filteredMarkets[highlightedIndex].name);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose, filteredMarkets, highlightedIndex, handleSelectMarket]);
+
+  const handleHeaderSort = useCallback((field: SortField) => {
+    setSortField((prevField) => {
+      if (prevField === field) {
+        setSortDirection((prevDir) => (prevDir === "asc" ? "desc" : "asc"));
+        return prevField;
+      }
       setSortDirection("desc");
-    }
-  };
-
-  const formatPrice = (val: number, decimals: number = 2) => {
-    if (!val || isNaN(val)) return "0.00";
-    if (val < 10) {
-      return val.toFixed(Math.max(3, decimals));
-    }
-    return val.toLocaleString(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
+      return field;
     });
-  };
-
-  const formatVolume = (val: number) => {
-    if (!val || isNaN(val)) return "$0";
-    if (val >= 1_000_000_000) return `$${(val / 1_000_000_000).toFixed(2)}B`;
-    if (val >= 1_000_000) return `$${(val / 1_000_000).toFixed(1)}M`;
-    if (val >= 1_000) return `$${(val / 1_000).toFixed(0)}K`;
-    return `$${val.toFixed(0)}`;
-  };
+  }, []);
 
   if (!isOpen || !mounted) return null;
 
   const modalContent = (
+    /* Rock-Solid Centered Screen Container (non-wonky, pure flexbox centering) */
     <div
       role="dialog"
       aria-modal="true"
       aria-label="Select Market"
-      className="fixed inset-0 z-[100]"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 select-none pointer-events-auto"
     >
-      {/* 1. Dimmed Backdrop */}
+      {/* 1. Backdrop with slight blur (clean, quiet, professional) */}
       <div
-        className="fixed inset-0 bg-black/80 backdrop-blur-[3px] transition-opacity animate-in fade-in duration-200"
+        className="fixed inset-0 bg-black/60 backdrop-blur-[2px] transition-opacity duration-150 cursor-pointer"
         onClick={onClose}
+        aria-hidden="true"
       />
 
-      {/* 2. QFEX Screen-Centered Modal Window with position: absolute */}
+      {/* 2. 100% Solid, Opaque Modal Window in the Middle of the App */}
       <div
-        ref={containerRef}
+        ref={popoverRef}
         onClick={(e) => e.stopPropagation()}
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 w-[94vw] max-w-[680px] bg-[#0C1215] border border-[#1E272C] rounded-none shadow-2xl shadow-black/95 flex flex-col overflow-hidden text-white select-none animate-in zoom-in-95 fade-in duration-150"
-        style={{ maxHeight: "min(640px, 88vh)" }}
+        style={{ maxHeight: "min(580px, 86vh)" }}
+        className="relative z-10 w-full max-w-[640px] bg-[#0E1318] border border-[#232C36] rounded-none shadow-[0_24px_64px_rgba(0,0,0,0.95)] flex flex-col overflow-hidden text-white animate-in fade-in zoom-in-95 duration-150"
       >
-        {/* Top Header with Title and Close Button */}
-        <div className="px-4 py-3 border-b border-[#1E272C] bg-[#10171A] flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <h2 className="text-sm font-bold tracking-tight text-white flex items-center gap-2">
-              <span>Select Market</span>
-            </h2>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded-none bg-[#162922] text-[#4ECCA3] border border-[#4ECCA3]/30 font-semibold">
-              {fullMarketList.length} Markets
-            </span>
-            <span className="hidden sm:inline-block text-[11px] font-mono text-[#728087]">
-              Robinhood Chain Perps
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span className="hidden sm:inline-block text-[10px] font-mono text-[#52636B] border border-[#212D33] px-1.5 py-0.5 rounded-none">
-              ESC
-            </span>
-            <button
-              type="button"
-              onClick={onClose}
-              className="w-7 h-7 rounded-none border border-[#212D33] bg-[#141B1F] hover:bg-[#1E272C] text-[#8C9DA6] hover:text-white flex items-center justify-center transition-colors cursor-pointer"
-              aria-label="Close modal"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-
-        {/* Search Input Bar */}
-        <div className="p-3 border-b border-[#1E272C] bg-[#0E1518] flex items-center gap-2.5">
-          <div className="relative flex-1 flex items-center">
-            <Search className="absolute left-3 w-4 h-4 text-[#728087] pointer-events-none" />
+        {/* Search Bar Header with Close Button */}
+        <div className="p-3 border-b border-[#1E2630] bg-[#121820] flex items-center gap-2.5">
+          <div className="relative flex-1 flex items-center bg-[#090D11] border border-[#263340] px-3 py-1.5 rounded-none">
+            <Search className="w-4 h-4 text-[#6A7B87] shrink-0 mr-2 pointer-events-none" />
             <input
               ref={searchInputRef}
               type="text"
-              placeholder="Search market or symbol (e.g. NATGAS, BTC, NVDA)..."
+              placeholder="Search markets (e.g. NATGAS, BTC, NVDA)..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-[40px] pl-9 pr-8 bg-[#141B1F] border border-[#212D33] focus:border-[#4ECCA3]/60 rounded-none text-xs text-white placeholder:text-[#6F7E85] outline-none font-mono transition-colors"
+              className="w-full bg-transparent text-xs text-white placeholder:text-[#556572] outline-none font-mono"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery("")}
-                className="absolute right-2.5 text-[#728087] hover:text-white cursor-pointer"
+                className="text-[#6A7B87] hover:text-white cursor-pointer ml-1"
+                title="Clear search"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
+
+          {/* Quick Close Button */}
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-8 h-8 rounded-none border border-[#263340] bg-[#090D11] hover:bg-[#18232D] text-[#8CA0AE] hover:text-white flex items-center justify-center transition-colors cursor-pointer shrink-0"
+            aria-label="Close modal"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
 
-        {/* Category Tabs */}
-        <div className="flex items-center px-3 border-b border-[#1E272C] bg-[#0E1518] overflow-x-auto [scrollbar-width:none] text-xs">
+        {/* Minimal Category Tabs */}
+        <div className="flex items-center px-3.5 border-b border-[#1E2630] bg-[#0E1318] gap-1 text-[11px] font-mono">
           <button
             type="button"
-            onClick={() => setSelectedCategory("ALL")}
-            className={`py-2.5 px-3 rounded-none font-semibold transition-colors shrink-0 cursor-pointer border-b-2 flex items-center gap-1.5 ${selectedCategory === "ALL"
-                ? "border-[#4ECCA3] text-white bg-[#141D21]"
-                : "border-transparent text-[#8C9DA6] hover:text-white hover:bg-[#121A1E]"
-              }`}
-          >
-            <span>All</span>
-            <span className="text-[10px] font-mono px-1 py-0.2 bg-[#1A252B] rounded-none text-[#8C9DA6]">
-              {categoryCounts.ALL}
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setSelectedCategory("FAVORITES")}
-            className={`py-2.5 px-3 rounded-none font-semibold transition-colors shrink-0 cursor-pointer border-b-2 flex items-center gap-1.5 ${selectedCategory === "FAVORITES"
-                ? "border-amber-400 text-amber-300 bg-[#141D21]"
-                : "border-transparent text-[#8C9DA6] hover:text-white hover:bg-[#121A1E]"
-              }`}
+            onClick={() => { setSelectedCategory("FAVORITES"); setSearchQuery(""); }}
+            className={`px-3 py-2 font-medium transition-colors cursor-pointer border-b-2 flex items-center gap-1.5 ${
+              selectedCategory === "FAVORITES"
+                ? "border-amber-400 text-amber-300 bg-[#141B22]"
+                : "border-transparent text-[#768794] hover:text-white hover:bg-[#121820]"
+            }`}
           >
             <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
             <span>Favorites</span>
-            <span className="text-[10px] font-mono px-1 py-0.2 bg-[#1A252B] rounded-none text-[#8C9DA6]">
-              {categoryCounts.FAVORITES}
-            </span>
           </button>
 
           <button
             type="button"
-            onClick={() => setSelectedCategory("COMMODITIES")}
-            className={`py-2.5 px-3 rounded-none font-semibold transition-colors shrink-0 cursor-pointer border-b-2 flex items-center gap-1.5 ${selectedCategory === "COMMODITIES"
-                ? "border-[#4ECCA3] text-white bg-[#141D21]"
-                : "border-transparent text-[#8C9DA6] hover:text-white hover:bg-[#121A1E]"
-              }`}
+            onClick={() => { setSelectedCategory("ALL"); setSearchQuery(""); }}
+            className={`px-3 py-2 font-medium transition-colors cursor-pointer border-b-2 ${
+              selectedCategory === "ALL"
+                ? "border-[#4ECCA3] text-white bg-[#141B22]"
+                : "border-transparent text-[#768794] hover:text-white hover:bg-[#121820]"
+            }`}
           >
-            <span>Commodities</span>
-            <span className="text-[10px] font-mono px-1 py-0.2 bg-[#1A252B] rounded-none text-[#8C9DA6]">
-              {categoryCounts.COMMODITIES}
-            </span>
+            All
           </button>
 
           <button
             type="button"
-            onClick={() => setSelectedCategory("CRYPTO")}
-            className={`py-2.5 px-3 rounded-none font-semibold transition-colors shrink-0 cursor-pointer border-b-2 flex items-center gap-1.5 ${selectedCategory === "CRYPTO"
-                ? "border-[#4ECCA3] text-white bg-[#141D21]"
-                : "border-transparent text-[#8C9DA6] hover:text-white hover:bg-[#121A1E]"
-              }`}
+            onClick={() => { setSelectedCategory("COMMODITIES"); setSearchQuery(""); }}
+            className={`px-3 py-2 font-medium transition-colors cursor-pointer border-b-2 ${
+              selectedCategory === "COMMODITIES"
+                ? "border-[#4ECCA3] text-white bg-[#141B22]"
+                : "border-transparent text-[#768794] hover:text-white hover:bg-[#121820]"
+            }`}
           >
-            <span>Crypto</span>
-            <span className="text-[10px] font-mono px-1 py-0.2 bg-[#1A252B] rounded-none text-[#8C9DA6]">
-              {categoryCounts.CRYPTO}
-            </span>
+            Commodities
           </button>
 
           <button
             type="button"
-            onClick={() => setSelectedCategory("EQUITY")}
-            className={`py-2.5 px-3 rounded-none font-semibold transition-colors shrink-0 cursor-pointer border-b-2 flex items-center gap-1.5 ${selectedCategory === "EQUITY"
-                ? "border-[#4ECCA3] text-white bg-[#141D21]"
-                : "border-transparent text-[#8C9DA6] hover:text-white hover:bg-[#121A1E]"
-              }`}
+            onClick={() => { setSelectedCategory("EQUITY"); setSearchQuery(""); }}
+            className={`px-3 py-2 font-medium transition-colors cursor-pointer border-b-2 ${
+              selectedCategory === "EQUITY"
+                ? "border-[#4ECCA3] text-white bg-[#141B22]"
+                : "border-transparent text-[#768794] hover:text-white hover:bg-[#121820]"
+            }`}
           >
-            <span>Shares</span>
-            <span className="text-[10px] font-mono px-1 py-0.2 bg-[#1A252B] rounded-none text-[#8C9DA6]">
-              {categoryCounts.EQUITY}
-            </span>
+            Shares
+          </button>
+
+          <button
+            type="button"
+            onClick={() => { setSelectedCategory("CRYPTO"); setSearchQuery(""); }}
+            className={`px-3 py-2 font-medium transition-colors cursor-pointer border-b-2 ${
+              selectedCategory === "CRYPTO"
+                ? "border-[#4ECCA3] text-white bg-[#141B22]"
+                : "border-transparent text-[#768794] hover:text-white hover:bg-[#121820]"
+            }`}
+          >
+            Crypto
           </button>
         </div>
 
-        {/* Sortable Column Headers */}
-        <div className="grid grid-cols-[36px_1.6fr_1fr_1fr_1fr] px-4 py-2.5 bg-[#0E1518] border-b border-[#1E272C] text-[11px] font-medium text-[#728087]">
+        {/* Opaque Table Header */}
+        <div className="grid grid-cols-[30px_1.7fr_1fr_1fr_1fr] px-3.5 py-2.5 bg-[#090D11] border-b border-[#1E2630] text-[10px] font-mono tracking-wider text-[#6A7B87] select-none">
           <div className="flex items-center justify-center">★</div>
 
           <button
@@ -410,15 +480,11 @@ export const MarketSelectorModal = React.memo<MarketSelectorModalProps>(function
             onClick={() => handleHeaderSort("name")}
             className="flex items-center gap-1 hover:text-white text-left cursor-pointer transition-colors"
           >
-            <span>Market</span>
-            {sortField === "name" ? (
-              sortDirection === "asc" ? (
-                <ChevronUp className="w-3 h-3 text-[#4ECCA3]" />
-              ) : (
-                <ChevronDown className="w-3 h-3 text-[#4ECCA3]" />
-              )
-            ) : (
-              <ArrowUpDown className="w-2.5 h-2.5 opacity-40" />
+            <span>MARKET</span>
+            {sortField === "name" && (
+              <span className="text-[#4ECCA3] text-[9px] font-bold">
+                {sortDirection === "asc" ? "▲" : "▼"}
+              </span>
             )}
           </button>
 
@@ -427,15 +493,11 @@ export const MarketSelectorModal = React.memo<MarketSelectorModalProps>(function
             onClick={() => handleHeaderSort("price")}
             className="flex items-center justify-end gap-1 hover:text-white text-right cursor-pointer transition-colors"
           >
-            <span>Price</span>
-            {sortField === "price" ? (
-              sortDirection === "asc" ? (
-                <ChevronUp className="w-3 h-3 text-[#4ECCA3]" />
-              ) : (
-                <ChevronDown className="w-3 h-3 text-[#4ECCA3]" />
-              )
-            ) : (
-              <ArrowUpDown className="w-2.5 h-2.5 opacity-40" />
+            <span>PRICE</span>
+            {sortField === "price" && (
+              <span className="text-[#4ECCA3] text-[9px] font-bold">
+                {sortDirection === "asc" ? "▲" : "▼"}
+              </span>
             )}
           </button>
 
@@ -444,15 +506,11 @@ export const MarketSelectorModal = React.memo<MarketSelectorModalProps>(function
             onClick={() => handleHeaderSort("change")}
             className="flex items-center justify-end gap-1 hover:text-white text-right cursor-pointer transition-colors"
           >
-            <span>24h Change</span>
-            {sortField === "change" ? (
-              sortDirection === "asc" ? (
-                <ChevronUp className="w-3 h-3 text-[#4ECCA3]" />
-              ) : (
-                <ChevronDown className="w-3 h-3 text-[#4ECCA3]" />
-              )
-            ) : (
-              <ArrowUpDown className="w-2.5 h-2.5 opacity-40" />
+            <span>24H CHANGE</span>
+            {sortField === "change" && (
+              <span className="text-[#4ECCA3] text-[9px] font-bold">
+                {sortDirection === "asc" ? "▲" : "▼"}
+              </span>
             )}
           </button>
 
@@ -461,23 +519,22 @@ export const MarketSelectorModal = React.memo<MarketSelectorModalProps>(function
             onClick={() => handleHeaderSort("volume")}
             className="flex items-center justify-end gap-1 hover:text-white text-right cursor-pointer transition-colors"
           >
-            <span>24h Volume</span>
-            {sortField === "volume" ? (
-              sortDirection === "asc" ? (
-                <ChevronUp className="w-3 h-3 text-[#4ECCA3]" />
-              ) : (
-                <ChevronDown className="w-3 h-3 text-[#4ECCA3]" />
-              )
-            ) : (
-              <ArrowUpDown className="w-2.5 h-2.5 opacity-40" />
+            <span>24H VOLUME</span>
+            {sortField === "volume" && (
+              <span className="text-[#4ECCA3] text-[9px] font-bold">
+                {sortDirection === "asc" ? "▲" : "▼"}
+              </span>
             )}
           </button>
         </div>
 
         {/* Scrollable Market Rows */}
-        <div className="overflow-y-auto flex-1 max-h-[380px] divide-y divide-[#182126] [scrollbar-width:thin] [scrollbar-color:#26343C_transparent]">
+        <div
+          ref={listContainerRef}
+          className="overflow-y-auto max-h-[380px] bg-[#0E1318] divide-y divide-[#161D24] [scrollbar-width:thin] [scrollbar-color:#26343C_transparent] overscroll-contain flex-1"
+        >
           {filteredMarkets.length === 0 ? (
-            <div className="py-14 text-center text-xs text-[#728087] flex flex-col items-center gap-2">
+            <div className="py-14 text-center text-xs text-[#6A7B87] flex flex-col items-center gap-2">
               <span>No markets found matching &quot;{searchQuery}&quot;</span>
               <button
                 type="button"
@@ -487,93 +544,23 @@ export const MarketSelectorModal = React.memo<MarketSelectorModalProps>(function
                 }}
                 className="text-[#4ECCA3] hover:underline cursor-pointer text-xs"
               >
-                Reset search filters
+                Reset search
               </button>
             </div>
           ) : (
-            filteredMarkets.map((m) => {
-              const isSelected = selectedMarketName === m.name;
-              const isFav = favoritesSet.has(m.name);
-              const isPositive = m.change24h >= 0;
-
-              return (
-                <div
-                  key={m.name}
-                  onClick={() => {
-                    onSelectMarket(m.name);
-                    onClose();
-                  }}
-                  style={{ contentVisibility: "auto", containIntrinsicSize: "0 49px" }}
-                  className={`grid grid-cols-[36px_1.6fr_1fr_1fr_1fr] px-4 py-3 items-center transition-colors cursor-pointer ${isSelected
-                      ? "bg-[#142320] border-l-2 border-[#4ECCA3]"
-                      : "hover:bg-[#141D22] border-l-2 border-transparent"
-                    }`}
-                >
-                  {/* Star Favorite */}
-                  <div className="flex items-center justify-center">
-                    <button
-                      type="button"
-                      onClick={(e) => toggleFavorite(m.name, e)}
-                      className="text-[#52636B] hover:text-amber-400 transition-colors p-1 cursor-pointer"
-                      title={isFav ? "Remove favorite" : "Add to favorites"}
-                    >
-                      <Star
-                        className={`w-3.5 h-3.5 ${isFav ? "text-amber-400 fill-amber-400" : ""
-                          }`}
-                      />
-                    </button>
-                  </div>
-
-                  {/* Market & Metadata */}
-                  <div className="flex flex-col min-w-0 pr-2">
-                    <div className="flex items-center gap-1.5">
-                      <span className="font-mono font-bold text-xs text-white tracking-tight">
-                        {m.name}-USDCX
-                      </span>
-                      <span className="text-[9.5px] font-mono px-1 py-0.2 rounded-none bg-[#1C262B] border border-[#26343C] text-[#8C9DA6]">
-                        {m.meta.maxLeverage || 1000}x
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-[10.5px] text-[#728087] truncate">
-                      <span className="truncate">{m.meta.name}</span>
-                    </div>
-                  </div>
-
-                  {/* Price */}
-                  <div className="font-mono text-xs font-semibold text-white text-right tabular-nums">
-                    ${formatPrice(m.markPx, m.szDecimals)}
-                  </div>
-
-                  {/* 24h Change */}
-                  <div
-                    className={`font-mono text-xs font-semibold text-right tabular-nums ${isPositive ? "text-[#4ECCA3]" : "text-[#EB4D5C]"
-                      }`}
-                  >
-                    {isPositive ? "+" : ""}
-                    {m.change24h ? m.change24h.toFixed(2) : "0.00"}%
-                  </div>
-
-                  {/* 24h Volume */}
-                  <div className="font-mono text-xs text-[#8C9DA6] text-right tabular-nums">
-                    {formatVolume(m.dayVolumeUsd)}
-                  </div>
-                </div>
-              );
-            })
+            filteredMarkets.map((m, index) => (
+              <MarketRow
+                key={m.name}
+                market={m}
+                isSelected={selectedMarketName === m.name}
+                isHighlighted={highlightedIndex === index}
+                isFav={favoritesSet.has(m.name)}
+                onSelect={handleSelectMarket}
+                onToggleFavorite={handleToggleFavorite}
+                onMouseEnter={() => setHighlightedIndex(index)}
+              />
+            ))
           )}
-        </div>
-
-        {/* Modal Footer with Status & Keyboard Hints */}
-        <div className="px-4 py-2.5 bg-[#0E1518] border-t border-[#1E272C] flex items-center justify-between text-[11px] text-[#728087] font-mono">
-          <div className="flex items-center gap-2">
-            <span className="inline-block w-1.5 h-1.5 bg-[#4ECCA3] rounded-none animate-pulse" />
-            <span>Robinhood Chain Live Oracle & CLOB</span>
-          </div>
-          <div className="flex items-center gap-3 text-[10.5px]">
-            <span className="hidden sm:inline">
-              Press <kbd className="px-1 py-0.5 bg-[#141B1F] border border-[#212D33] text-white/80">ESC</kbd> to exit
-            </span>
-          </div>
         </div>
       </div>
     </div>

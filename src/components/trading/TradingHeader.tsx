@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import {
@@ -57,32 +57,28 @@ export const TradingHeader = React.memo<TradingHeaderProps>(function TradingHead
   );
   const [showWarning, setShowWarning] = useState(true);
   const [showAccountModal, setShowAccountModal] = useState(false);
-  const headerRef = useRef<HTMLDivElement>(null);
-  const [headerHeight, setHeaderHeight] = useState<number>(showWarning ? 88 : 56);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   const displayAlias = alias || (address ? `Trader #${address.slice(2, 6).toUpperCase()}` : "Trader #4663");
 
   useEffect(() => {
-    if (!headerRef.current) return;
-    const updateHeight = () => {
-      if (headerRef.current) {
-        setHeaderHeight(headerRef.current.getBoundingClientRect().height);
-      }
+    const handleScroll = () => {
+      const scrolled = window.scrollY > 8;
+      setIsScrolled((prev) => (prev !== scrolled ? scrolled : prev));
     };
-    updateHeight();
-    const observer = new ResizeObserver(updateHeight);
-    observer.observe(headerRef.current);
-    return () => observer.disconnect();
-  }, [showWarning]);
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
     <>
-      <div ref={headerRef} className="fixed top-0 left-0 right-0 z-40 flex flex-col w-full">
-        {/* 1. Dismissible Testnet Banner */}
+      <div className="w-full flex flex-col">
+        {/* 1. Dismissible Testnet Banner (scrolls away naturally) */}
         {showWarning && (
           <div
             role="status"
-            className="relative z-20 flex items-center justify-center gap-2 border-b border-[var(--border)] bg-[var(--warn-soft)] px-10 py-[6px]"
+            className="relative z-10 flex items-center justify-center gap-2 border-b border-[var(--border)] bg-[var(--warn-soft)] px-10 py-[6px]"
           >
             <span className="text-[12px] font-semibold tracking-[0.02em] text-[var(--warn)]">
               Testnet environment: funds and data are not real
@@ -98,10 +94,14 @@ export const TradingHeader = React.memo<TradingHeaderProps>(function TradingHead
           </div>
         )}
 
-        {/* 2. Main Header */}
+        {/* 2. Main Header (sticky to top: 0 with elevation on scroll) */}
         <header
           role="banner"
-          className="flex items-center justify-between gap-[14px] px-[12px] sm:px-[20px] h-[var(--header-h)] border-b border-[var(--border)] bg-[rgba(10,10,12,0.85)] [backdrop-filter:blur(14px)_saturate(1.8)] [-webkit-backdrop-filter:blur(14px)_saturate(1.8)]"
+          className={`sticky top-0 z-[60] flex items-center justify-between gap-[14px] px-[12px] sm:px-[20px] h-[var(--header-h)] border-b transition-[background-color,border-color,box-shadow] duration-200 ${
+            isScrolled
+              ? "bg-[#0a0a0c]/98 border-[#232e34] shadow-lg shadow-black/50 backdrop-blur-md"
+              : "bg-[rgba(10,10,12,0.85)] border-[var(--border)] backdrop-blur-md"
+          }`}
         >
         {/* Left: Alvion Brand Lockup & Nav Tabs */}
         <div className="flex items-center gap-[16px] min-w-0">
@@ -136,19 +136,6 @@ export const TradingHeader = React.memo<TradingHeaderProps>(function TradingHead
               }`}
             >
               <span>Trade</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("vault")}
-              aria-label="Vault"
-              aria-current={activeTab === "vault" ? "page" : undefined}
-              className={`inline-flex items-center px-[14px] py-[6px] rounded-none text-[13px] tracking-[-0.005em] transition-colors cursor-pointer ${
-                activeTab === "vault"
-                  ? "bg-[var(--surface)] text-[var(--t1)] font-semibold shadow-[0_1px_3px_rgba(0,0,0,.25)]"
-                  : "text-[var(--t2)] hover:text-[var(--t1)] font-normal"
-              }`}
-            >
-              <span>Vault</span>
             </button>
 
             <button
@@ -272,9 +259,6 @@ export const TradingHeader = React.memo<TradingHeaderProps>(function TradingHead
         resetAccount={resetAccount || (() => {})}
       />
     ) : null}
-
-    {/* Spacer to preserve normal document flow beneath fixed navbar */}
-    <div style={{ height: headerHeight }} aria-hidden="true" className="shrink-0 pointer-events-none" />
   </>
   );
 });

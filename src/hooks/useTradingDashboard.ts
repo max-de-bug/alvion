@@ -168,7 +168,7 @@ export function useTradingDashboard() {
       const data = await res.json();
       return data.success && data.orderBook ? (data.orderBook as OrderBookData) : null;
     },
-    refetchInterval: 2000,
+    refetchInterval: 1200,
   });
 
   // 4. Request dynamic quote from Hyperliquid pricing engine via TanStack Query
