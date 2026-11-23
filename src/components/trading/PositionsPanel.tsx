@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useState, useMemo } from "react";
+import { Share2 } from "lucide-react";
 import { MarketContext } from "@/lib/hyperliquid";
 import { SignedOrder, MatchedTrade } from "@/lib/orderTypes";
 import { Position } from "@/stores/useTradingStore";
+import { SharePnlModal } from "./SharePnlModal";
 
 interface PositionsPanelProps {
   bottomTab: "positions" | "openOrders" | "trades";
@@ -33,6 +35,8 @@ export const PositionsPanel = React.memo<PositionsPanelProps>(function Positions
     () => new Map(markets.map((m) => [m.name, m])),
     [markets]
   );
+
+  const [sharingPosition, setSharingPosition] = useState<Position | null>(null);
   return (
     <div className="bg-[#0C1215] border border-[#1E272B] rounded-none p-4 flex flex-col shadow-xl select-none text-slate-200">
       <div className="flex items-center justify-between border-b border-[#1E272B] pb-2 mb-3">
@@ -152,12 +156,24 @@ export const PositionsPanel = React.memo<PositionsPanelProps>(function Positions
                           ${pos.liquidationPrice > 10 ? pos.liquidationPrice.toLocaleString(undefined, { minimumFractionDigits: 2 }) : pos.liquidationPrice.toFixed(4)}
                         </td>
                         <td className="py-3 text-right font-sans">
-                          <button
-                            onClick={() => onClosePosition(pos.id)}
-                            className="px-3 py-1 rounded-none bg-[#182125] hover:bg-rose-500/20 hover:text-rose-300 text-slate-300 text-xs border border-[#232F35] transition-colors cursor-pointer font-medium"
-                          >
-                            Close Market
-                          </button>
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => setSharingPosition(pos)}
+                              title="Share PnL Card"
+                              className="px-2.5 py-1 rounded-none bg-[#182125] hover:bg-[#1E2931] hover:text-[#4ECCA3] text-slate-400 text-xs border border-[#232F35] transition-colors cursor-pointer font-medium flex items-center gap-1"
+                            >
+                              <Share2 className="w-3.5 h-3.5 text-[#4ECCA3]" />
+                              <span className="hidden sm:inline">Share</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => onClosePosition(pos.id)}
+                              className="px-3 py-1 rounded-none bg-[#182125] hover:bg-rose-500/20 hover:text-rose-300 text-slate-300 text-xs border border-[#232F35] transition-colors cursor-pointer font-medium"
+                            >
+                              Close Market
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -283,6 +299,14 @@ export const PositionsPanel = React.memo<PositionsPanelProps>(function Positions
           )}
         </div>
       )}
+
+      {/* Share PnL Modal */}
+      <SharePnlModal
+        isOpen={!!sharingPosition}
+        onClose={() => setSharingPosition(null)}
+        position={sharingPosition}
+        market={sharingPosition ? marketMap.get(sharingPosition.market) || currentMarket : null}
+      />
     </div>
   );
 });

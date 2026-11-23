@@ -266,6 +266,41 @@ export function useTradingDashboard() {
     return () => clearInterval(interval);
   }, [fundingInfo?.next_funding_time]);
 
+  // 7. Real-Time Liquidation Sentinel (Automated Invariant & Margin Enforcement)
+  const liquidatingRef = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (positions.length === 0 || markets.length === 0) return;
+
+    for (const pos of positions) {
+      if (liquidatingRef.current.has(pos.id)) continue;
+      const market = markets.find((m) => m.name === pos.market);
+      if (!market || market.markPx <= 0) continue;
+
+      // Long liquidation triggered if mark price <= liquidation price
+      // Short liquidation triggered if mark price >= liquidation price
+      const isLiquidatable = pos.isLong
+        ? market.markPx <= pos.liquidationPrice
+        : market.markPx >= pos.liquidationPrice;
+
+      if (isLiquidatable) {
+        liquidatingRef.current.add(pos.id);
+        removePosition(pos.id);
+        notify(
+          `⚠️ Position Liquidated: ${pos.market}-USDCx ${pos.isLong ? "Long" : "Short"} ${pos.leverage}x breached liquidation price ($${pos.liquidationPrice > 10 ? pos.liquidationPrice.toLocaleString(undefined, { minimumFractionDigits: 2 }) : pos.liquidationPrice.toFixed(4)}). Collateral accrued to ${pos.market} Domain Insurance Reserve.`,
+          7000
+        );
+        queryClient.invalidateQueries({ queryKey: ["solvency"] });
+        queryClient.invalidateQueries({ queryKey: ["domain"] });
+
+        // Clear sentinel lock after debounce window
+        setTimeout(() => {
+          liquidatingRef.current.delete(pos.id);
+        }, 5000);
+      }
+    }
+  }, [markets, positions, removePosition, notify, queryClient]);
+
   // Execute trade (Option A: EIP-712 Limit order or Vault Market order)
   const handleExecuteTrade = useCallback(async () => {
     if (!quote) return;

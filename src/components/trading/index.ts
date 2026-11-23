@@ -17,3 +17,4 @@ export { VaultBackstopTab } from "./VaultBackstopTab";
 export { CreditsTab } from "./CreditsTab";
 export { ArchitectureDocsTab } from "./ArchitectureDocsTab";
 export { TradingFooter } from "./TradingFooter";
+export { SharePnlModal } from "./SharePnlModal";
