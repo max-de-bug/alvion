@@ -60,40 +60,54 @@ Built on a hybrid architecture, Alvion fuses the execution velocity and capital 
 
 ## System Architecture
 
+<p align="center">
+  <img src="public/alvion-architecture.svg" width="100%" alt="Alvion System Architecture" />
+</p>
+
+<p align="center">
+  <sub>Rendered with <a href="https://pele.run">Pele</a> · <strong>Mint:</strong> Zero-Gas EIP-712 Order &amp; Settlement Path · <strong>Cyan:</strong> 2s Oracle / Vault MM Loop &amp; Live WebSocket Stream</sub>
+</p>
+
+<details>
+<summary>View Mermaid source (Pele &amp; Mermaid compatible)</summary>
+
 ```mermaid
-flowchart TD
-    subgraph Client ["Client Layer (Next.js 16 + React 19)"]
-        UI["Trading Terminal (Pro / Consumer)"]
-        EW["Embedded Non-Custodial Wallet"]
-        EIP["EIP-712 Order Signer"]
-        UI --> EW --> EIP
-    end
+architecture-beta
+    group client(cloud)[Client Tier · Next.js 16 + React 19]
+        service ui(server)[Trading Terminal] in client
+        service ew(disk)[EIP-712 Signer] in client
+        service api(server)[Next.js API] in client
 
-    subgraph Engine ["Off-Chain Matching Tier (Rust CLOB)"]
-        WS["Axum WebSocket & REST Dispatcher"]
-        VMM["Vault Market Maker (Avellaneda-Stoikov)"]
-        SLAB["Zero-Copy Slab Arena (FIFO Priority)"]
-        PERC["Percolator Risk Firewall & Junior PnL"]
-        DAMP["Dynamic Leverage Dampener"]
+    group oracles(internet)[External Oracles]
+        service feeds(internet)[HL · NYSE · Pyth] in oracles
 
-        WS --> SLAB
-        VMM -->|Resting Liquidity| SLAB
-        SLAB --> PERC
-        PERC --> DAMP
-    end
+    group engine(server)[Off-Chain Matching · Rust CLOB]
+        service ws(server)[Axum WS :8080] in engine
+        service vmm(server)[Vault MM Skew] in engine
+        service seq(disk)[2s Sequencer] in engine
+        service slab(database)[Zero-Copy Slab] in engine
+        service perc(disk)[Percolator Risk] in engine
 
-    subgraph Settlement ["Settlement Layer (Robinhood Chain • Orbit L2)"]
-        REL["Batched Execution Relayer"]
-        CH["USDC Clearinghouse Contract"]
-        INS["Isolated Domain Insurance Buffers"]
+    group chain(cloud)[Robinhood Chain · Orbit L2 (4663)]
+        service rel(server)[30-Tx Relayer] in chain
+        service ch(database)[USDC Clearinghouse] in chain
+        service ins(disk)[Domain Insurance] in chain
 
-        REL --> CH
-        CH --> INS
-    end
-
-    EIP -->|Zero-Gas Signed Order| WS
-    PERC -->|Matched Fills & Liquidations| REL
+    ui:R --> L:ew
+    ew:R --> L:api
+    api:B --> T:ws
+    ws:L --> B:ui
+    feeds:B --> T:seq
+    seq:L --> R:vmm
+    ws:B --> L:slab
+    vmm:B --> T:slab
+    slab:R --> L:perc
+    perc:R --> L:rel
+    rel:R --> L:ch
+    ch:B -- T:ins
 ```
+
+</details>
 
 ---
 

@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="pele pele-architecture" viewBox="0 0 1124 650" width="1124" height="650" style="max-width:100%;height:auto;--_bg:var(--pele-bg,#0B1014);--_fg:var(--pele-fg,#E6EDF3);--_m:var(--pele-muted,#9AA5B1);--_l:var(--pele-line,#4ECCA3);--_s:var(--pele-surface,#161F25);--_a:var(--pele-surface-alt,#11181D);--_b:var(--pele-border,#25333B);--_c:var(--pele-accent,#4ECCA3);color:var(--_fg);--_r:var(--pele-radius,4px);--_fm:var(--pele-font-mono,JetBrains Mono, ui-monospace, SFMono-Regular, monospace);font:13px sans-serif;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;font-family:var(--pele-font,Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif)" fill="var(--_fg)" role="graphics-document document" aria-roledescription="architecture">
+<style>
+  svg.pele {
+    --pele-bg: #0B1014;
+    --pele-fg: #E6EDF3;
+    --pele-fg-on-light: #0B1014;
+    --pele-fg-on-dark: #E6EDF3;
+    --pele-muted: #8C9DA6;
+    --pele-line: #4ECCA3;
+    --pele-surface: #141B1F;
+    --pele-surface-alt: #11181D;
+    --pele-border: #25333B;
+    --pele-accent: #4ECCA3;
+    --pele-radius: 4px;
+    --pele-heading-weight: 600;
+  }
+  .pele-cluster > rect {
+    fill: #11181D !important;
+    fill-opacity: 0.94 !important;
+    stroke: #24323A !important;
+    stroke-width: 1.25px !important;
+  }
+  .pele-cluster-label {
+    fill: #9AA5B1 !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+  }
+  .pele-node > rect {
+    fill: #161F25 !important;
+    stroke: #2C3D47 !important;
+    stroke-width: 1.25px !important;
+  }
+  .pele-node[data-id="slab"] > rect,
+  .pele-node[data-id="perc"] > rect,
+  .pele-node[data-id="ch"] > rect {
+    stroke: #4ECCA3 !important;
+    stroke-opacity: 0.7 !important;
+  }
+  .pele-node .pele-label {
+    fill: #F4F6F8 !important;
+    font-size: 12.5px !important;
+    font-weight: 500 !important;
+  }
+  /* Order execution & on-chain settlement path: Mint (#4ECCA3) */
+  .pele-edge path:not(.pele-marker) {
+    stroke: #4ECCA3 !important;
+    stroke-opacity: 0.8 !important;
+    stroke-width: 1.5px !important;
+  }
+  .pele-marker {
+    fill: #4ECCA3 !important;
+  }
+  /* 2s Oracle / Vault MM loop & Live WS stream: Cyan (#38BDF8) */
+  .pele-edge[data-id="ws-ui"] path:not(.pele-marker) {
+    stroke: #38BDF8 !important;
+    stroke-dasharray: 4 3 !important;
+    stroke-opacity: 0.85 !important;
+  }
+  .pele-edge[data-id="feeds-seq"] path:not(.pele-marker),
+  .pele-edge[data-id="seq-vmm"] path:not(.pele-marker),
+  .pele-edge[data-id="vmm-slab"] path:not(.pele-marker) {
+    stroke: #38BDF8 !important;
+    stroke-opacity: 0.8 !important;
+  }
+  .pele-edge[data-id="ws-ui"] .pele-marker,
+  .pele-edge[data-id="feeds-seq"] .pele-marker,
+  .pele-edge[data-id="seq-vmm"] .pele-marker,
+  .pele-edge[data-id="vmm-slab"] .pele-marker {
+    fill: #38BDF8 !important;
+  }
+  .pele-icon path {
+    stroke: #9AA5B1 !important;
+  }
+  .pele-node[data-id="slab"] .pele-icon path,
+  .pele-node[data-id="perc"] .pele-icon path,
+  .pele-node[data-id="ch"] .pele-icon path {
+    stroke: #4ECCA3 !important;
+  }
+  .pele-node[data-id="feeds"] .pele-icon path,
+  .pele-node[data-id="seq"] .pele-icon path,
+  .pele-node[data-id="vmm"] .pele-icon path {
+    stroke: #38BDF8 !important;
+  }
+</style>
+<rect x="0" y="0" width="100%" height="100%" rx="8" fill="#0B1014" stroke="#1E2930" stroke-width="1.5"/>
+<g transform="translate(36,36)"><g class="pele-clusters"><g class="pele-cluster" data-id="client"><rect x="0" y="0" width="424" height="124" fill="var(--_a)" fill-opacity="0.5" stroke="var(--_b)" style="rx:var(--_r)"/><svg class="pele-icon" data-icon="cloud" x="10" y="8" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18a4 4 0 0 1-.5-7.97A6 6 0 0 1 18 9.5a4.25 4.25 0 0 1-.5 8.5z" stroke="var(--_fg)" stroke-width="1.5"/></svg><text class="pele-cluster-label" fill="var(--_m)" x="131.32" y="20.55" text-anchor="middle">Client Tier · Next.js 16 + React 19</text></g><g class="pele-cluster" data-id="oracles"><rect x="596" y="0" width="148" height="124" fill="var(--_a)" fill-opacity="0.5" stroke="var(--_b)" style="rx:var(--_r)"/><svg class="pele-icon" data-icon="internet" x="606" y="8" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0-18 0M3 12h18M12 3a13 13 0 0 0 0 18M12 3a13 13 0 0 1 0 18" stroke="var(--_fg)" stroke-width="1.5"/></svg><text class="pele-cluster-label" fill="var(--_m)" x="676.04" y="20.55" text-anchor="middle">External Oracles</text></g><g class="pele-cluster" data-id="engine"><rect x="290" y="164" width="454" height="282" fill="var(--_a)" fill-opacity="0.5" stroke="var(--_b)" style="rx:var(--_r)"/><svg class="pele-icon" data-icon="server" x="363" y="172" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18v7H3zM3 13h18v7H3zM7 7.5h.01M7 16.5h.01M11 7.5h6M11 16.5h6" stroke="var(--_fg)" stroke-width="1.5"/></svg><text class="pele-cluster-label" fill="var(--_m)" x="481.25" y="184.55" text-anchor="middle">Off-Chain Matching · Rust CLOB</text></g><g class="pele-cluster" data-id="chain"><rect x="784" y="308" width="268" height="270" fill="var(--_a)" fill-opacity="0.5" stroke="var(--_b)" style="rx:var(--_r)"/><svg class="pele-icon" data-icon="cloud" x="794" y="316" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18a4 4 0 0 1-.5-7.97A6 6 0 0 1 18 9.5a4.25 4.25 0 0 1-.5 8.5z" stroke="var(--_fg)" stroke-width="1.5"/></svg><text class="pele-cluster-label" fill="var(--_m)" x="917.32" y="328.55" text-anchor="middle">Robinhood Chain · Orbit L2 (4663)</text></g></g><g class="pele-edges" fill="none" stroke="var(--_l)" stroke-linecap="round" stroke-linejoin="round"><g class="pele-edge" data-id="ui-ew"><path d="M94,56L174,56"/><path class="pele-marker" d="M181,56L173,59.36L173,52.64Z" fill="var(--_l)" stroke="none"/></g><g class="pele-edge" data-id="ew-api"><path d="M229,56L326,56"/><path class="pele-marker" d="M333,56L325,59.36L325,52.64Z" fill="var(--_l)" stroke="none"/></g><g class="pele-edge" data-id="api-ws"><path d="M357,106L357,189"/><path class="pele-marker" d="M357,196L353.64,188L360.36,188Z" fill="var(--_l)" stroke="none"/></g><g class="pele-edge" data-id="ws-ui"><path d="M333,220L76,220Q70,220 70,214L70,113"/><path class="pele-marker" d="M70,106L73.36,114L66.64,114Z" fill="var(--_l)" stroke="none"/></g><g class="pele-edge" data-id="feeds-seq"><path d="M670,106L670,189"/><path class="pele-marker" d="M670,196L666.64,188L673.36,188Z" fill="var(--_l)" stroke="none"/></g><g class="pele-edge" data-id="seq-vmm"><path d="M646,220L541,220"/><path class="pele-marker" d="M534,220L542,216.64L542,223.36Z" fill="var(--_l)" stroke="none"/></g><g class="pele-edge" data-id="ws-slab"><path d="M357,270L357,358Q357,364 363,364L479,364"/><path class="pele-marker" d="M486,364L478,367.36L478,360.64Z" fill="var(--_l)" stroke="none"/></g><g class="pele-edge" data-id="vmm-slab"><path d="M510,270L510,333"/><path class="pele-marker" d="M510,340L506.64,332L513.36,332Z" fill="var(--_l)" stroke="none"/></g><g class="pele-edge" data-id="slab-perc"><path d="M534,364L639,364"/><path class="pele-marker" d="M646,364L638,367.36L638,360.64Z" fill="var(--_l)" stroke="none"/></g><g class="pele-edge" data-id="perc-rel"><path d="M694,364L814,364"/><path class="pele-marker" d="M821,364L813,367.36L813,360.64Z" fill="var(--_l)" stroke="none"/></g><g class="pele-edge" data-id="rel-ch"><path d="M869,364L948,364"/><path class="pele-marker" d="M955,364L947,367.36L947,360.64Z" fill="var(--_l)" stroke="none"/></g><g class="pele-edge" data-id="ch-ins"><path d="M979,428L979,486"/></g></g><g class="pele-nodes"><g class="pele-node pele-service" data-id="ui" transform="translate(70,32)"><rect x="-24" width="48" height="48" fill="var(--_s)" stroke="var(--_b)" style="rx:var(--_r)"/><svg class="pele-icon" data-icon="server" x="-12" y="12" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18v7H3zM3 13h18v7H3zM7 7.5h.01M7 16.5h.01M11 7.5h6M11 16.5h6" stroke="var(--_fg)" stroke-width="1.5"/></svg><text class="pele-label" x="0" y="66.55" text-anchor="middle">Trading Terminal</text></g><g class="pele-node pele-service" data-id="ew" transform="translate(205,32)"><rect x="-24" width="48" height="48" fill="var(--_s)" stroke="var(--_b)" style="rx:var(--_r)"/><svg class="pele-icon" data-icon="disk" x="-12" y="12" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14v18H5zM12 6.5a4 4 0 1 0 0 8a4 4 0 1 0 0-8M12 10.5h.01M8 18h3" stroke="var(--_fg)" stroke-width="1.5"/></svg><text class="pele-label" x="0" y="66.55" text-anchor="middle">EIP-712 Signer</text></g><g class="pele-node pele-service" data-id="api" transform="translate(357,32)"><rect x="-24" width="48" height="48" fill="var(--_s)" stroke="var(--_b)" style="rx:var(--_r)"/><svg class="pele-icon" data-icon="server" x="-12" y="12" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18v7H3zM3 13h18v7H3zM7 7.5h.01M7 16.5h.01M11 7.5h6M11 16.5h6" stroke="var(--_fg)" stroke-width="1.5"/></svg><text class="pele-label" x="0" y="66.55" text-anchor="middle">Next.js API</text></g><g class="pele-node pele-service" data-id="feeds" transform="translate(670,32)"><rect x="-24" width="48" height="48" fill="var(--_s)" stroke="var(--_b)" style="rx:var(--_r)"/><svg class="pele-icon" data-icon="internet" x="-12" y="12" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0-18 0M3 12h18M12 3a13 13 0 0 0 0 18M12 3a13 13 0 0 1 0 18" stroke="var(--_fg)" stroke-width="1.5"/></svg><text class="pele-label" x="0" y="66.55" text-anchor="middle">HL · NYSE · Pyth</text></g><g class="pele-node pele-service" data-id="ws" transform="translate(357,196)"><rect x="-24" width="48" height="48" fill="var(--_s)" stroke="var(--_b)" style="rx:var(--_r)"/><svg class="pele-icon" data-icon="server" x="-12" y="12" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18v7H3zM3 13h18v7H3zM7 7.5h.01M7 16.5h.01M11 7.5h6M11 16.5h6" stroke="var(--_fg)" stroke-width="1.5"/></svg><text class="pele-label" x="0" y="66.55" text-anchor="middle">Axum WS :8080</text></g><g class="pele-node pele-service" data-id="vmm" transform="translate(510,196)"><rect x="-24" width="48" height="48" fill="var(--_s)" stroke="var(--_b)" style="rx:var(--_r)"/><svg class="pele-icon" data-icon="server" x="-12" y="12" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18v7H3zM3 13h18v7H3zM7 7.5h.01M7 16.5h.01M11 7.5h6M11 16.5h6" stroke="var(--_fg)" stroke-width="1.5"/></svg><text class="pele-label" x="0" y="66.55" text-anchor="middle">Vault MM Skew</text></g><g class="pele-node pele-service" data-id="seq" transform="translate(670,196)"><rect x="-24" width="48" height="48" fill="var(--_s)" stroke="var(--_b)" style="rx:var(--_r)"/><svg class="pele-icon" data-icon="disk" x="-12" y="12" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14v18H5zM12 6.5a4 4 0 1 0 0 8a4 4 0 1 0 0-8M12 10.5h.01M8 18h3" stroke="var(--_fg)" stroke-width="1.5"/></svg><text class="pele-label" x="0" y="66.55" text-anchor="middle">2s Sequencer</text></g><g class="pele-node pele-service" data-id="slab" transform="translate(510,340)"><rect x="-24" width="48" height="48" fill="var(--_s)" stroke="var(--_b)" style="rx:var(--_r)"/><svg class="pele-icon" data-icon="database" x="-12" y="12" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6a8 3 0 1 0 16 0a8 3 0 1 0-16 0M4 6v12a8 3 0 0 0 16 0V6M4 12a8 3 0 0 0 16 0" stroke="var(--_fg)" stroke-width="1.5"/></svg><text class="pele-label" x="0" y="66.55" text-anchor="middle">Zero-Copy Slab</text></g><g class="pele-node pele-service" data-id="perc" transform="translate(670,340)"><rect x="-24" width="48" height="48" fill="var(--_s)" stroke="var(--_b)" style="rx:var(--_r)"/><svg class="pele-icon" data-icon="disk" x="-12" y="12" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14v18H5zM12 6.5a4 4 0 1 0 0 8a4 4 0 1 0 0-8M12 10.5h.01M8 18h3" stroke="var(--_fg)" stroke-width="1.5"/></svg><text class="pele-label" x="0" y="66.55" text-anchor="middle">Percolator Risk</text></g><g class="pele-node pele-service" data-id="rel" transform="translate(845,340)"><rect x="-24" width="48" height="48" fill="var(--_s)" stroke="var(--_b)" style="rx:var(--_r)"/><svg class="pele-icon" data-icon="server" x="-12" y="12" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18v7H3zM3 13h18v7H3zM7 7.5h.01M7 16.5h.01M11 7.5h6M11 16.5h6" stroke="var(--_fg)" stroke-width="1.5"/></svg><text class="pele-label" x="0" y="66.55" text-anchor="middle">30-Tx Relayer</text></g><g class="pele-node pele-service" data-id="ch" transform="translate(979,340)"><rect x="-24" width="48" height="48" fill="var(--_s)" stroke="var(--_b)" style="rx:var(--_r)"/><svg class="pele-icon" data-icon="database" x="-12" y="12" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6a8 3 0 1 0 16 0a8 3 0 1 0-16 0M4 6v12a8 3 0 0 0 16 0V6M4 12a8 3 0 0 0 16 0" stroke="var(--_fg)" stroke-width="1.5"/></svg><text class="pele-label" text-anchor="middle" xml:space="preserve"><tspan x="0" y="65.05">USDC</tspan><tspan x="0" y="82.05">Clearinghouse</tspan></text></g><g class="pele-node pele-service" data-id="ins" transform="translate(979,486)"><rect x="-24" width="48" height="48" fill="var(--_s)" stroke="var(--_b)" style="rx:var(--_r)"/><svg class="pele-icon" data-icon="disk" x="-12" y="12" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14v18H5zM12 6.5a4 4 0 1 0 0 8a4 4 0 1 0 0-8M12 10.5h.01M8 18h3" stroke="var(--_fg)" stroke-width="1.5"/></svg><text class="pele-label" x="0" y="66.55" text-anchor="middle">Domain Insurance</text></g></g></g></svg>
