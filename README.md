@@ -69,42 +69,31 @@ Built on a hybrid architecture, Alvion fuses the execution velocity and capital 
 </p>
 
 <details>
-<summary>View Mermaid source (Pele &amp; Mermaid compatible)</summary>
+<summary>View Mermaid source (Universal Flowchart · Pele &amp; Mermaid compatible)</summary>
 
 ```mermaid
-architecture-beta
-    group client(cloud)[Client Tier · Next.js 16 + React 19]
-        service ui(server)[Trading Terminal] in client
-        service ew(disk)[EIP-712 Signer] in client
-        service api(server)[Next.js API] in client
+flowchart TD
+    subgraph Client ["Client Tier (Next.js 16 / React 19)"]
+        direction LR
+        UI["Trading Terminal"] -->|"Sign Order"| EW(["Embedded Wallet · EIP-712"]) -->|"Submit"| API["Next.js API Routes"]
+    end
 
-    group oracles(internet)[External Oracles]
-        service feeds(internet)[HL · NYSE · Pyth] in oracles
+    subgraph Engine ["Off-Chain Matching Engine (Rust CLOB)"]
+        direction TB
+        ORC[("HL / NYSE / Pyth Oracles")] -->|"2s Tick"| SEQ["Sequencer and Vault MM"]
+        WS["Axum REST and WS (:8080)"] -->|"Margin Check"| SLAB["Zero-Copy Slab Arena (FIFO)"]
+        SEQ -->|"3-Level Quotes"| SLAB
+        SLAB -->|"Matched Fills"| PERC{"Percolator Firewall and Dampener"}
+    end
 
-    group engine(server)[Off-Chain Matching · Rust CLOB]
-        service ws(server)[Axum WS :8080] in engine
-        service vmm(server)[Vault MM Skew] in engine
-        service seq(disk)[2s Sequencer] in engine
-        service slab(database)[Zero-Copy Slab] in engine
-        service perc(disk)[Percolator Risk] in engine
+    subgraph Settlement ["Settlement Layer (Robinhood Chain Orbit L2 · 4663)"]
+        direction LR
+        REL["On-Chain Relayer (30-Tx Batches)"] -->|"Batch Commit"| CH[("USDC Clearinghouse")] --- INS["15 Domain Insurance Buffers"]
+    end
 
-    group chain(cloud)[Robinhood Chain · Orbit L2 (4663)]
-        service rel(server)[30-Tx Relayer] in chain
-        service ch(database)[USDC Clearinghouse] in chain
-        service ins(disk)[Domain Insurance] in chain
-
-    ui:R --> L:ew
-    ew:R --> L:api
-    api:B --> T:ws
-    ws:L --> B:ui
-    feeds:B --> T:seq
-    seq:L --> R:vmm
-    ws:B --> L:slab
-    vmm:B --> T:slab
-    slab:R --> L:perc
-    perc:R --> L:rel
-    rel:R --> L:ch
-    ch:B -- T:ins
+    API -->|"Zero-Gas Order"| WS
+    WS -.->|"Live L2 Stream"| UI
+    PERC -->|"Verified Fills"| REL
 ```
 
 </details>

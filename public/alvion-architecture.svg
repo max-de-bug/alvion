@@ -14,7 +14,7 @@
     --pele-radius: 4px;
     --pele-heading-weight: 600;
   }
-  .pele-cluster > rect {
+  .pele-cluster rect {
     fill: #11181D !important;
     fill-opacity: 0.94 !important;
     stroke: #24323A !important;
@@ -25,14 +25,14 @@
     font-size: 12px !important;
     font-weight: 600 !important;
   }
-  .pele-node > rect {
+  .pele-node rect {
     fill: #161F25 !important;
     stroke: #2C3D47 !important;
     stroke-width: 1.25px !important;
   }
-  .pele-node[data-id="slab"] > rect,
-  .pele-node[data-id="perc"] > rect,
-  .pele-node[data-id="ch"] > rect {
+  .pele-node[data-id="slab"] rect,
+  .pele-node[data-id="perc"] rect,
+  .pele-node[data-id="ch"] rect {
     stroke: #4ECCA3 !important;
     stroke-opacity: 0.7 !important;
   }
@@ -41,7 +41,7 @@
     font-size: 12.5px !important;
     font-weight: 500 !important;
   }
-  /* Order execution & on-chain settlement path: Mint (#4ECCA3) */
+  /* Order execution and settlement path: Mint */
   .pele-edge path:not(.pele-marker) {
     stroke: #4ECCA3 !important;
     stroke-opacity: 0.8 !important;
@@ -50,7 +50,7 @@
   .pele-marker {
     fill: #4ECCA3 !important;
   }
-  /* 2s Oracle / Vault MM loop & Live WS stream: Cyan (#38BDF8) */
+  /* Oracle / Vault MM loop and Live WS stream: Cyan */
   .pele-edge[data-id="ws-ui"] path:not(.pele-marker) {
     stroke: #38BDF8 !important;
     stroke-dasharray: 4 3 !important;
