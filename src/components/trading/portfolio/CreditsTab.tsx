@@ -12,7 +12,6 @@ import {
   Shield,
   Layers,
   Sparkles,
-  ExternalLink,
 } from "lucide-react";
 
 interface CreditsTabProps {

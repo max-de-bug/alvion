@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useRef, useEffect } from "react";
-import { ChevronsRight, ArrowUpDown, ChevronDown, Check } from "lucide-react";
+import { ChevronsRight, ChevronDown } from "lucide-react";
 import { OrderBookData } from "@/types/trading";
 import { MatchedTrade } from "@/lib/orderTypes";
 

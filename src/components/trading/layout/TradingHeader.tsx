@@ -7,15 +7,17 @@ import {
   X,
   Plus,
   ChevronDown,
-  Settings,
 } from "lucide-react";
 import { AlvionBirdLogo } from "@/components/brand/AlvionBirdLogo";
 import { useShallow } from "zustand/react/shallow";
-import { useTradingStore, type ActiveTab } from "@/stores/useTradingStore";
+import { useTradingStore, type ActiveTab, type Position } from "@/stores/useTradingStore";
+import type { SignedOrder } from "@/lib/orderTypes";
+import type { MarketContext } from "@/lib/hyperliquid";
+import { AccountValueHoverCard } from "./AccountValueHoverCard";
 
 // Vercel Best Practice: bundle-dynamic-imports
 const AccountModal = dynamic(
-  () => import("./AccountModal").then((m) => m.AccountModal),
+  () => import("../modals/AccountModal").then((m) => m.AccountModal),
   { ssr: false }
 );
 
@@ -24,14 +26,15 @@ interface TradingHeaderProps {
   setActiveTab: (tab: ActiveTab) => void;
   walletBalance: number;
   faucetWallet: (amount: number) => void;
-  isConnected?: boolean;
   address?: string;
   alias?: string;
   chainId?: number;
-  connectWallet?: () => void;
-  disconnect?: () => void;
   exportPrivateKey?: () => string;
   resetAccount?: () => void;
+  positions?: Position[];
+  openOrders?: SignedOrder[];
+  markets?: MarketContext[];
+  currentMarket?: MarketContext;
 }
 
 export const TradingHeader = React.memo<TradingHeaderProps>(function TradingHeader({
@@ -39,13 +42,14 @@ export const TradingHeader = React.memo<TradingHeaderProps>(function TradingHead
   setActiveTab,
   walletBalance,
   faucetWallet,
-  isConnected,
   address,
   alias,
-  connectWallet,
-  disconnect,
   exportPrivateKey,
   resetAccount,
+  positions,
+  openOrders,
+  markets,
+  currentMarket,
 }) {
   // Vercel Best Practice: rerender-defer-reads & shallow store subscription
   const { tradingMode, setTradingMode, credits } = useTradingStore(
@@ -204,22 +208,22 @@ export const TradingHeader = React.memo<TradingHeaderProps>(function TradingHead
             </button>
           </div>
 
-          {/* 1. Cash Balance Pill */}
-          <button
-            type="button"
-            onClick={() => {
+          {/* 1. Account Value Pill with QFEX Hover Breakdown */}
+          <AccountValueHoverCard
+            walletBalance={walletBalance}
+            positions={positions}
+            openOrders={openOrders}
+            markets={markets}
+            currentMarket={currentMarket}
+            onOpenDeposit={() => {
               setAccountModalTab("deposit");
               setShowAccountModal(true);
             }}
-            className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-none bg-[var(--surface-3)] hover:bg-[var(--hover)] border border-[var(--border)] transition-colors cursor-pointer"
-            title="Cash Balance • Click to deposit"
-          >
-            <span className="text-[10px] text-[#728087] uppercase font-mono tracking-wider">Cash</span>
-            <span className="text-xs font-mono font-bold text-white">
-              ${walletBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </span>
-            <span className="text-[10.5px] text-[#4ECCA3] font-mono font-semibold">USDC</span>
-          </button>
+            onOpenAccount={() => {
+              setAccountModalTab("account");
+              setShowAccountModal(true);
+            }}
+          />
 
           {/* 2. Instant Deposit Button */}
           <button

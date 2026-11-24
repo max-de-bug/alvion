@@ -133,7 +133,7 @@ export function useTradingDashboard() {
           : currentMarket.markPx.toFixed(4);
       setLimitPrice(defaultPrice);
     }
-  }, [currentMarket?.name, currentMarket?.markPx, setLimitPrice]);
+  }, [currentMarket, setLimitPrice]);
 
   // 2. Fetch Open Orders and Recent Trades from Option A matching engine via TanStack Query
   const { data: engineState } = useQuery({
@@ -396,7 +396,6 @@ export function useTradingDashboard() {
     limitPrice,
     leverage,
     address,
-    isConnected,
     signOrder,
     currentMarket.name,
     isLong,

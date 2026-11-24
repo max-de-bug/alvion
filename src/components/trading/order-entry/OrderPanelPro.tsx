@@ -6,17 +6,10 @@ import {
   ChevronDown,
   Check,
   Info,
-  Sliders,
-  Maximize2,
 } from "lucide-react";
 import { MarketContext, QuoteResult } from "@/lib/hyperliquid";
 import { useShallow } from "zustand/react/shallow";
-import {
-  useTradingStore,
-  type ProOrderType,
-  type MarginMode,
-  type CollateralMode,
-} from "@/stores/useTradingStore";
+import { useTradingStore } from "@/stores/useTradingStore";
 
 interface OrderPanelProProps {
   currentMarket: MarketContext;
@@ -33,11 +26,6 @@ interface OrderPanelProProps {
   walletBalance: number;
   quote: QuoteResult | null;
   loadingQuote: boolean;
-  availableLongLiq: number;
-  availableShortLiq: number;
-  longFundingRate: number;
-  shortFundingRate: number;
-  formatUsdCompact: (val: number) => string;
   onExecuteTrade: () => void;
 }
 
@@ -59,11 +47,6 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
   walletBalance,
   quote,
   loadingQuote,
-  availableLongLiq,
-  availableShortLiq,
-  longFundingRate,
-  shortFundingRate,
-  formatUsdCompact,
   onExecuteTrade,
 }) {
   const marginInputId = useId();
@@ -174,7 +157,7 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
     if (walletBalance <= 0) return;
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
-    } catch { }
+    } catch {}
     setIsDragging(true);
     updateFromPointer(e.clientX);
   };
@@ -188,7 +171,7 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
     if (!isDragging) return;
     try {
       e.currentTarget.releasePointerCapture(e.pointerId);
-    } catch { }
+    } catch {}
     setIsDragging(false);
     if (dragPercent !== null && walletBalance > 0) {
       const computedMargin = Math.max(0, Math.round((dragPercent / 100) * walletBalance));
@@ -312,8 +295,8 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
                     setShowMarginModal(false);
                   }}
                   className={`p-2 rounded-none text-left text-xs transition-colors cursor-pointer flex items-center justify-between ${marginMode === "isolated"
-                    ? "bg-[#1c272c] border border-[var(--fixed-green)]/40 text-white"
-                    : "hover:bg-[var(--hover)] text-[var(--t2)]"
+                      ? "bg-[#1c272c] border border-[var(--fixed-green)]/40 text-white"
+                      : "hover:bg-[var(--hover)] text-[var(--t2)]"
                     }`}
                 >
                   <div>
@@ -329,8 +312,8 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
                     setShowMarginModal(false);
                   }}
                   className={`p-2 rounded-none text-left text-xs transition-colors cursor-pointer flex items-center justify-between ${marginMode === "cross"
-                    ? "bg-[#1c272c] border border-[var(--fixed-green)]/40 text-white"
-                    : "hover:bg-[var(--hover)] text-[var(--t2)]"
+                      ? "bg-[#1c272c] border border-[var(--fixed-green)]/40 text-white"
+                      : "hover:bg-[var(--hover)] text-[var(--t2)]"
                     }`}
                 >
                   <div>
@@ -383,8 +366,8 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
                       setShowLeverageModal(false);
                     }}
                     className={`py-1 rounded-none text-[11px] font-mono font-medium transition-colors cursor-pointer ${leverage === preset
-                      ? "bg-[var(--fixed-green)] text-slate-950 font-bold"
-                      : "bg-[var(--surface-3)] text-[var(--t2)] hover:text-white"
+                        ? "bg-[var(--fixed-green)] text-slate-950 font-bold"
+                        : "bg-[var(--surface-3)] text-[var(--t2)] hover:text-white"
                       }`}
                   >
                     {preset}x
@@ -418,8 +401,8 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
                     setShowCollateralModal(false);
                   }}
                   className={`p-2 rounded-none text-left text-xs transition-colors cursor-pointer flex items-center justify-between ${collateralMode === "unified"
-                    ? "bg-[#1c272c] border border-[var(--fixed-green)]/40 text-white"
-                    : "hover:bg-[var(--hover)] text-[var(--t2)]"
+                      ? "bg-[#1c272c] border border-[var(--fixed-green)]/40 text-white"
+                      : "hover:bg-[var(--hover)] text-[var(--t2)]"
                     }`}
                 >
                   <div>
@@ -435,8 +418,8 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
                     setShowCollateralModal(false);
                   }}
                   className={`p-2 rounded-none text-left text-xs transition-colors cursor-pointer flex items-center justify-between ${collateralMode === "isolated"
-                    ? "bg-[#1c272c] border border-[var(--fixed-green)]/40 text-white"
-                    : "hover:bg-[var(--hover)] text-[var(--t2)]"
+                      ? "bg-[#1c272c] border border-[var(--fixed-green)]/40 text-white"
+                      : "hover:bg-[var(--hover)] text-[var(--t2)]"
                     }`}
                 >
                   <div>
@@ -461,8 +444,8 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
               setShowProMenu(false);
             }}
             className={`relative pb-2.5 font-medium transition-colors mr-7 cursor-pointer ${orderType === "market" && !isProTypeSelected
-              ? "text-white font-semibold"
-              : "text-[#7a8990] hover:text-white"
+                ? "text-white font-semibold"
+                : "text-[#7a8990] hover:text-white"
               }`}
           >
             Market
@@ -480,8 +463,8 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
               setShowProMenu(false);
             }}
             className={`relative pb-2.5 font-medium transition-colors mr-7 cursor-pointer ${orderType === "limit" && !isProTypeSelected
-              ? "text-white font-semibold"
-              : "text-[#7a8990] hover:text-white"
+                ? "text-white font-semibold"
+                : "text-[#7a8990] hover:text-white"
               }`}
           >
             Limit
@@ -496,8 +479,8 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
               type="button"
               onClick={() => setShowProMenu((prev) => !prev)}
               className={`relative pb-2.5 font-medium transition-colors flex items-center gap-1 cursor-pointer ${isProTypeSelected
-                ? "text-white font-semibold"
-                : "text-[#7a8990] hover:text-white"
+                  ? "text-white font-semibold"
+                  : "text-[#7a8990] hover:text-white"
                 }`}
             >
               <span>{getProLabel()}</span>
@@ -563,8 +546,8 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
             type="button"
             onClick={() => setIsLong(true)}
             className={`h-[36px] rounded-none text-[13.5px] font-semibold transition-all cursor-pointer flex items-center justify-center ${isLong
-              ? "bg-[#5ec2a8] text-[#0b1a16] shadow-sm font-bold"
-              : "text-[#d6dee2] hover:text-white"
+                ? "bg-[#5ec2a8] text-[#0b1a16] shadow-sm font-bold"
+                : "text-[#d6dee2] hover:text-white"
               }`}
           >
             Buy / Long
@@ -573,8 +556,8 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
             type="button"
             onClick={() => setIsLong(false)}
             className={`h-[36px] rounded-none text-[13.5px] font-semibold transition-all cursor-pointer flex items-center justify-center ${!isLong
-              ? "bg-[#eb4d5c] text-white shadow-sm font-bold"
-              : "text-[#d6dee2] hover:text-white"
+                ? "bg-[#eb4d5c] text-white shadow-sm font-bold"
+                : "text-[#d6dee2] hover:text-white"
               }`}
           >
             Sell / Short
@@ -677,8 +660,9 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
 
             {/* Filled line up to current percentage */}
             <div
-              className={`absolute left-0 h-[2px] rounded-none bg-[#5ec2a8] ${isDragging ? "transition-none" : "transition-all duration-150"
-                }`}
+              className={`absolute left-0 h-[2px] rounded-none bg-[#5ec2a8] ${
+                isDragging ? "transition-none" : "transition-all duration-150"
+              }`}
               style={{ width: `${activePercent}%` }}
             />
 
@@ -702,8 +686,9 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
 
             {/* Hollow Teal Ring Thumb */}
             <div
-              className={`absolute size-[18px] -translate-x-1/2 rounded-none border-[2.5px] border-[#5ec2a8] bg-[#10171a] shadow-sm pointer-events-none z-20 ${isDragging ? "transition-none scale-110" : "transition-all duration-150"
-                }`}
+              className={`absolute size-[18px] -translate-x-1/2 rounded-none border-[2.5px] border-[#5ec2a8] bg-[#10171a] shadow-sm pointer-events-none z-20 ${
+                isDragging ? "transition-none scale-110" : "transition-all duration-150"
+              }`}
               style={{ left: `${activePercent}%` }}
             />
           </div>
@@ -856,8 +841,8 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
           type="button"
           onClick={onExecuteTrade}
           className={`w-full flex items-center justify-center gap-1.5 py-3 rounded-none text-[13.5px] font-bold uppercase tracking-[0.05em] cursor-pointer transition-all shadow-lg active:scale-[0.98] ${isLong
-            ? "bg-[#5ec2a8] hover:bg-[#52ad96] text-[#0b1a16] shadow-[#5ec2a8]/20"
-            : "bg-[#eb4d5c] hover:bg-[#d43f4d] text-white shadow-[#eb4d5c]/20"
+              ? "bg-[#5ec2a8] hover:bg-[#52ad96] text-[#0b1a16] shadow-[#5ec2a8]/20"
+              : "bg-[#eb4d5c] hover:bg-[#d43f4d] text-white shadow-[#eb4d5c]/20"
             }`}
         >
           {loadingQuote ? (
@@ -965,8 +950,8 @@ export const OrderPanelPro = React.memo<OrderPanelProProps>(function OrderPanelP
                     setShowSlippageMenu(false);
                   }}
                   className={`py-1 rounded-none border text-[10.5px] font-mono font-semibold transition-colors cursor-pointer ${selectedSlippage === preset
-                    ? "bg-[var(--surface)] border-[var(--fixed-green)] text-white"
-                    : "bg-[var(--surface)] border-[var(--border)] text-[var(--t2)] hover:text-white"
+                      ? "bg-[var(--surface)] border-[var(--fixed-green)] text-white"
+                      : "bg-[var(--surface)] border-[var(--border)] text-[var(--t2)] hover:text-white"
                     }`}
                 >
                   {preset}%

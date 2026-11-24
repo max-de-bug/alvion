@@ -1,5 +1,5 @@
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
-import { ROBINHOOD_CLEARINGHOUSE, ORDER_TYPES, EIP712_DOMAIN } from "./wagmi";
+import { ORDER_TYPES, EIP712_DOMAIN } from "./wagmi";
 
 const STORAGE_KEY = "alvion_embedded_wallet_v2";
 

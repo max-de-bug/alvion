@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import {
   getOrCreateEmbeddedWallet,
   signOrderWithEmbeddedWallet,
@@ -12,12 +12,6 @@ import {
 export function useAlvionTrading() {
   const [wallet, setWallet] = useState<EmbeddedWalletState>(() => getOrCreateEmbeddedWallet());
   const [isSigning, setIsSigning] = useState(false);
-
-  useEffect(() => {
-    // Sync with localStorage on client mount
-    const current = getOrCreateEmbeddedWallet();
-    setWallet(current);
-  }, []);
 
   const signOrder = useCallback(
     async (params: SignOrderParams) => {

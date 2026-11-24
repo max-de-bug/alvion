@@ -2,7 +2,7 @@
 // You can use any dependencies from npm; we import them automatically in package.json
 
 import { cn } from "@/lib/utils";
-import React, { useState } from "react";
+import React from "react";
 
 export interface DemoBgProps extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode;
@@ -17,8 +17,6 @@ export default function Component({
   squareSize = 24,
   ...props
 }: DemoBgProps) {
-  const [count, setCount] = useState(0);
-
   return (
     <div className={cn("min-h-screen w-full bg-[#f8fafc] relative", className)} {...props}>
       {/* Top Fade Grid Background */}

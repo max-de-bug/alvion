@@ -10,6 +10,7 @@ import {
   LineSeries,
   type IChartApi,
   type ISeriesApi,
+  type UTCTimestamp,
 } from "lightweight-charts";
 import type { Timeframe } from "@/stores/useTradingStore";
 
@@ -60,7 +61,7 @@ function generateCandleData(basePrice: number, count: number = 80, intervalSecon
   const closeHistory: number[] = [];
 
   for (let i = count; i >= 0; i--) {
-    const time = (now - i * intervalSeconds) as any;
+    const time = (now - i * intervalSeconds) as UTCTimestamp;
     const volatility = currentPrice * 0.0035;
     const change = (Math.random() - 0.485) * volatility;
     
@@ -274,8 +275,8 @@ export const AlvionNativeChart = React.memo<AlvionNativeChartProps>(function Alv
           });
         }
       } else {
-        const candle = param.seriesData.get(candleSeries) as any;
-        const volume = param.seriesData.get(volumeSeries) as any;
+        const candle = param.seriesData.get(candleSeries) as { open: number; high: number; low: number; close: number } | undefined;
+        const volume = param.seriesData.get(volumeSeries) as { value: number } | undefined;
         if (candle) {
           setLegendData({
             open: candle.open,

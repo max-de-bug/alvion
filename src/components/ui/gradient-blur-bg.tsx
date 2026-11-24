@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import React, { useState } from "react";
+import React from "react";
 
 export interface GradientBlurBgProps extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode;
@@ -16,8 +16,6 @@ export const Component: React.FC<GradientBlurBgProps> = ({
   glowColor = "#d5c5ff",
   ...props
 }) => {
-  const [count, setCount] = useState(0);
-
   const backgroundSize = squareSize
     ? `${squareSize}px ${squareSize}px, ${squareSize}px ${squareSize}px, 100% 100%`
     : "96px 64px, 96px 64px, 100% 100%";

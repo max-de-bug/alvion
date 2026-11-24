@@ -21,11 +21,6 @@ interface OrderPanelProps {
   walletBalance: number;
   quote: QuoteResult | null;
   loadingQuote: boolean;
-  availableLongLiq: number;
-  availableShortLiq: number;
-  longFundingRate: number;
-  shortFundingRate: number;
-  formatUsdCompact: (val: number) => string;
   onExecuteTrade: () => void;
 }
 
@@ -64,11 +59,6 @@ export const OrderPanel = React.memo<OrderPanelProps>(function OrderPanel(props)
           walletBalance={props.walletBalance}
           quote={props.quote}
           loadingQuote={props.loadingQuote}
-          availableLongLiq={props.availableLongLiq}
-          availableShortLiq={props.availableShortLiq}
-          longFundingRate={props.longFundingRate}
-          shortFundingRate={props.shortFundingRate}
-          formatUsdCompact={props.formatUsdCompact}
           onExecuteTrade={props.onExecuteTrade}
         />
       )}

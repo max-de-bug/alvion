@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { X, Copy, Check, ExternalLink, Share2, TrendingUp, TrendingDown } from "lucide-react";
 import { AlvionBirdLogo } from "@/components/brand/AlvionBirdLogo";
-import { MarketIcon } from "@/components/trading/MarketIcon";
+import { MarketIcon } from "../shared/MarketIcon";
 import { Position } from "@/stores/useTradingStore";
 import { MarketContext } from "@/lib/hyperliquid";
 

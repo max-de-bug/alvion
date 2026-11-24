@@ -60,7 +60,6 @@ export interface QuoteResult {
 
 const HYPERLIQUID_API_URL = "https://api.hyperliquid.xyz/info";
 const DEFAULT_VAULT_LIQUIDITY_USDC = 5_000_000; // $5M USDC Single Vault simulation
-const ROBINHOOD_USDC_ADDRESS = "0x538d689255850901eC5A206A2a9d80d283A44919";
 
 export async function fetchNyseEquities(): Promise<MarketContext[]> {
   const equityDefs = [

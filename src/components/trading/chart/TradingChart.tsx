@@ -7,14 +7,12 @@ import type { Timeframe } from "@/stores/useTradingStore";
 interface TradingChartProps {
   currentMarketName: string;
   timeframe: Timeframe;
-  setTimeframe: (tf: Timeframe) => void;
   className?: string;
 }
 
 export const TradingChart = React.memo<TradingChartProps>(function TradingChart({
   currentMarketName,
   timeframe,
-  setTimeframe,
   className = "",
 }) {
   const chartWrapperRef = useRef<HTMLDivElement>(null);

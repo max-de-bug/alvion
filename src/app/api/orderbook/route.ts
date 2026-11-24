@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { MARKETS_METADATA } from "@/stores/useTradingStore";
 
 export interface OrderBookLevel {
   px: string;

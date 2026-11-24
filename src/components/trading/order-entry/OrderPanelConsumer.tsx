@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import NumberFlow from "@number-flow/react";
-import { TrendingUp, TrendingDown, Zap } from "lucide-react";
+import { TrendingUp, TrendingDown } from "lucide-react";
 import { MarketContext, QuoteResult } from "@/lib/hyperliquid";
 
 interface OrderPanelConsumerProps {
@@ -64,12 +64,6 @@ export const OrderPanelConsumer = React.memo<OrderPanelConsumerProps>(function O
     setCustomAmount(nextVal.toString());
   };
 
-  const handleMax = () => {
-    const maxVal = Math.floor(walletBalance);
-    setMarginUsdc(maxVal);
-    setCustomAmount(maxVal.toString());
-  };
-
   return (
     <div className="flex flex-col shrink-0 rounded-none border border-[var(--border)] bg-[var(--surface)] p-4 gap-4 text-[var(--t1)] select-none">
       {/* Friendly Header Badge */}
@@ -116,10 +110,11 @@ export const OrderPanelConsumer = React.memo<OrderPanelConsumerProps>(function O
           <button
             type="button"
             onClick={() => setIsLong(true)}
-            className={`p-3 rounded-none border text-left transition-all flex flex-col gap-1 relative cursor-pointer ${isLong
+            className={`p-3 rounded-none border text-left transition-all flex flex-col gap-1 relative cursor-pointer ${
+              isLong
                 ? "bg-[#10241E] border-[#4ECCA3] shadow-md shadow-[#4ECCA3]/10"
                 : "bg-[var(--surface-3)] border-[var(--border)] hover:border-[var(--border-strong)] text-[var(--t2)]"
-              }`}
+            }`}
           >
             <div className="flex items-center justify-between">
               <span className={`text-xs font-bold flex items-center gap-1.5 ${isLong ? "text-[#4ECCA3]" : "text-[var(--t2)]"}`}>
@@ -137,10 +132,11 @@ export const OrderPanelConsumer = React.memo<OrderPanelConsumerProps>(function O
           <button
             type="button"
             onClick={() => setIsLong(false)}
-            className={`p-3 rounded-none border text-left transition-all flex flex-col gap-1 relative cursor-pointer ${!isLong
+            className={`p-3 rounded-none border text-left transition-all flex flex-col gap-1 relative cursor-pointer ${
+              !isLong
                 ? "bg-[#251319] border-[var(--red)] shadow-md shadow-[var(--red)]/10"
                 : "bg-[var(--surface-3)] border-[var(--border)] hover:border-[var(--border-strong)] text-[var(--t2)]"
-              }`}
+            }`}
           >
             <div className="flex items-center justify-between">
               <span className={`text-xs font-bold flex items-center gap-1.5 ${!isLong ? "text-[var(--red)]" : "text-[var(--t2)]"}`}>
@@ -175,10 +171,11 @@ export const OrderPanelConsumer = React.memo<OrderPanelConsumerProps>(function O
               key={preset.val}
               type="button"
               onClick={() => setLeverage(preset.val)}
-              className={`py-2 px-1 rounded-none border text-center transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer ${leverage === preset.val
+              className={`py-2 px-1 rounded-none border text-center transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
+                leverage === preset.val
                   ? "bg-[#182622] border-[#4ECCA3] text-[#4ECCA3] shadow-sm"
                   : "bg-[var(--surface-3)] border-[var(--border)] hover:border-[var(--border-strong)] text-[var(--t2)]"
-                }`}
+              }`}
             >
               <span className="text-xs font-mono font-bold">{preset.label}</span>
               <span className="text-[9px] text-[var(--t3)] tracking-tight">{preset.tag}</span>
@@ -241,10 +238,11 @@ export const OrderPanelConsumer = React.memo<OrderPanelConsumerProps>(function O
               key={amt}
               type="button"
               onClick={() => handleQuickAdd(amt)}
-              className={`py-1.5 text-xs font-mono rounded-none border transition-all cursor-pointer ${marginUsdc === amt
+              className={`py-1.5 text-xs font-mono rounded-none border transition-all cursor-pointer ${
+                marginUsdc === amt
                   ? "bg-[#182622] border-[#4ECCA3] text-[#4ECCA3] font-bold"
                   : "bg-[var(--surface-3)] border-[var(--border)] hover:border-[var(--border-strong)] text-[var(--t2)]"
-                }`}
+              }`}
             >
               ${amt}
             </button>
@@ -271,10 +269,11 @@ export const OrderPanelConsumer = React.memo<OrderPanelConsumerProps>(function O
         type="button"
         onClick={onExecuteTrade}
         disabled={loadingQuote || marginUsdc <= 0}
-        className={`w-full py-3.5 rounded-none font-bold text-sm tracking-wide transition-colors shadow-lg flex items-center justify-center cursor-pointer ${isLong
+        className={`w-full py-3.5 rounded-none font-bold text-sm tracking-wide transition-colors shadow-lg flex items-center justify-center cursor-pointer ${
+          isLong
             ? "bg-[#4ECCA3] hover:bg-[#3fb892] text-slate-950 shadow-[#4ECCA3]/20"
             : "bg-[var(--red)] hover:bg-[#d42d3e] text-white shadow-[var(--red)]/20"
-          } disabled:opacity-50 disabled:cursor-not-allowed`}
+        } disabled:opacity-50 disabled:cursor-not-allowed`}
       >
         {loadingQuote ? (
           <span>Calculating...</span>

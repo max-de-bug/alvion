@@ -7,7 +7,6 @@ import {
   TradingHeader,
   NotificationToast,
   MarketTickerBar,
-  RiskFirewallBar,
   TradingChart,
   OrderBookView,
   PositionsPanel,
@@ -18,22 +17,22 @@ import {
 // Vercel Best Practice: bundle-dynamic-imports
 // Lazy-load secondary tabs so initial JS payload is minimal and critical path renders instantly
 const FullOrderBookTab = dynamic(
-  () => import("@/components/trading/FullOrderBookTab").then((m) => m.FullOrderBookTab),
+  () => import("@/components/trading/orderbook/FullOrderBookTab").then((m) => m.FullOrderBookTab),
   { ssr: false }
 );
 
 const VaultBackstopTab = dynamic(
-  () => import("@/components/trading/VaultBackstopTab").then((m) => m.VaultBackstopTab),
+  () => import("@/components/trading/portfolio/VaultBackstopTab").then((m) => m.VaultBackstopTab),
   { ssr: false }
 );
 
 const CreditsTab = dynamic(
-  () => import("@/components/trading/CreditsTab").then((m) => m.CreditsTab),
+  () => import("@/components/trading/portfolio/CreditsTab").then((m) => m.CreditsTab),
   { ssr: false }
 );
 
 const ArchitectureDocsTab = dynamic(
-  () => import("@/components/trading/ArchitectureDocsTab").then((m) => m.ArchitectureDocsTab),
+  () => import("@/components/trading/portfolio/ArchitectureDocsTab").then((m) => m.ArchitectureDocsTab),
   { ssr: false }
 );
 
@@ -61,7 +60,6 @@ export default function Home() {
     activeTab,
     setActiveTab,
     timeframe,
-    setTimeframe,
     notification,
     vaultLiquidity,
     vaultNetSkew,
@@ -71,35 +69,25 @@ export default function Home() {
     markets,
     currentMarket,
     marketMeta,
-    isEquity,
     openOrders,
     recentTrades,
     orderBook,
     quote,
     loadingQuote,
     solvency,
-    domainInfo,
     credits,
 
     // Wallet
     address,
     alias,
-    isConnected,
     chainId,
-    connectWallet,
-    disconnect,
     exportPrivateKey,
     resetAccount,
 
     // Metrics
     longOi,
     shortOi,
-    longOiRatio,
-    shortOiRatio,
     longFundingRate,
-    shortFundingRate,
-    availableLongLiq,
-    availableShortLiq,
     minutesToFunding,
     formatUsdCompact,
 
@@ -117,14 +105,15 @@ export default function Home() {
         setActiveTab={setActiveTab}
         walletBalance={walletBalance}
         faucetWallet={faucetWallet}
-        isConnected={isConnected}
         address={address}
         alias={alias}
         chainId={chainId}
-        connectWallet={connectWallet}
-        disconnect={disconnect}
         exportPrivateKey={exportPrivateKey}
         resetAccount={resetAccount}
+        positions={positions}
+        openOrders={openOrders}
+        markets={markets}
+        currentMarket={currentMarket}
       />
 
       {/* 2. Notification Toast */}
@@ -147,16 +136,10 @@ export default function Home() {
                         setSelectedMarketName={setSelectedMarketName}
                         currentMarket={currentMarket}
                         marketMeta={marketMeta}
-                        isEquity={isEquity}
                         longOi={longOi}
                         shortOi={shortOi}
-                        longOiRatio={longOiRatio}
-                        shortOiRatio={shortOiRatio}
                         longFundingRate={longFundingRate}
-                        shortFundingRate={shortFundingRate}
                         minutesToFunding={minutesToFunding}
-                        availableLongLiq={availableLongLiq}
-                        availableShortLiq={availableShortLiq}
                         formatUsdCompact={formatUsdCompact}
                         markets={markets}
                       />
@@ -165,7 +148,6 @@ export default function Home() {
                     <TradingChart
                       currentMarketName={currentMarket.name}
                       timeframe={timeframe}
-                      setTimeframe={setTimeframe}
                       className="flex-1 w-full h-full min-h-0"
                     />
                   </div>
@@ -238,11 +220,6 @@ export default function Home() {
                   walletBalance={walletBalance}
                   quote={quote}
                   loadingQuote={loadingQuote}
-                  availableLongLiq={availableLongLiq}
-                  availableShortLiq={availableShortLiq}
-                  longFundingRate={longFundingRate}
-                  shortFundingRate={shortFundingRate}
-                  formatUsdCompact={formatUsdCompact}
                   onExecuteTrade={handleExecuteTrade}
                 />
               </div>

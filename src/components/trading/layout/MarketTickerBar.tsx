@@ -5,11 +5,11 @@ import dynamic from "next/dynamic";
 import { ChevronDown } from "lucide-react";
 import { MarketContext } from "@/lib/hyperliquid";
 import { MarketMetadata } from "@/stores/useTradingStore";
-import { MarketIcon } from "./MarketIcon";
+import { MarketIcon } from "../shared/MarketIcon";
 
 // Vercel Best Practice: bundle-dynamic-imports (lazy load 600-line modal)
 const MarketSelectorModal = dynamic(
-  () => import("./MarketSelectorModal").then((m) => m.MarketSelectorModal),
+  () => import("../modals/MarketSelectorModal").then((m) => m.MarketSelectorModal),
   { ssr: false }
 );
 
@@ -18,16 +18,10 @@ interface MarketTickerBarProps {
   setSelectedMarketName: (name: string) => void;
   currentMarket: MarketContext;
   marketMeta: MarketMetadata;
-  isEquity: boolean;
   longOi: number;
   shortOi: number;
-  longOiRatio: number;
-  shortOiRatio: number;
   longFundingRate: number;
-  shortFundingRate: number;
   minutesToFunding: number;
-  availableLongLiq: number;
-  availableShortLiq: number;
   formatUsdCompact: (val: number) => string;
   markets?: MarketContext[];
 }
@@ -37,16 +31,10 @@ export const MarketTickerBar = React.memo<MarketTickerBarProps>(function MarketT
   setSelectedMarketName,
   currentMarket,
   marketMeta,
-  isEquity,
   longOi,
   shortOi,
-  longOiRatio,
-  shortOiRatio,
   longFundingRate,
-  shortFundingRate,
   minutesToFunding,
-  availableLongLiq,
-  availableShortLiq,
   formatUsdCompact,
   markets = [],
 }) {

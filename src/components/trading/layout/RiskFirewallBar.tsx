@@ -2,7 +2,7 @@
 
 import React from "react";
 import { DomainData, SolvencyData } from "@/types/trading";
-import { ShieldCheck, ShieldAlert, Activity } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 
 interface RiskFirewallBarProps {
   domainInfo: DomainData | null;

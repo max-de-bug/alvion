@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { ArrowUpRight, Check, Copy, ShieldCheck, Sparkles, RefreshCw } from "lucide-react";
+import { Check, Copy, RefreshCw } from "lucide-react";
 import { AlvionBirdLogo } from "@/components/brand/AlvionBirdLogo";
 import { PeacefulBirdHeroArt } from "@/components/brand/PeacefulBirdHeroArt";
 
@@ -115,7 +115,9 @@ export const PROTOCOL_TIERS: ProtocolTier[] = [
 ];
 
 export default function WaitlistPage() {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(() =>
+    typeof window !== "undefined" ? localStorage.getItem("alvion_waitlist_email") || "" : ""
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isJoined, setIsJoined] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -139,7 +141,6 @@ export default function WaitlistPage() {
       // 2. Restore saved email if previously registered
       const savedEmail = localStorage.getItem("alvion_waitlist_email");
       if (savedEmail) {
-        setEmail(savedEmail);
         fetch(`/api/waitlist?email=${encodeURIComponent(savedEmail.trim().toLowerCase())}`)
           .then((res) => res.json())
           .then((data) => {

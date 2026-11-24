@@ -6,7 +6,9 @@ import type { Timeframe } from "@/stores/useTradingStore";
 
 declare global {
   interface Window {
-    TradingView?: any;
+    TradingView?: {
+      widget: new (config: Record<string, unknown>) => unknown;
+    };
   }
 }
 
@@ -193,7 +195,7 @@ export const TradingViewChart = React.memo<TradingViewChartProps>(function Tradi
         container.innerHTML = "";
       }
     };
-  }, [tvSymbol, tvInterval]);
+  }, [tvSymbol, tvInterval, chartId]);
 
   return (
     <div className={`relative w-full h-full min-h-[460px] overflow-hidden bg-[#10171a] ${className}`}>

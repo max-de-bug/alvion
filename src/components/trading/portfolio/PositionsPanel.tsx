@@ -5,7 +5,7 @@ import { Share2 } from "lucide-react";
 import { MarketContext } from "@/lib/hyperliquid";
 import { SignedOrder, MatchedTrade } from "@/lib/orderTypes";
 import { Position } from "@/stores/useTradingStore";
-import { SharePnlModal } from "./SharePnlModal";
+import { SharePnlModal } from "../modals/SharePnlModal";
 
 interface PositionsPanelProps {
   bottomTab: "positions" | "openOrders" | "trades";

@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { Search, X, Star } from "lucide-react";
 import { MarketContext } from "@/lib/hyperliquid";
 import { MARKETS_METADATA, MarketMetadata } from "@/stores/useTradingStore";
-import { MarketIcon } from "./MarketIcon";
+import { MarketIcon } from "../shared/MarketIcon";
 
 type MarketCategory = "ALL" | "FAVORITES" | "COMMODITIES" | "EQUITY" | "CRYPTO";
 type SortField = "name" | "price" | "change" | "volume";

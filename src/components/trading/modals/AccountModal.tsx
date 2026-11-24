@@ -8,11 +8,9 @@ import {
   Check,
   Key,
   RotateCcw,
-  Plus,
   ShieldCheck,
   Wallet,
   ArrowDownToLine,
-  ExternalLink,
 } from "lucide-react";
 
 interface AccountModalProps {
